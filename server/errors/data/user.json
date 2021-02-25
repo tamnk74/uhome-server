@@ -1,0 +1,22 @@
+{
+  "LOG-0001": {
+    "status": 400,
+    "detail": "Incorrect email or password"
+  },
+  "LOG-0002": {
+    "status": 400,
+    "detail": "Invalid google token"
+  },
+  "USER-0001": {
+    "status": 403,
+    "detail": "User is inactive"
+  },
+  "USER-1001": {
+    "status": 422,
+    "detail": "Email is invalid"
+  },
+  "USER-1002": {
+    "status": 422,
+    "detail": "Password is invalid"
+  }
+}

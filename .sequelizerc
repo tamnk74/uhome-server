@@ -1,0 +1,13 @@
+require('babel-core/register');
+require('babel-polyfill');
+const path = require('path');
+require('dotenv').config();
+global.__rootDir = path.resolve(__dirname, '..');
+
+module.exports = {
+  "config": path.resolve('./server/config', 'database.js'),
+  "env": process.env.NODE_ENV || 'development',
+  "models-path": path.resolve('./server/models'),
+  "seeders-path": path.resolve('./server/databases/seeders'),
+  "migrations-path": path.resolve('./server/databases/migrations')
+};
