@@ -1,6 +1,6 @@
-FROM node:12.13.0-alpine
+FROM node:14.16.0-alpine
 
-RUN apk update && apk add bash && apk add python && apk add make && npm install -g loopback-cli && npm install -g nodemon && npm install -g node-pre-gyp
+RUN apk update && apk add bash && apk add python && apk add make && npm install -g nodemon && npm install -g node-pre-gyp
 
 USER root
 

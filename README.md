@@ -1,6 +1,6 @@
 ### U home server
 
-Api ser built by nodejs
+Api server built by nodejs
 
 ### Start app with docker
 
@@ -12,25 +12,21 @@ Api ser built by nodejs
 
 ### Restart app
 
-> docker-compose restart node-app
+> docker-compose restart app
 
 #### Show log
 
-> docker-compose logs -f node-app
+> docker-compose logs -f app
 
 #### Access node app and run seeder
 
-> docker-compose exec node-app bash
+> docker-compose exec app bash
 
 > docker-compose exec redis redis-cli
 
 ### Build app
 
 > npm run build
-
-### Run seeder
-
-> npm run seed
 
 ### Check eslint & prettier
 
@@ -41,9 +37,3 @@ Api ser built by nodejs
 ### Run test
 
 > npm test
-
-### Run cli
-
-> npm link
-
-> app-cli
