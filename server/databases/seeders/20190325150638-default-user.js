@@ -1,34 +1,38 @@
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
+const { roles } = require('../../constants/user');
 
 module.exports = {
   up: async (queryInterface) => {
     const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash('uhome123!@#', salt);
     const users = [
       {
         id: uuidv4(),
         name: 'Admin',
-        email: 'khac.tam.94@gmail.com',
-        fullName: 'Admin',
-        password: await bcrypt.hash('admin123!@#', salt),
-        role: 'ADMIN',
+        phone_number: '0338021280',
+        password,
+        role: roles.ADMIN,
         status: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       {
         id: uuidv4(),
         name: 'Thanh',
-        email: 'thanhnpn@gmail.com',
-        fullName: 'Thanh NPN',
-        password: await bcrypt.hash('admin123!@#', salt),
-        role: 'ADMIN',
+        phone_number: '0768428040',
+        password,
+        role: roles.ADMIN,
         status: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      },
+      {
+        id: uuidv4(),
+        name: 'Admin 1',
+        phone_number: '0905566438',
+        password,
+        role: roles.ADMIN,
+        status: 1,
       },
     ];
-
+    console.log(users);
     return queryInterface.bulkInsert('users', users, {});
   },
 

@@ -37,3 +37,17 @@ Api server built by nodejs
 ### Run test
 
 > npm test
+
+### Sequelize
+
+> npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string
+
+> npx sequelize-cli migration:generate --name
+
+> npx sequelize-cli db:migrate
+
+> npx sequelize-cli db:migrate:undo
+
+> npx sequelize-cli db:seed:all
+
+> npx sequelize-cli db:seed:undo --seed name-of-seed-as-in-data
