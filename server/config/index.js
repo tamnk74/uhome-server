@@ -12,4 +12,4 @@ export const jwtExpireTime = process.env.JWT_EXPIRE_TIME || '1h';
 export const jwtRefreshExpireTime = process.env.JWT_REFRESH_EXPIRE_TIME || '30d';
 export const googleClientId = process.env.GOOGLE_ID;
 export const googleSecret = process.env.GOOGLE_SECRET;
-export const dbConfig = databaseConfig[env];
+export const dbConfig = databaseConfig;

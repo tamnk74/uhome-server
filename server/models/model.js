@@ -70,7 +70,7 @@ BaseModel.init(
     id: {
       allowNull: false,
       primaryKey: true,
-      type: Sequelize.UUID,
+      type: Sequelize.DataTypes.UUID,
       defaultValue: Sequelize.UUIDV4,
     },
   },

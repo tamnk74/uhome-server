@@ -16,13 +16,9 @@ User.init(
       unique: true,
       allowNull: false,
     },
-    email: {
+    phoneNumber: {
       type: Sequelize.STRING,
       unique: true,
-      allowNull: false,
-    },
-    fullName: {
-      type: Sequelize.STRING,
       allowNull: false,
     },
     birthday: {
@@ -39,6 +35,12 @@ User.init(
     password: {
       type: Sequelize.STRING,
       allowNull: true,
+    },
+    longitude: {
+      type: Sequelize.DataTypes.FLOAT,
+    },
+    latitude: {
+      type: Sequelize.DataTypes.FLOAT,
     },
     role: {
       type: Sequelize.ENUM('USER', 'ADMIN'),

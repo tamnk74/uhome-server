@@ -4,35 +4,36 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID,
+        type: Sequelize.DataTypes.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
       name: {
-        type: Sequelize.STRING,
-        unique: true,
+        type: Sequelize.DataTypes.STRING(255),
         allowNull: false,
       },
-      email: {
-        type: Sequelize.STRING,
+      phone_number: {
+        type: Sequelize.DataTypes.STRING(16),
         unique: true,
-        allowNull: false,
-      },
-      fullName: {
-        type: Sequelize.STRING,
         allowNull: false,
       },
       birthday: {
-        type: Sequelize.DATE,
+        type: Sequelize.DataTypes.DATEONLY,
       },
       address: {
-        type: Sequelize.STRING,
+        type: Sequelize.DataTypes.STRING(255),
       },
       avatar: {
-        type: Sequelize.STRING,
+        type: Sequelize.DataTypes.STRING(255),
       },
       password: {
-        type: Sequelize.STRING,
+        type: Sequelize.DataTypes.STRING(127),
         allowNull: false,
+      },
+      longitude: {
+        type: Sequelize.DataTypes.FLOAT,
+      },
+      latitude: {
+        type: Sequelize.DataTypes.FLOAT,
       },
       role: {
         type: Sequelize.ENUM('ADMIN', 'USER'),
@@ -44,15 +45,15 @@ module.exports = {
         allowNull: false,
         default: 0,
       },
-      createdAt: {
+      created_at: {
         type: Sequelize.DATE,
         defautValue: Sequelize.NOW,
       },
-      updatedAt: {
+      updated_at: {
         type: Sequelize.DATE,
         defautValue: Sequelize.NOW,
       },
-      deletedAt: {
+      deleted_at: {
         type: Sequelize.DATE,
       },
     });
