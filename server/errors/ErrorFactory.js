@@ -1,4 +1,3 @@
-import joiMapping from './data/joi.json';
 import errors from './data';
 import ApiError from './ApiError';
 import { env } from '../config';
@@ -32,20 +31,17 @@ class ErrorFactory {
         type,
         context: { label: key },
       } = joiError;
-
-      const code = joiMapping[`${key}.${type}`];
+      const code = `${key}.${type}`;
       const error = errors[code];
       if (error) {
-        return new ApiError({
-          code,
-          ...error,
-        });
+        return new ApiError(error);
       }
 
       // Handle undefined error
       return new ApiError({
         code: 'ERR-0422',
         ...errors['ERR-0422'],
+        detail: joiError.message,
       });
     });
   };
