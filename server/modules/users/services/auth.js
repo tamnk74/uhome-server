@@ -1,15 +1,12 @@
-import { OAuth2Client } from 'google-auth-library';
-import uuid from 'uuid';
 import User from '../../../models/user';
 import JWT from '../../../helpers/JWT';
 import { status as userStatus } from '../../../constants/user';
-import { googleClientId, googleSecret } from '../../../config';
 
 export default class AuthService {
-  static async authenticate({ email = '', password }) {
+  static async authenticate({ phoneNumber = '', password }) {
     const user = await User.findOne({
       where: {
-        email,
+        phoneNumber,
         status: userStatus.ACTIVE,
       },
     });

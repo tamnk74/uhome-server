@@ -66,6 +66,7 @@ User.init(
   },
   {
     sequelize,
+    underscored: true,
     modelName: 'users',
     table: 'users',
   }
@@ -74,9 +75,8 @@ User.init(
 User.prototype.toPayload = function toPayload() {
   return {
     id: this.dataValues.id,
-    email: this.dataValues.email,
+    phoneNumber: this.dataValues.phoneNumber,
     name: this.dataValues.name,
-    fullName: this.dataValues.fullName,
   };
 };
 

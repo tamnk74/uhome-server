@@ -48,3 +48,43 @@ export const convertToSlug = (str) =>
     .toLowerCase()
     .replace(/ /g, '-')
     .replace(/[^\w-]+/g, '');
+
+export const snakeToCamel = (str) =>
+  str
+    .toLowerCase()
+    .replace(/([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '').replace('_', ''));
+
+export const objectToCamel = (obj) => {
+  const result = {};
+  Object.keys(obj).forEach((key) => {
+    const camelKey = snakeToCamel(key);
+    if (Array.isArray(obj[key])) {
+      result[camelKey] = obj[key].map((item) => objectToCamel(item));
+    }
+    if (typeof obj[key] === 'object') {
+      result[camelKey] = objectToCamel(obj[key]);
+    }
+    result[camelKey] = obj[key];
+  });
+
+  return result;
+};
+
+export const camelToSnakeCase = (str) =>
+  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+export const objectToSnake = (obj) => {
+  const result = {};
+  Object.keys(obj).forEach((key) => {
+    const snakeKey = camelToSnakeCase(key);
+    if (Array.isArray(obj[key])) {
+      result[snakeKey] = obj[key].map((item) => objectToSnake(item));
+    }
+    if (typeof obj[key] === 'object') {
+      result[snakeKey] = objectToSnake(obj[key]);
+    }
+    result[snakeKey] = obj[key];
+  });
+
+  return result;
+};

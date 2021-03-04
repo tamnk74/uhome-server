@@ -1,12 +1,12 @@
 import AuthService from '../services/auth';
-import { userSerializer, authSerializer } from '../serializer';
+import { objectToSnake } from '../../../helpers/Util';
 
 export default class AuthController {
   static async login(req, res, next) {
     try {
       const authUser = await AuthService.authenticate(req.body);
 
-      return res.status(200).json(authSerializer.serialize(authUser));
+      return res.status(200).json(objectToSnake(authUser));
     } catch (e) {
       return next(e);
     }
@@ -16,7 +16,7 @@ export default class AuthController {
     try {
       const authUser = await AuthService.handleGoogleAuth(req.body.access_token);
 
-      return res.status(200).json(authSerializer.serialize(authUser));
+      return res.status(200).json(objectToSnake(authUser));
     } catch (e) {
       return next(e);
     }
@@ -36,7 +36,7 @@ export default class AuthController {
     try {
       const user = await AuthService.getUserById(req.user.id);
 
-      return res.status(200).json(userSerializer.serialize(user));
+      return res.status(200).json(user);
     } catch (e) {
       return next(e);
     }

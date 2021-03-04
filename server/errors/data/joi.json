@@ -1,10 +1,8 @@
 {
-  "email.string.base": "USER-1001",
-  "email.string.email": "USER-1001",
-  "email.string.min": "USER-1001",
-  "email.string.max": "USER-1001",
-  "password.string.base": "USER-1002",
-  "password.string.min": "USER-1002",
-  "password.string.max": "USER-1002",
-  "startDate.date.base": "EVEN-0001"
+  "phone_number.string.regex.base": {
+    "status": 422,
+    "code": "phone_number.invalid",
+    "title": "Unprocessable Entity",
+    "detail": "Invalid phone number"
+  }
 }
