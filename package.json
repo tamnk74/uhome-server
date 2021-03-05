@@ -16,7 +16,8 @@
     "prettier": "prettier --check **/*.js",
     "prettier:fix": "prettier --write **/*.js",
     "lint:fix": "eslint ./server --fix",
-    "lint": "eslint ./server"
+    "lint": "eslint ./server",
+    "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up"
   },
   "dependencies": {
     "babel-core": "^6.26.3",

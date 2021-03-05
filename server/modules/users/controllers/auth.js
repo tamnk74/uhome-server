@@ -41,4 +41,14 @@ export default class AuthController {
       return next(e);
     }
   }
+
+  static async register(req, res, next) {
+    try {
+      const authUser = await AuthService.register(req.body);
+
+      return res.status(200).json(objectToSnake(authUser));
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

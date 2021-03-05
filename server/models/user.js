@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import Bcrypt from 'bcryptjs';
+import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 
@@ -89,6 +90,8 @@ User.prototype.comparePassword = async function comparePassword(password) {
 };
 
 User.beforeCreate(async function beforeCreate(user) {
+  user.id = uuid.v4();
+
   if (user.changed('password')) {
     user.password = await User.generateHash(user.password);
   }
