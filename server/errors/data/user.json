@@ -5,7 +5,23 @@
   },
   "LOG-0002": {
     "status": 400,
-    "detail": "Invalid google token"
+    "detail": "The account hasn't been verified"
+  },
+  "LOG-0003": {
+    "status": 400,
+    "detail": "Facebook account hasn't been registered"
+  },
+  "LOG-0004": {
+    "status": 400,
+    "detail": "Zalo account hasn't been registered"
+  },
+  "LOG-0005": {
+    "status": 400,
+    "detail": "The facebook access token is invalid"
+  },
+  "LOG-0006": {
+    "status": 400,
+    "detail": "The zalo code is invalid"
   },
   "USER-0001": {
     "status": 403,
@@ -13,7 +29,7 @@
   },
   "USER-1001": {
     "status": 422,
-    "detail": "Email is invalid"
+    "detail": "Phone number is invalid"
   },
   "USER-1002": {
     "status": 422,

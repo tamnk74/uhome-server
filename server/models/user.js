@@ -1,13 +1,37 @@
 import Sequelize from 'sequelize';
 import Bcrypt from 'bcryptjs';
 import uuid from 'uuid';
-import BaseModel from './model';
 import sequelize from '../databases/database';
+import BaseModel from './model';
+import SocialAccount from './socialAccount';
+import { socialAccount } from '../constants';
 
 class User extends BaseModel {
   static ACTIVE_STATUS = 'ACTIVE';
 
   static INACTIVE_STATUS = 'INACTIVE';
+
+  static includeFacebookAccount(socialId) {
+    return {
+      model: SocialAccount,
+      as: 'socialAccounts',
+      where: {
+        socialId,
+        type: socialAccount.FACEBOOK,
+      },
+    };
+  }
+
+  static includeZaloAccount(socialId) {
+    return {
+      model: SocialAccount,
+      as: 'socialAccounts',
+      where: {
+        socialId,
+        type: socialAccount.ZALO,
+      },
+    };
+  }
 }
 
 User.init(
@@ -72,6 +96,9 @@ User.init(
     table: 'users',
   }
 );
+
+User.hasMany(SocialAccount, { as: 'socialAccounts' });
+SocialAccount.belongsTo(User);
 
 User.prototype.toPayload = function toPayload() {
   return {

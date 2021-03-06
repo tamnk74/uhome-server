@@ -3,6 +3,9 @@ import databaseConfig from './database';
 
 DotENV.config();
 
+export * from './zalo';
+export * from './facebook';
+
 export const env = process.env.NODE_ENV || 'development';
 export const port = process.env.PORT || 'http://localhost:3000';
 export const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;

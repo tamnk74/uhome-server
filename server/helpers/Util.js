@@ -1,3 +1,6 @@
+import camelCase from 'lodash/camelCase';
+import snakeCase from 'lodash/snakeCase';
+
 exports.mapKeys = (mapKeys, obj) => {
   const result = {};
   Object.keys(obj).forEach((key) => {
@@ -49,20 +52,17 @@ export const convertToSlug = (str) =>
     .replace(/ /g, '-')
     .replace(/[^\w-]+/g, '');
 
-export const snakeToCamel = (str) =>
-  str
-    .toLowerCase()
-    .replace(/([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '').replace('_', ''));
-
 export const objectToCamel = (obj) => {
   const result = {};
   Object.keys(obj).forEach((key) => {
-    const camelKey = snakeToCamel(key);
+    const camelKey = camelCase(key);
     if (Array.isArray(obj[key])) {
       result[camelKey] = obj[key].map((item) => objectToCamel(item));
+      return;
     }
     if (typeof obj[key] === 'object' && obj[key] !== null) {
       result[camelKey] = objectToCamel(obj[key]);
+      return;
     }
     result[camelKey] = obj[key];
   });
@@ -70,18 +70,17 @@ export const objectToCamel = (obj) => {
   return result;
 };
 
-export const camelToSnakeCase = (str) =>
-  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-
 export const objectToSnake = (obj) => {
   const result = {};
   Object.keys(obj).forEach((key) => {
-    const snakeKey = camelToSnakeCase(key);
+    const snakeKey = snakeCase(key);
     if (Array.isArray(obj[key])) {
       result[snakeKey] = obj[key].map((item) => objectToSnake(item));
+      return;
     }
     if (typeof obj[key] === 'object' && obj[key] !== null) {
       result[snakeKey] = objectToSnake(obj[key]);
+      return;
     }
     result[snakeKey] = obj[key];
   });
