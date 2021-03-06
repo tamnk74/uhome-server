@@ -23,7 +23,7 @@ module.exports = {
           allowNull: false,
         },
         type: {
-          type: Sequelize.DataTypes.INTEGER,
+          type: Sequelize.ENUM('IOS', 'ANDROID'),
         },
         created_at: {
           type: Sequelize.DATE,
