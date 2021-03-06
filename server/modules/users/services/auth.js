@@ -34,6 +34,14 @@ export default class AuthService {
     return User.findByPk(userId);
   }
 
+  static updateUser(userId, data) {
+    return User.update(data, {
+      where: {
+        id: userId,
+      },
+    });
+  }
+
   static async register({ phoneNumber, password, name, deviceToken = null, type = null }) {
     const user = await User.findOne({
       where: {
