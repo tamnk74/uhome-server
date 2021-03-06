@@ -65,6 +65,15 @@ export default class AuthController {
     }
   }
 
+  static async updateUser(req, res, next) {
+    try {
+      await AuthService.updateUser(req.user.id, req.body);
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async register(req, res, next) {
     try {
       const authUser = await AuthService.register(req.body);
