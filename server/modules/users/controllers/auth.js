@@ -1,3 +1,4 @@
+import omit from 'lodash/omit';
 import AuthService from '../services/auth';
 import { objectToSnake } from '../../../helpers/Util';
 
@@ -26,7 +27,7 @@ export default class AuthController {
     try {
       const authUser = await AuthService.refrehToken(req.body.refresh_token);
 
-      return res.status(200).json(authSerializer.serialize(authUser));
+      return res.status(200).json(objectToSnake(authUser));
     } catch (e) {
       return next(e);
     }
@@ -35,8 +36,14 @@ export default class AuthController {
   static async userInfo(req, res, next) {
     try {
       const user = await AuthService.getUserById(req.user.id);
-
-      return res.status(200).json(user);
+      const userData = omit(user.toJSON(), [
+        'password',
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
+        'status',
+      ]);
+      return res.status(200).json(objectToSnake(userData));
     } catch (e) {
       return next(e);
     }
