@@ -5,6 +5,7 @@ DotENV.config();
 
 export * from './zalo';
 export * from './facebook';
+export * from './redis';
 
 export const env = process.env.NODE_ENV || 'development';
 export const port = process.env.PORT || 'http://localhost:3000';

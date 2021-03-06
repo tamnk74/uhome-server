@@ -3,6 +3,7 @@ import DeviceToken from '../../../models/deviceToken';
 import JWT from '../../../helpers/JWT';
 import Zalo from '../../../helpers/Zalo';
 import Facebook from '../../../helpers/Facebook';
+import RedisService from '../../../helpers/Redis';
 import { status as userStatus } from '../../../constants';
 
 export default class AuthService {
@@ -22,7 +23,7 @@ export default class AuthService {
       JWT.generateToken(user.toPayload()),
       JWT.generateRefreshToken(user.id),
     ]);
-
+    await RedisService.saveAccessToken(user.id, accessToken);
     return {
       accessToken,
       refreshToken,
@@ -63,7 +64,7 @@ export default class AuthService {
       JWT.generateToken(userCreated.toPayload()),
       JWT.generateRefreshToken(userCreated.id),
     ]);
-
+    await RedisService.saveAccessToken(user.id, accessToken);
     return {
       accessToken,
       refreshToken,
@@ -91,7 +92,7 @@ export default class AuthService {
       JWT.generateToken(user.toPayload()),
       JWT.generateRefreshToken(user.id),
     ]);
-
+    await RedisService.saveAccessToken(user.id, accessToken);
     return {
       accessToken,
       refreshToken,
@@ -119,11 +120,15 @@ export default class AuthService {
       JWT.generateToken(user.toPayload()),
       JWT.generateRefreshToken(user.id),
     ]);
-
+    await RedisService.saveAccessToken(user.id, accessToken);
     return {
       accessToken,
       refreshToken,
       tokenType: 'Bearer',
     };
+  }
+
+  static async logout(user, token) {
+    return RedisService.removeAccessToken(user.id, token);
   }
 }

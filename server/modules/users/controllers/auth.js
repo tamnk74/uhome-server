@@ -49,6 +49,17 @@ export default class AuthController {
     }
   }
 
+  static async logout(req, res, next) {
+    try {
+      const token = req.headers.authorization.slice(7);
+      await AuthService.logout(req.user, token);
+
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async userInfo(req, res, next) {
     try {
       const user = await AuthService.getUserById(req.user.id);
