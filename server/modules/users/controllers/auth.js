@@ -13,9 +13,25 @@ export default class AuthController {
     }
   }
 
-  static async googleLogin(req, res, next) {
+  static async loginFb(req, res, next) {
     try {
-      const authUser = await AuthService.handleGoogleAuth(req.body.access_token);
+      const authUser = await AuthService.handleFacebookAuth(req.body.accessToken);
+      const authData = omit(authUser, [
+        'password',
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
+        'status',
+      ]);
+      return res.status(200).json(objectToSnake(authData));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async loginZalo(req, res, next) {
+    try {
+      const authUser = await AuthService.handleZaloAuth(req.body.code);
 
       return res.status(200).json(objectToSnake(authUser));
     } catch (e) {

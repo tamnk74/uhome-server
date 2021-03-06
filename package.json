@@ -20,6 +20,7 @@
     "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.1.0",
     "babel-polyfill": "^6.26.0",
