@@ -61,7 +61,7 @@ export const objectToCamel = (obj) => {
     if (Array.isArray(obj[key])) {
       result[camelKey] = obj[key].map((item) => objectToCamel(item));
     }
-    if (typeof obj[key] === 'object') {
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
       result[camelKey] = objectToCamel(obj[key]);
     }
     result[camelKey] = obj[key];
@@ -80,7 +80,7 @@ export const objectToSnake = (obj) => {
     if (Array.isArray(obj[key])) {
       result[snakeKey] = obj[key].map((item) => objectToSnake(item));
     }
-    if (typeof obj[key] === 'object') {
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
       result[snakeKey] = objectToSnake(obj[key]);
     }
     result[snakeKey] = obj[key];
