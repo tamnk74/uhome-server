@@ -4,4 +4,4 @@ const db = process.env.REDIS_DB || 1;
 const user = process.env.REDIS_PWD || '';
 const password = process.env.REDIS_PWD || '';
 
-export { host, port, db, user, password };
+export const redisConfig = { host, port, db, user, password };
