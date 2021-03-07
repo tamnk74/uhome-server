@@ -34,5 +34,17 @@
   "USER-1002": {
     "status": 422,
     "detail": "Password is invalid"
+  },
+  "USER-2001": {
+    "status": 422,
+    "detail": "The account has been verified"
+  },
+  "USER-2002": {
+    "status": 422,
+    "detail": "The verify code isn't match"
+  },
+  "REG-0001": {
+    "status": 422,
+    "detail": "The phone number is exist"
   }
 }

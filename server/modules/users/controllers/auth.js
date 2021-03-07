@@ -66,11 +66,11 @@ export default class AuthController {
     try {
       const user = await AuthService.getUserById(req.user.id);
       const userData = omit(user.toJSON(), [
+        'verify_code',
         'password',
         'createdAt',
         'updatedAt',
         'deletedAt',
-        'status',
       ]);
       return res.status(200).json(objectToSnake(userData));
     } catch (e) {
@@ -92,6 +92,15 @@ export default class AuthController {
       const authUser = await AuthService.register(req.body);
 
       return res.status(200).json(objectToSnake(authUser));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async verifyCode(req, res, next) {
+    try {
+      await AuthService.verifyCode(req.user.id, req.body.verifyCode);
+      return res.status(204).json({});
     } catch (e) {
       return next(e);
     }

@@ -87,3 +87,10 @@ export const objectToSnake = (obj) => {
 
   return result;
 };
+
+export const randomNumber = (length = 6) => {
+  const str = '0123456789';
+  let result = '';
+  for (let i = length; i > 0; --i) result += str[Math.floor(Math.random() * str.length)];
+  return result;
+};
