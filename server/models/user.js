@@ -44,7 +44,6 @@ User.init(
     phoneNumber: {
       type: Sequelize.STRING,
       unique: true,
-      allowNull: false,
     },
     birthday: {
       type: Sequelize.DATE,

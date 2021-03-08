@@ -1,5 +1,6 @@
 import omit from 'lodash/omit';
 import AuthService from '../services/auth';
+import User from '../../../models/user';
 import { objectToSnake } from '../../../helpers/Util';
 
 export default class AuthController {
@@ -16,6 +17,7 @@ export default class AuthController {
   static async loginFb(req, res, next) {
     try {
       const authUser = await AuthService.handleFacebookAuth(req.body.accessToken);
+
       const authData = omit(authUser, [
         'password',
         'createdAt',

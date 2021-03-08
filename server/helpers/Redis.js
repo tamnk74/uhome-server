@@ -12,7 +12,6 @@ const authPrefix = 'auth:';
 
 export default class RedisService {
   static saveAccessToken(userId, token) {
-    console.log(authPrefix + userId, token, Date.now());
     return redis.hset(authPrefix + userId, token, Date.now());
   }
 
