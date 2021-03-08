@@ -76,6 +76,10 @@ User.init(
       allowNull: true,
       defaultValue: 0,
     },
+    verifiedAt: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
     createdAt: {
       defaultValue: Sequelize.NOW,
       type: Sequelize.DATE,

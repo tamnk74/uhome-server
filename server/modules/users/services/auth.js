@@ -4,7 +4,9 @@ import JWT from '../../../helpers/JWT';
 import Zalo from '../../../helpers/Zalo';
 import Facebook from '../../../helpers/Facebook';
 import RedisService from '../../../helpers/Redis';
+import SpeedSMS from '../../../helpers/SpeedSMS';
 import { status as userStatus, socialAccount } from '../../../constants';
+import { randomNumber } from '../../../helpers/Util';
 
 export default class AuthService {
   static async authenticate({ phoneNumber = '', password }) {
@@ -50,6 +52,14 @@ export default class AuthService {
       },
     });
 
+    const verifyCode = randomNumber();
+
+    const foo = await SpeedSMS.sendSMS({
+      to: phoneNumber,
+      content: `Your verify code: ${verifyCode}`,
+    });
+    console.log('foo', foo);
+
     if (user) {
       throw new Error('REG-0001');
     }
@@ -60,16 +70,42 @@ export default class AuthService {
       DeviceToken.create({ token: deviceToken, type, userId: userCreated.id });
     }
 
+    await RedisService.saveVerifyCode(userCreated.id, verifyCode);
+
     const [accessToken, refreshToken] = await Promise.all([
       JWT.generateToken(userCreated.toPayload()),
       JWT.generateRefreshToken(userCreated.id),
     ]);
-    await RedisService.saveAccessToken(user.id, accessToken);
+    await RedisService.saveAccessToken(userCreated.id, accessToken);
     return {
       accessToken,
       refreshToken,
       tokenType: 'Bearer',
     };
+  }
+
+  static async verifyCode(userId, verifyCode) {
+    const user = await User.findByPk(userId);
+
+    if (Number(user.status) === userStatus.ACTIVE) {
+      throw new Error('USER-2001');
+    }
+
+    const userVerifyCode = await RedisService.getVerifyCode(user.id);
+    if (userVerifyCode !== verifyCode) {
+      throw new Error('USER-2002');
+    }
+
+    User.update(
+      { status: userStatus.ACTIVE, verifiedAt: new Date() },
+      {
+        where: {
+          id: user.id,
+        },
+      }
+    );
+
+    await RedisService.removeVerifyCode(user.id);
   }
 
   static async handleFacebookAuth(fbToken) {
@@ -97,10 +133,6 @@ export default class AuthService {
           include: [User.includeFacebookAccount(fbUser.id)],
         }
       );
-    }
-
-    if (user.status === userStatus.IN_ACTIVE) {
-      throw new Error('LOG-0002');
     }
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -139,10 +171,6 @@ export default class AuthService {
           include: [User.includeZaloAccount(zaloUser.id)],
         }
       );
-    }
-
-    if (user.status === userStatus.IN_ACTIVE) {
-      throw new Error('LOG-0002');
     }
 
     const [accessToken, refreshToken] = await Promise.all([

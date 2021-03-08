@@ -4,6 +4,7 @@ import databaseConfig from './database';
 DotENV.config();
 
 export * from './zalo';
+export * from './speedsms';
 export * from './facebook';
 export * from './redis';
 
@@ -17,3 +18,4 @@ export const jwtRefreshExpireTime = process.env.JWT_REFRESH_EXPIRE_TIME || '30d'
 export const googleClientId = process.env.GOOGLE_ID;
 export const googleSecret = process.env.GOOGLE_SECRET;
 export const dbConfig = databaseConfig;
+export const verifyCodeExpiredTime = process.env.VERIFY_CODE_EXPIRE_TIME || '300';
