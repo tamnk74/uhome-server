@@ -14,7 +14,6 @@ module.exports = {
       phone_number: {
         type: Sequelize.DataTypes.STRING(16),
         unique: true,
-        allowNull: false,
       },
       birthday: {
         type: Sequelize.DataTypes.DATEONLY,

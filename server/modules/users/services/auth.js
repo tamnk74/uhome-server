@@ -4,7 +4,7 @@ import JWT from '../../../helpers/JWT';
 import Zalo from '../../../helpers/Zalo';
 import Facebook from '../../../helpers/Facebook';
 import RedisService from '../../../helpers/Redis';
-import { status as userStatus } from '../../../constants';
+import { status as userStatus, socialAccount } from '../../../constants';
 
 export default class AuthService {
   static async authenticate({ phoneNumber = '', password }) {
@@ -76,12 +76,27 @@ export default class AuthService {
     const fbUser = await Facebook.getUser(fbToken).catch(() => {
       throw new Error('LOG-0005');
     });
-    const user = await User.findOne({
+    let user = await User.findOne({
       include: [User.includeFacebookAccount(fbUser.id)],
     });
 
     if (!user) {
-      throw new Error('LOG-0003');
+      user = await User.create(
+        {
+          name: fbUser.name,
+          phoneNumber: null,
+          avatar: fbUser.picture && fbUser.picture.data.url,
+          password: fbToken,
+          status: userStatus.ACTIVE,
+          socialAccounts: {
+            socialId: fbUser.id,
+            type: socialAccount.FACEBOOK,
+          },
+        },
+        {
+          include: [User.includeFacebookAccount(fbUser.id)],
+        }
+      );
     }
 
     if (user.status === userStatus.IN_ACTIVE) {
@@ -103,13 +118,27 @@ export default class AuthService {
   static async handleZaloAuth(zaloCode) {
     const zaloToken = await Zalo.getAccessToken(zaloCode);
     const zaloUser = await Zalo.getUser(zaloToken);
-    console.log(zaloToken, zaloUser);
-    const user = await User.findOne({
+    let user = await User.findOne({
       include: [User.includeZaloAccount(zaloUser.id)],
     });
 
     if (!user) {
-      throw new Error('LOG-0004');
+      user = await User.create(
+        {
+          name: zaloUser.name,
+          phoneNumber: null,
+          avatar: zaloUser.picture && zaloUser.picture.data.url,
+          password: zaloToken,
+          status: userStatus.ACTIVE,
+          socialAccounts: {
+            socialId: zaloUser.id,
+            type: socialAccount.ZALO,
+          },
+        },
+        {
+          include: [User.includeZaloAccount(zaloUser.id)],
+        }
+      );
     }
 
     if (user.status === userStatus.IN_ACTIVE) {
