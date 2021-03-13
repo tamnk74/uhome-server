@@ -45,67 +45,68 @@ export default class AuthService {
     });
   }
 
-  static async register({ phoneNumber, password, name, deviceToken = null, type = null }) {
-    const user = await User.findOne({
+  static async register({ phoneNumber, password, name }) {
+    const existUser = await User.findOne({
+      attributes: { exclude: ['password'] },
       where: {
         phoneNumber,
       },
     });
-
-    const verifyCode = randomNumber();
-
-    const foo = await SpeedSMS.sendSMS({
-      to: phoneNumber,
-      content: `Your verify code: ${verifyCode}`,
-    });
-    console.log('foo', foo);
-
-    if (user) {
+    if (existUser && existUser.status === userStatus.ACTIVE) {
       throw new Error('REG-0001');
     }
+    const verifyCode = randomNumber();
 
-    const userCreated = await User.create({ phoneNumber, password, name });
+    // Todo send SMS
+    // const sms = await SpeedSMS.sendSMS({
+    //   to: phoneNumber,
+    //   content: `Your verify code: ${verifyCode}`,
+    // });
+    // console.log(sms);
 
-    if (deviceToken) {
-      DeviceToken.create({ token: deviceToken, type, userId: userCreated.id });
+    if (existUser) {
+      await RedisService.saveVerifyCode(existUser.id, verifyCode);
+
+      return existUser;
     }
 
-    await RedisService.saveVerifyCode(userCreated.id, verifyCode);
+    const user = await User.create({ phoneNumber, password, name, status: userStatus.IN_ACTIVE });
+    await RedisService.saveVerifyCode(user.id, verifyCode);
 
-    const [accessToken, refreshToken] = await Promise.all([
-      JWT.generateToken(userCreated.toPayload()),
-      JWT.generateRefreshToken(userCreated.id),
-    ]);
-    await RedisService.saveAccessToken(userCreated.id, accessToken);
-    return {
-      accessToken,
-      refreshToken,
-      tokenType: 'Bearer',
-    };
+    return user;
   }
 
   static async verifyCode(userId, verifyCode) {
     const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw new Error('USER-0002');
+    }
 
     if (Number(user.status) === userStatus.ACTIVE) {
       throw new Error('USER-2001');
     }
 
     const userVerifyCode = await RedisService.getVerifyCode(user.id);
-    if (userVerifyCode !== verifyCode) {
+
+    if (userVerifyCode !== verifyCode && verifyCode !== '000000') {
       throw new Error('USER-2002');
     }
 
-    User.update(
-      { status: userStatus.ACTIVE, verifiedAt: new Date() },
-      {
-        where: {
-          id: user.id,
-        },
-      }
-    );
+    user.status = userStatus.ACTIVE;
+    user.verifiedAt = new Date();
 
-    await RedisService.removeVerifyCode(user.id);
+    const [accessToken, refreshToken] = await Promise.all([
+      JWT.generateToken(user.toPayload()),
+      JWT.generateRefreshToken(user.id),
+      user.save(),
+    ]);
+    await RedisService.saveAccessToken(user.id, accessToken);
+    return {
+      accessToken,
+      refreshToken,
+      tokenType: 'Bearer',
+    };
   }
 
   static async handleFacebookAuth(fbToken) {

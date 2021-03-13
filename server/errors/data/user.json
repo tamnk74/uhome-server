@@ -27,6 +27,10 @@
     "status": 403,
     "detail": "User is inactive"
   },
+  "USER-0002": {
+    "status": 404,
+    "detail": "User not found"
+  },
   "USER-1001": {
     "status": 422,
     "detail": "Phone number is invalid"
@@ -37,14 +41,14 @@
   },
   "USER-2001": {
     "status": 422,
-    "detail": "The account has been verified"
+    "detail": "The account was already verified"
   },
   "USER-2002": {
     "status": 422,
     "detail": "The verify code isn't match"
   },
   "REG-0001": {
-    "status": 422,
-    "detail": "The phone number is exist"
+    "status": 400,
+    "detail": "The phone number is already being in use"
   }
 }

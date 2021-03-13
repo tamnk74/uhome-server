@@ -9,5 +9,9 @@ export const registerSchema = Joi.object().keys({
   device_token: Joi.string().optional(),
   type: Joi.string()
     .valid(...Object.values(type))
-    .when('device_token', { is: Joi.string(), then: Joi.required() }),
+    .when('device_token', {
+      is: Joi.string().required(),
+      then: Joi.required(),
+      otherwise: Joi.string().optional(),
+    }),
 });
