@@ -78,6 +78,10 @@ export const objectToSnake = (obj) => {
       result[snakeKey] = obj[key].map((item) => objectToSnake(item));
       return;
     }
+    if (obj[key] instanceof Date) {
+      result[snakeKey] = obj[key];
+      return;
+    }
     if (typeof obj[key] === 'object' && obj[key] !== null) {
       result[snakeKey] = objectToSnake(obj[key]);
       return;

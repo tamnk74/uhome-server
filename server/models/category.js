@@ -2,18 +2,23 @@ import Sequelize from 'sequelize';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 
-class Category extends BaseModel {}
+class Category extends BaseModel {
+  static get searchFields() {
+    return ['name'];
+  }
+}
 
 Category.init(
   {
-    title: {
+    name: {
       type: Sequelize.STRING,
       allowNull: false,
     },
     description: {
-      type: Sequelize.TEXT('tiny'),
+      type: Sequelize.STRING,
+      allowNull: false,
     },
-    image: {
+    thumbnail: {
       type: Sequelize.STRING,
       allowNull: true,
     },
@@ -31,9 +36,14 @@ Category.init(
   },
   {
     sequelize,
+    underscored: true,
+    timestamps: true,
+    paranoid: true,
     modelName: 'categories',
     table: 'categories',
   }
 );
+
+Category.baseAttibutes = ['name', 'description', 'thumbnail'];
 
 module.exports = Category;
