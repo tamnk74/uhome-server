@@ -1,6 +1,5 @@
 import omit from 'lodash/omit';
 import AuthService from '../services/auth';
-import User from '../../../models/user';
 import { objectToSnake } from '../../../helpers/Util';
 
 export default class AuthController {
