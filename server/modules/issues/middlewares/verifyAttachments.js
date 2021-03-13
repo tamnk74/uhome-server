@@ -5,7 +5,7 @@ export const verifyAttachments = async (req, res, next) => {
   try {
     const attachments = await Attachment.findAll({
       where: {
-        id: req.body.attachmentIds,
+        id: req.body.attachmentIds || [],
         issueId: null,
       },
     });

@@ -1,10 +1,15 @@
 import Sequelize from 'sequelize';
 import BaseModel from './model';
 import sequelize from '../databases/database';
+import { fileSystemConfig } from '../config';
 
 class Attachment extends BaseModel {
   static get searchFields() {
     return ['name'];
+  }
+
+  static buildUrlAttribuiteSelect() {
+    return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}', path)`), 'url'];
   }
 }
 

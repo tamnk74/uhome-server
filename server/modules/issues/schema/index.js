@@ -1,1 +1,1 @@
-export * from './createIssueSchema'
+export * from './createIssueSchema';
