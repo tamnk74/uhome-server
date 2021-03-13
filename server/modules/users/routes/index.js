@@ -21,8 +21,6 @@ router.route('/auth/zalo').post(validator(loginZaloSchema), AuthController.login
 router.route('/register').post(validator(registerSchema), AuthController.register);
 router.route('/me').get(auth, AuthController.userInfo);
 router.route('/me').patch(auth, validator(updateUserSchema), AuthController.updateUser);
-router
-  .route('/auth/verify-code')
-  .patch(auth, validator(verifyCodeSchema), AuthController.verifyCode);
+router.route('/users/:userId/verify').patch(validator(verifyCodeSchema), AuthController.verifyCode);
 
 export default router;

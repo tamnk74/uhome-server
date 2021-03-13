@@ -90,7 +90,7 @@ export default class AuthController {
     try {
       const authUser = await AuthService.register(req.body);
 
-      return res.status(200).json(objectToSnake(authUser));
+      return res.status(200).json(objectToSnake(authUser.toJSON()));
     } catch (e) {
       return next(e);
     }
@@ -98,8 +98,9 @@ export default class AuthController {
 
   static async verifyCode(req, res, next) {
     try {
-      await AuthService.verifyCode(req.user.id, req.body.verifyCode);
-      return res.status(204).json({});
+      const authUser = await AuthService.verifyCode(req.params.userId, req.body.verifyCode);
+
+      return res.status(200).json(authUser);
     } catch (e) {
       return next(e);
     }
