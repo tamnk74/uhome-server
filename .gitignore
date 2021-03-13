@@ -121,3 +121,5 @@ yarn-error.log
 /.vscode
 client
 dist
+/server/public/*
+*.DS_Store
