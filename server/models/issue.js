@@ -3,6 +3,7 @@ import uuid from 'uuid';
 import BaseModel from './model';
 import Category from './category';
 import CategoryIssue from './categoryIssue';
+import Attachment from './attachment';
 import sequelize from '../databases/database';
 
 class Issue extends BaseModel {
@@ -47,6 +48,7 @@ Issue.init(
 );
 
 Issue.belongsToMany(Category, { as: 'categories', through: CategoryIssue });
+Issue.hasMany(Attachment, { as: 'attachments' });
 Issue.beforeCreate((issue) => {
   issue.id = uuid.v4();
 });
@@ -57,9 +59,14 @@ Issue.addIssue = (data) => {
       transaction: t,
     });
 
-    await issue.addCategories(data.categoryIds, {
-      transaction: t,
-    });
+    await Promise.all([
+      issue.addCategories(data.categoryIds, {
+        transaction: t,
+      }),
+      issue.addAttachments(data.attachmentIds, {
+        transaction: t,
+      }),
+    ]);
 
     return issue;
   });

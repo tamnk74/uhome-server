@@ -9,6 +9,8 @@ services:
       - NODE_ENV=development
       - DB_HOST=mysql
       - REDIS_HOST=redis
+      - MINIO_ACCESS_KEY=u-home-key
+      - MINIO_SECRET_KEY=u-home-secret
     ports:
       - '3000:3000'
     depends_on:
