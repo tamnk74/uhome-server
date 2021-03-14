@@ -57,7 +57,19 @@ export const objectToCamel = (obj) => {
   Object.keys(obj).forEach((key) => {
     const camelKey = camelCase(key);
     if (Array.isArray(obj[key])) {
-      result[camelKey] = obj[key].map((item) => objectToCamel(item));
+      result[camelKey] = obj[key].map((item) => {
+        if (typeof item === 'string' || item instanceof Date) {
+          return item;
+        }
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          return objectToCamel(item);
+        }
+        return item;
+      });
+      return;
+    }
+    if (typeof obj[key] === 'string' || obj[key] instanceof Date) {
+      result[camelKey] = obj[key];
       return;
     }
     if (typeof obj[key] === 'object' && obj[key] !== null) {

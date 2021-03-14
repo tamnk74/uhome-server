@@ -1,0 +1,8 @@
+{
+  "ISSU-0001": {
+    "status": 404,
+    "error": "Not found",
+    "tile": "Issue not found",
+    "detail": "Issue not found"
+  }
+}

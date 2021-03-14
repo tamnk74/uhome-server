@@ -58,4 +58,8 @@ app.use('/api', ApiRouter);
 
 app.use(handleError);
 
+process.on('unhandledRejection', (reason, p) => {
+  console.error('Unhandled Rejection at:', p, 'reason:', reason);
+});
+
 module.exports = app;

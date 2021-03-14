@@ -1,0 +1,6 @@
+{
+  "ATTA-0001": {
+    "status": 400,
+    "detail": "Request contains invalid attachments"
+  }
+}
