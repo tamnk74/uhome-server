@@ -5,7 +5,6 @@ import CORS from 'cors';
 import BodyParser from 'body-parser';
 import Compress from 'compression';
 import Path from 'path';
-import FileUpload from 'express-fileupload';
 import { ApiRouter } from './routes';
 import { env } from './config';
 import { handleError } from './errors';
@@ -21,13 +20,8 @@ app.use(CORS());
 // Parse incoming requests data
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: false }));
+app.use(Express.urlencoded({ extended: false }));
 app.use(Compress());
-
-app.use(
-  FileUpload({
-    limits: { fileSize: 10 * 1024 * 1024 },
-  })
-);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -47,7 +41,7 @@ if (env === 'development') {
 }
 
 // set path for static assets
-app.use(Express.static(Path.resolve(__dirname, 'public')));
+app.use('/static', Express.static(Path.resolve(__dirname, 'public')));
 
 app.use((req, res, next) => {
   // Trim all request body data

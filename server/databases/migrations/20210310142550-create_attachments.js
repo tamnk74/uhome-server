@@ -22,7 +22,7 @@ module.exports = {
           model: 'issues',
           key: 'id',
         },
-        allowNull: false,
+        allowNull: true,
       },
       size: {
         type: Sequelize.DataTypes.INTEGER,
