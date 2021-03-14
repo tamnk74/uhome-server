@@ -16,7 +16,7 @@ export default class AuthController {
 
   static async remove(req, res, next) {
     try {
-      await IssueService.remove(req.params.issueId);
+      await IssueService.remove(req.issue);
       return res.status(204).json({});
     } catch (e) {
       return next(e);

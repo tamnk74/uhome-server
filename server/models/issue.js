@@ -71,4 +71,20 @@ Issue.addIssue = (data) => {
     return issue;
   });
 };
+
+Issue.removeIssue = (issue) => {
+  return sequelize.transaction(async (t) => {
+    return Promise.all([
+      Attachment.destroy({
+        where: {
+          issueId: issue.id,
+        },
+        transaction: t,
+      }),
+      issue.destroy({
+        transaction: t,
+      }),
+    ]);
+  });
+};
 module.exports = Issue;

@@ -5,11 +5,7 @@ export default class IssueService {
     return Issue.addIssue(issue);
   }
 
-  static async remove(issueId) {
-    return Issue.destroy({
-      where: {
-        id: issueId,
-      },
-    });
+  static async remove(issue) {
+    return Issue.removeIssue(issue);
   }
 }
