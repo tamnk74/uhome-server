@@ -1,3 +1,5 @@
+import { issueStatus } from '../../constants';
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('issues', {
@@ -21,6 +23,10 @@ module.exports = {
       },
       location: {
         type: Sequelize.DataTypes.STRING(1024),
+      },
+      status: {
+        type: Sequelize.ENUM(Object.values(issueStatus)),
+        defaultValue: issueStatus.OPEN,
       },
       created_at: {
         type: Sequelize.DATE,
