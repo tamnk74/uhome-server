@@ -10,6 +10,14 @@ class Issue extends BaseModel {
   static get searchFields() {
     return ['title'];
   }
+
+  static get mapFilterFields() {
+    return {
+      created_by: 'createdBy',
+      title: 'title',
+      location: 'location',
+    };
+  }
 }
 
 Issue.init(

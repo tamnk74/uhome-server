@@ -44,6 +44,6 @@ Category.init(
   }
 );
 
-Category.baseAttibutes = ['name', 'description', 'thumbnail'];
+Category.baseAttibutes = ['id', 'name', 'description', 'thumbnail'];
 
 module.exports = Category;
