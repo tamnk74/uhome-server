@@ -5,6 +5,7 @@ import Category from './category';
 import CategoryIssue from './categoryIssue';
 import Attachment from './attachment';
 import sequelize from '../databases/database';
+import { issueStatus } from '../constants';
 
 class Issue extends BaseModel {
   static get searchFields() {
@@ -32,6 +33,10 @@ Issue.init(
     },
     location: {
       type: Sequelize.DataTypes.STRING,
+    },
+    status: {
+      type: Sequelize.ENUM(Object.values(issueStatus)),
+      defaultValue: issueStatus.OPEN,
     },
     createdAt: {
       type: Sequelize.DATE,
