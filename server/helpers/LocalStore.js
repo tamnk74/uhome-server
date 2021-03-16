@@ -14,4 +14,12 @@ export default class LocalUpload {
 
     return fs.writeFileSync(path, file.buffer);
   }
+
+  async remove(path) {
+    const fullPath = `${fileSystemConfig[this.driver].root}/${path}`;
+
+    return new Promise((resolve, reject) =>
+      fs.unlink(fullPath, (err) => (err ? reject(err) : resolve()))
+    );
+  }
 }

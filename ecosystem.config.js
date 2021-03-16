@@ -5,6 +5,11 @@ module.exports = {
       script: 'dist/index.js',
       watch: '.',
     },
+    {
+      name: 'jobs',
+      script: 'dist/schedulers/index.js',
+      watch: '.',
+    },
   ],
 
   deploy: {

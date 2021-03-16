@@ -22,7 +22,7 @@ module.exports = {
         type: Sequelize.DataTypes.STRING(255),
       },
       avatar: {
-        type: Sequelize.DataTypes.STRING(255),
+        type: Sequelize.DataTypes.STRING(1024),
       },
       password: {
         type: Sequelize.DataTypes.STRING(127),

@@ -31,4 +31,9 @@ export default class Uploader {
     const instance = this.getInstance();
     return instance.upload(file, option);
   }
+
+  static async remove(path) {
+    const instance = this.getInstance();
+    return instance.remove(path);
+  }
 }
