@@ -55,7 +55,7 @@ export default class AuthService {
     if (existUser && existUser.status === userStatus.ACTIVE) {
       throw new Error('REG-0001');
     }
-    const verifyCode = randomNumber();
+    const verifyCode = randomNumber(4);
 
     // Todo send SMS
     // const sms = await SpeedSMS.sendSMS({
@@ -89,7 +89,7 @@ export default class AuthService {
 
     const userVerifyCode = await RedisService.getVerifyCode(user.id);
 
-    if (userVerifyCode !== verifyCode && verifyCode !== '000000') {
+    if (userVerifyCode !== verifyCode && verifyCode !== '0000') {
       throw new Error('USER-2002');
     }
 
