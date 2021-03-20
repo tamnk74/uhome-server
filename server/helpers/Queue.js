@@ -1,13 +1,9 @@
 import Queue from 'bull';
-import { host, port, db } from '../config/redis';
+import { redisConfig } from '../config';
 
-const queue = new Queue('Email Queue', {
+export const attachmentQueue = new Queue('Attachment Queue', {
   redis: {
-    port,
-    host,
-    db,
+    host: redisConfig.host,
+    port: redisConfig.port,
   },
 });
-queue.setMaxListeners(queue.maxListener);
-
-export default queue;

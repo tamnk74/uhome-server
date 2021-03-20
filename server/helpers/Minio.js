@@ -38,4 +38,8 @@ export default class MinioUpload {
       metaData
     );
   }
+
+  async remove(path) {
+    return this.minioClient.removeObject(fileSystemConfig[this.driver].bucket_name, path);
+  }
 }
