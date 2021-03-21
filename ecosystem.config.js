@@ -3,12 +3,12 @@ module.exports = {
     {
       name: 'uhome',
       script: 'dist/index.js',
-      watch: '.',
+      watch: false,
     },
     {
       name: 'jobs',
       script: 'dist/schedulers/index.js',
-      watch: '.',
+      watch: false,
     },
   ],
 
