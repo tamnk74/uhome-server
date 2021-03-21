@@ -124,4 +124,3 @@ dist
 /server/public/*
 *.DS_Store
 firebase-admin-config.json
-package-lock.json

@@ -1,4 +1,7 @@
 import JsonWebToken from 'jsonwebtoken';
+import { authenticator } from 'otplib';
+import Redis from './Redis';
+
 import { jwtExpireTime, jwtSecretKey, jwtRefreshKey, jwtRefreshExpireTime } from '../config';
 
 export default class JWT {
@@ -26,6 +29,16 @@ export default class JWT {
     return JsonWebToken.sign(payload, jwtSecretKey, {
       expiresIn: jwtExpireTime,
     });
+  }
+
+  static async generateAuthCode(userId) {
+    const code = authenticator.generateSecret();
+    await Redis.saveOauthCode(userId, code);
+    return code;
+  }
+
+  static async verifyAuthCode(code) {
+    return Redis.getOauthCode(code);
   }
 
   static generateRefreshToken(userId) {

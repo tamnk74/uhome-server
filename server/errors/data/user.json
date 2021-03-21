@@ -23,6 +23,11 @@
     "status": 400,
     "detail": "The zalo code is invalid"
   },
+  
+  "LOG-0007": {
+    "status": 400,
+    "detail": "The auth code is invalid"
+  },
   "USER-0001": {
     "status": 403,
     "detail": "User is inactive"

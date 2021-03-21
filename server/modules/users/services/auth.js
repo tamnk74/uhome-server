@@ -1,3 +1,4 @@
+import { ExtractJwt } from 'passport-jwt';
 import User from '../../../models/user';
 import JWT from '../../../helpers/JWT';
 import Zalo from '../../../helpers/Zalo';
@@ -19,15 +20,10 @@ export default class AuthService {
       throw new Error('LOG-0001');
     }
 
-    const [accessToken, refreshToken] = await Promise.all([
-      JWT.generateToken(user.toPayload()),
-      JWT.generateRefreshToken(user.id),
-    ]);
-    await RedisService.saveAccessToken(user.id, accessToken);
+    const code = await JWT.generateAuthCode(user.id);
+
     return {
-      accessToken,
-      refreshToken,
-      tokenType: 'Bearer',
+      code,
     };
   }
 
@@ -41,6 +37,27 @@ export default class AuthService {
         id: userId,
       },
     });
+  }
+
+  static async authorize({ code, role }) {
+    const userId = await JWT.verifyAuthCode(code);
+    if (!userId) {
+      throw new Error('LOG-0007');
+    }
+    const user = await User.findByPk(userId);
+    if (!user) {
+      throw new Error('LOG-0007');
+    }
+    const [accessToken, refreshToken] = await Promise.all([
+      JWT.generateToken(user.toPayload(role)),
+      JWT.generateRefreshToken(user.id),
+    ]);
+    await RedisService.saveAccessToken(user.id, accessToken);
+    return {
+      accessToken,
+      refreshToken,
+      tokenType: 'Bearer',
+    };
   }
 
   static async register({ phoneNumber, password, name }) {
@@ -138,15 +155,10 @@ export default class AuthService {
       );
     }
 
-    const [accessToken, refreshToken] = await Promise.all([
-      JWT.generateToken(user.toPayload()),
-      JWT.generateRefreshToken(user.id),
-    ]);
-    await RedisService.saveAccessToken(user.id, accessToken);
+    const code = await JWT.generateAuthCode(user.id);
+
     return {
-      accessToken,
-      refreshToken,
-      tokenType: 'Bearer',
+      code,
     };
   }
 
@@ -176,15 +188,10 @@ export default class AuthService {
       );
     }
 
-    const [accessToken, refreshToken] = await Promise.all([
-      JWT.generateToken(user.toPayload()),
-      JWT.generateRefreshToken(user.id),
-    ]);
-    await RedisService.saveAccessToken(user.id, accessToken);
+    const code = await JWT.generateAuthCode(user.id);
+
     return {
-      accessToken,
-      refreshToken,
-      tokenType: 'Bearer',
+      code,
     };
   }
 

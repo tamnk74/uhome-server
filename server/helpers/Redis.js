@@ -9,15 +9,28 @@ const redis = new Redis({
   db: redisConfig.db,
 });
 const authPrefix = 'auth:';
+const oauthPrefix = 'oauth:';
 const userPrefix = 'user:';
 
 export default class RedisService {
-  static saveAccessToken(userId, token) {
-    return redis.hset(authPrefix + userId, token, Date.now());
+  static saveAccessToken(userId, token, value = Date.now()) {
+    return redis.hset(authPrefix + userId, token, value);
+  }
+
+  static saveOauthCode(userId, code) {
+    return redis.set(`${oauthPrefix}${code}`, userId, 'EX', 3600);
+  }
+
+  static getOauthCode(code) {
+    return redis.get(`${oauthPrefix}${code}`);
   }
 
   static isExistAccessToken(userId, token) {
     return redis.hexists(authPrefix + userId, token);
+  }
+
+  static getRoleAccessToken(userId, token) {
+    return redis.hget(authPrefix + userId, token);
   }
 
   static removeAccessToken(userId, token) {

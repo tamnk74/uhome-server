@@ -16,6 +16,7 @@ import {
   uploadFileschema,
   updateSkillsSchema,
   subscriptionSchema,
+  setRoleSchema,
 } from '../schema';
 
 import { verifyUser } from '../middlewares';
@@ -34,6 +35,7 @@ router.route('/logout').post(auth, AuthController.logout);
 router.route('/auth/facebook').post(validator(loginFbSchema), AuthController.loginFb);
 router.route('/auth/zalo').post(validator(loginZaloSchema), AuthController.loginZalo);
 router.route('/register').post(validator(registerSchema), AuthController.register);
+router.route('/auth/token').post(validator(setRoleSchema), AuthController.authorize);
 router.route('/me').get(auth, AuthController.userInfo);
 router.route('/me').patch(auth, validator(updateUserSchema), AuthController.updateUser);
 router.route('/users/:userId/verify').patch(validator(verifyCodeSchema), AuthController.verifyCode);

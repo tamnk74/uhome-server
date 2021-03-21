@@ -3,6 +3,11 @@ export const status = Object.freeze({
   ACTIVE: 1,
 });
 
+export const userRoles = Object.freeze({
+  CUSTOMER: 'CUSTOMER',
+  WORKER: 'WORKER',
+});
+
 export const roles = Object.freeze({
   USER: 'USER',
   ADMIN: 'ADMIN',
