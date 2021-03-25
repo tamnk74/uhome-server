@@ -6,6 +6,7 @@ import CategoryIssue from './categoryIssue';
 import Attachment from './attachment';
 import sequelize from '../databases/database';
 import { issueStatus } from '../constants';
+import ChatChannel from './chatChannel';
 
 class Issue extends BaseModel {
   static get searchFields() {
@@ -38,6 +39,14 @@ Issue.init(
       type: Sequelize.ENUM(Object.values(issueStatus)),
       defaultValue: issueStatus.OPEN,
     },
+    chatChannelId: {
+      type: Sequelize.DataTypes.UUID,
+      references: {
+        model: 'chat_channels',
+        key: 'id',
+      },
+      allowNull: false,
+    },
     createdAt: {
       type: Sequelize.DATE,
       defautValue: Sequelize.NOW,
@@ -62,6 +71,7 @@ Issue.init(
 
 Issue.belongsToMany(Category, { as: 'categories', through: CategoryIssue });
 Issue.hasMany(Attachment, { as: 'attachments' });
+Issue.belongsTo(ChatChannel, { as: 'chatChannel' });
 Issue.beforeCreate((issue) => {
   issue.id = uuid.v4();
 });
