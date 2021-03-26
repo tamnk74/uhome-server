@@ -22,4 +22,13 @@ export default class AuthController {
       return next(e);
     }
   }
+
+  static async show(req, res, next) {
+    try {
+      const issue = await IssueService.getDetail(req.issue.id, req.user);
+      return res.status(201).json(objectToSnake(issue.toJSON()));
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

@@ -15,5 +15,6 @@ router.post(
   IssueController.create
 );
 router.delete('/issues/:issueId', auth, verifyIssue, IssueController.remove);
+router.get('/issues/:issueId', auth, verifyIssue, IssueController.show);
 
 export default router;
