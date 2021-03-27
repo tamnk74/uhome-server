@@ -81,11 +81,35 @@ export default class UserController {
     }
   }
 
+  static async subscribe(req, res, next) {
+    try {
+      await UserService.subscribe({
+        userId: req.user.id,
+        token: req.body.deviceToken,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async skills(req, res, next) {
     try {
       await UserService.createOrUpdateSkills(req.user.id, req.body);
 
       return res.status(204).json();
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async unsubscribe(req, res, next) {
+    try {
+      await UserService.unsubscribe({
+        userId: req.user.id,
+        token: req.body.deviceToken,
+      });
+      return res.status(204).json({});
     } catch (e) {
       return next(e);
     }

@@ -22,6 +22,16 @@ class Issue extends BaseModel {
       status: 'status',
     };
   }
+
+  fmtRes() {
+    return {
+      status: this.status,
+      id: this.id,
+      title: this.title,
+      location: this.location,
+      createdBy: this.createdBy,
+    };
+  }
 }
 
 Issue.init(

@@ -11,6 +11,8 @@ import UserProfile from '../../../models/userProfile';
 import { fileType } from '../../../constants/user';
 
 import Uploader from '../../../helpers/Uploader';
+import Subscription from '../../../models/subscription';
+import Fcm from '../../../helpers/Fcm';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -165,5 +167,26 @@ export default class Userervice {
 
   static async createOrUpdateSkills(userId, payload) {
     return User.updateSkills(userId, payload);
+  }
+
+  static async subscribe({ userId, token }) {
+    await Subscription.findOrCreate({
+      where: {
+        userId,
+        token,
+      },
+      defaults: {
+        userId,
+        token,
+      },
+    });
+    return Fcm.subscribeNewIssue(token);
+  }
+
+  static async unsubscribe({ userId, token }) {
+    await Subscription.destroy({
+      where: { userId, token },
+    });
+    return Fcm.unsubscribeNewIssue(token);
   }
 }

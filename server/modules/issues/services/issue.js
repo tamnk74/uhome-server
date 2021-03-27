@@ -1,9 +1,11 @@
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
+import { notificationQueue } from '../../../helpers/Queue';
 
 export default class IssueService {
   static async create(issue) {
     issue = await Issue.addIssue(issue);
+    notificationQueue.add('issue', { id: issue.id });
     return this.getDetail(issue.id);
   }
 

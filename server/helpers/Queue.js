@@ -7,3 +7,10 @@ export const attachmentQueue = new Queue('Attachment Queue', {
     port: redisConfig.port,
   },
 });
+
+export const notificationQueue = new Queue('Push notificaion', {
+  redis: {
+    host: redisConfig.host,
+    port: redisConfig.port,
+  },
+});

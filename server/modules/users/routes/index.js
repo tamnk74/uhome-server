@@ -15,6 +15,7 @@ import {
   verifyCodeSchema,
   uploadFileschema,
   updateSkillsSchema,
+  subscriptionSchema,
 } from '../schema';
 
 import { verifyUser } from '../middlewares';
@@ -45,4 +46,8 @@ router
   .route('/me/upload-file')
   .post(auth, upload, validFile, validator(uploadFileschema), UserController.uploadFile);
 
+router.route('/me/subscribe').post(auth, validator(subscriptionSchema), UserController.subscribe);
+router
+  .route('/me/unsubscribe')
+  .post(auth, validator(subscriptionSchema), UserController.unsubscribe);
 export default router;
