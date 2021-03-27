@@ -13,7 +13,6 @@ export default class AuthService {
     const user = await User.findOne({
       where: {
         phoneNumber,
-        status: userStatus.ACTIVE,
       },
     });
 
@@ -96,16 +95,14 @@ export default class AuthService {
     user.status = userStatus.ACTIVE;
     user.verifiedAt = new Date();
 
-    const [accessToken, refreshToken] = await Promise.all([
-      JWT.generateToken(user.toPayload()),
-      JWT.generateRefreshToken(user.id),
-      user.save(),
-    ]);
-    await RedisService.saveAccessToken(user.id, accessToken);
+    // const [accessToken, refreshToken] = await Promise.all([
+    //   JWT.generateToken(user.toPayload()),
+    //   JWT.generateRefreshToken(user.id),
+    //   user.save(),
+    // ]);
+    // await RedisService.saveAccessToken(user.id, accessToken);
     return {
-      accessToken,
-      refreshToken,
-      tokenType: 'Bearer',
+        user
     };
   }
 
