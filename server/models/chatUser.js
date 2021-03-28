@@ -59,7 +59,7 @@ ChatUser.beforeCreate((user) => {
 ChatUser.findUserFree = async (channelId) => {
   const chatUsers = await sequelize.query(
     'SELECT chat_users.* FROM chat_users left join chat_members on chat_users.identity = chat_members.identity ' +
-      'where chat_users.deleted_at IS NULL and chat_members.channel_id <> :channelId limit 1',
+      'where chat_users.deleted_at IS NULL and chat_members.channel_id <> :channelId ORDER BY RAND() limit 1',
     {
       replacements: { channelId },
       type: Sequelize.QueryTypes.SELECT,

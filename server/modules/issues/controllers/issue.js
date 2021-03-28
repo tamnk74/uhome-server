@@ -25,7 +25,7 @@ export default class AuthController {
 
   static async show(req, res, next) {
     try {
-      const issue = await IssueService.getDetail(req.issue.id, req.user);
+      const issue = await IssueService.getDetail(req.issue.id);
       return res.status(201).json(objectToSnake(issue.toJSON()));
     } catch (e) {
       return next(e);

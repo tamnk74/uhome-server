@@ -102,7 +102,7 @@ export default class AuthService {
     // ]);
     // await RedisService.saveAccessToken(user.id, accessToken);
     return {
-        user
+      user,
     };
   }
 

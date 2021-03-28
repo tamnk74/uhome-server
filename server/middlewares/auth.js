@@ -6,6 +6,7 @@ import { status } from '../constants/user';
 export default (req, res, next) => {
   passport.authenticate('jwt', { session: false }, async (err, jwtPayload) => {
     const user = jwtPayload;
+
     if (!user) {
       return next(errorFactory.getError('ERR-0401'));
     }
