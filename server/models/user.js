@@ -108,6 +108,7 @@ User.prototype.toPayload = function toPayload() {
     id: this.dataValues.id,
     phoneNumber: this.dataValues.phoneNumber,
     name: this.dataValues.name,
+    status: this.dataValues.status,
   };
 };
 
@@ -132,5 +133,13 @@ User.beforeBulkUpdate(async function beforeBulkUpdate(options) {
   options.attributes.password =
     options.attributes.password && (await User.generateHash(options.attributes.password));
 });
+
+User.prototype.toJSON = function toJSON() {
+  const values = { ...this.get() };
+
+  delete values.password;
+
+  return values;
+};
 
 module.exports = User;
