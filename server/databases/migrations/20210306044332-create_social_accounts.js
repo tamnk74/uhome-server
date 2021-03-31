@@ -18,7 +18,7 @@ module.exports = {
           allowNull: false,
         },
         social_id: {
-          type: Sequelize.DataTypes.STRING(16),
+          type: Sequelize.DataTypes.STRING(36),
           unique: true,
           allowNull: false,
         },

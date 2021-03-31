@@ -18,7 +18,7 @@ export default class Zalo {
   static async getUser(accessToken) {
     const zaloUrl = 'https://graph.zalo.me/v2.0/me';
     const res = await axios.get(
-      `${zaloUrl}?accesstoken=${accessToken}&fields=id,birthday,name,gender,picture`
+      `${zaloUrl}?access_token=${accessToken}&fields=id,birthday,name,gender,picture`
     );
     const { error } = res.data;
     if (error) {
