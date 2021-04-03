@@ -42,4 +42,17 @@ export default class MinioUpload {
   async remove(path) {
     return this.minioClient.removeObject(fileSystemConfig[this.driver].bucket_name, path);
   }
+
+  async preSignedUrl(path, ttl) {
+    return this.minioClient.presignedUrl(
+      'GET',
+      fileSystemConfig[this.driver].bucket_name,
+      path,
+      ttl
+    );
+  }
+
+  async getObject(path) {
+    return this.minioClient.getObject(fileSystemConfig[this.driver].bucket_name, path);
+  }
 }

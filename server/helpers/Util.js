@@ -1,5 +1,4 @@
-import camelCase from 'lodash/camelCase';
-import snakeCase from 'lodash/snakeCase';
+const { snakeCase, camelCase } = require('lodash');
 
 exports.mapKeys = (mapKeys, obj) => {
   const result = {};
@@ -109,4 +108,48 @@ export const randomNumber = (length = 6) => {
   let result = '';
   for (let i = length; i > 0; --i) result += str[Math.floor(Math.random() * str.length)];
   return result;
+};
+
+export const toPlain = (response) => {
+  const flattenDataValues = ({ dataValues }) => {
+    const flattenedObject = {};
+
+    Object.keys(dataValues).forEach((key) => {
+      const dataValue = dataValues[key];
+
+      if (
+        Array.isArray(dataValue) &&
+        dataValue[0] &&
+        dataValue[0].dataValues &&
+        typeof dataValue[0].dataValues === 'object'
+      ) {
+        flattenedObject[key] = dataValues[key].map(flattenDataValues);
+      } else if (dataValue && dataValue.dataValues && typeof dataValue.dataValues === 'object') {
+        flattenedObject[key] = flattenDataValues(dataValues[key]);
+      } else {
+        flattenedObject[key] = dataValues[key];
+      }
+    });
+
+    return flattenedObject;
+  };
+
+  return Array.isArray(response) ? response.map(flattenDataValues) : flattenDataValues(response);
+};
+
+export const distance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const { sin, cos, atan2: atan, sqrt } = Math;
+  const dLatR = (lat2 - lat1).toRad();
+  const dLonR = (lon2 - lon1).toRad();
+  const lat1R = lat1.toRad();
+  const lat2R = lat2.toRad();
+  const a =
+    sin(dLatR / 2) * sin(dLatR / 2) + cos(lat1R) * cos(lat2R) * sin(dLonR / 2) * sin(dLonR / 2);
+  const b = 2 * atan(sqrt(a), sqrt(1 - a));
+  return R * b; // Km
+};
+
+Number.prototype.toRad = function () {
+  return (this * Math.PI) / 180;
 };

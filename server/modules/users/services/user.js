@@ -1,9 +1,16 @@
+import { v4 as uuidv4 } from 'uuid';
+import { Op } from 'sequelize';
+import { fileSystemConfig } from '../../../config';
 import Issue from '../../../models/issue';
 import Category from '../../../models/category';
 import Attachment from '../../../models/attachment';
 import ReceiveIssue from '../../../models/receiveIssue';
 import ReceiveIssueComment from '../../../models/receiveIssueComment';
 import User from '../../../models/user';
+import UserProfile from '../../../models/userProfile';
+import { fileType } from '../../../constants/user';
+
+import Uploader from '../../../helpers/Uploader';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -83,5 +90,80 @@ export default class Userervice {
       limit,
       offset,
     });
+  }
+
+  static async updateProfile(userId, { gender, birthday }) {
+    await UserProfile.update(
+      {
+        gender,
+        birthday,
+      },
+      {
+        where: {
+          userId,
+        },
+      }
+    );
+  }
+
+  static async uploadFile(userId, { file, body: { type } }) {
+    const id = uuidv4();
+    const fileName = `${id}-${file.originalname}`;
+    const path = `users/${type}_${fileName}`;
+    const userProfile = await UserProfile.findOne({
+      where: {
+        userId,
+      },
+    });
+    const identityCard = userProfile.identityCard
+      ? JSON.parse(userProfile.identityCard)
+      : { before: null, after: null };
+
+    Uploader.upload(file, {
+      path,
+      'x-amz-meta-mimeType': file.mimetype,
+      'x-amz-meta-size': file.size.toString(),
+    });
+
+    switch (type) {
+      case fileType.AVATAR:
+        User.update({ avatar: path }, { where: { id: userId } });
+        break;
+      case fileType.IDENTITY_CARD_BEFORE:
+        identityCard.before = path;
+        UserProfile.update({ identityCard: JSON.stringify(identityCard) }, { where: { userId } });
+        break;
+      case fileType.IDENTITY_CARD_AFTER:
+        identityCard.after = path;
+        UserProfile.update({ identityCard: JSON.stringify(identityCard) }, { where: { userId } });
+        break;
+      default:
+      //
+    }
+
+    return `${fileSystemConfig.clout_front}/${path}`;
+  }
+
+  static getUserById(userId) {
+    return User.findByPk(userId, {
+      include: [
+        {
+          model: UserProfile,
+          as: 'profile',
+          required: true,
+        },
+        {
+          model: Category,
+          as: 'categories',
+          required: false,
+          through: { attributes: [] },
+        },
+      ],
+      nest: true,
+    });
+  }
+
+  static async createOrUpdateSkills(userId, payload) {
+    return User.updateSkills(userId, payload);
   }
 }

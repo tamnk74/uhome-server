@@ -1,9 +1,11 @@
-import Sequelize from 'sequelize';
+import Sequelize, { Op } from 'sequelize';
 import Bcrypt from 'bcryptjs';
 import uuid from 'uuid';
 import sequelize from '../databases/database';
 import BaseModel from './model';
 import SocialAccount from './socialAccount';
+import UserProfile from './userProfile';
+import Category from './category';
 import { socialAccount } from '../constants';
 
 class User extends BaseModel {
@@ -102,6 +104,18 @@ User.init(
 
 User.hasMany(SocialAccount, { as: 'socialAccounts' });
 SocialAccount.belongsTo(User);
+User.hasOne(UserProfile, { as: 'profile', foreignKey: 'user_id' });
+User.belongsToMany(Category, {
+  as: 'categories',
+  through: 'user_category',
+  foreignKey: 'userId',
+});
+
+Category.belongsToMany(User, {
+  as: 'users',
+  through: 'user_category',
+  foreignKey: 'categoryId',
+});
 
 User.prototype.toPayload = function toPayload() {
   return {
@@ -133,6 +147,38 @@ User.beforeBulkUpdate(async function beforeBulkUpdate(options) {
   options.attributes.password =
     options.attributes.password && (await User.generateHash(options.attributes.password));
 });
+
+User.updateSkills = async (userId, { categoryIds, yearExperience }) => {
+  return sequelize.transaction(async (t) => {
+    const user = await User.findByPk(userId);
+    const categories = await user.getCategories();
+
+    if (categories.length) {
+      user.removeCategories(categories, { transaction: t });
+    }
+
+    if (categoryIds) {
+      const createCategories = await Category.findAll({
+        where: {
+          id: { [Op.in]: categoryIds },
+        },
+      });
+
+      if (createCategories) {
+        await user.addCategories(createCategories, { transaction: t });
+      }
+    }
+    await UserProfile.update(
+      { yearExperience },
+      {
+        where: {
+          userId,
+        },
+        transaction: t,
+      }
+    );
+  });
+};
 
 User.prototype.toJSON = function toJSON() {
   const values = { ...this.get() };

@@ -13,6 +13,7 @@ export default class Uploader {
     switch (fileSystemConfig.driver) {
       case 'minio':
         this.uploader = new MinioUpload(fileSystemConfig.driver);
+        this.uploader.makeBucket();
         break;
       case 'local':
         this.uploader = new LocalUpload(fileSystemConfig.driver);
@@ -35,5 +36,15 @@ export default class Uploader {
   static async remove(path) {
     const instance = this.getInstance();
     return instance.remove(path);
+  }
+
+  static async preSignedUrl(path, ttl = 3600) {
+    const url = await this.uploader.preSignedUrl(path, ttl);
+    return url;
+  }
+
+  static async getObject(path) {
+    const url = await this.uploader.getObject(path);
+    return url;
   }
 }
