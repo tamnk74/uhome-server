@@ -32,12 +32,8 @@ export default class Twilio {
       .members.create({ identity: userId, attributes });
   }
 
-  async sendMessage(channelId, from, body, type) {
-    return this.client.chat.services(twilioConfig.chatId).channels(channelId).messages.create({
-      from,
-      body,
-      type,
-    });
+  async sendMessage(channelId, data) {
+    return this.client.chat.services(twilioConfig.chatId).channels(channelId).messages.create(data);
   }
 
   async getUsers(limit, page) {
@@ -61,6 +57,10 @@ export default class Twilio {
     token.addGrant(chatGrant);
 
     return token.toJwt();
+  }
+
+  async getMessage(channelId, id) {
+    return this.client.chat.services(twilioConfig.chatId).channels(channelId).messages(id).fetch();
   }
 }
 

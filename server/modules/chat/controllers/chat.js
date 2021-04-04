@@ -10,4 +10,13 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async sendCommand(req, res, next) {
+    try {
+      await ChatService.sendCommand(req.chatChannel, req.user, req.body);
+      return res.status(204).json();
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
