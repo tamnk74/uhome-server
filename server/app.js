@@ -5,18 +5,28 @@ import CORS from 'cors';
 import BodyParser from 'body-parser';
 import Compress from 'compression';
 import Path from 'path';
+import i18n from 'i18n';
 import { ApiRouter } from './routes';
 import { env } from './config';
 import { handleError } from './errors';
 import { trimObject } from './helpers/Util';
 import './config/passport';
 
+i18n.configure({
+  locales: ['vi'],
+  directory: `${__dirname}/locales`,
+  defaultLocale: 'vi',
+  cookie: 'i18n',
+  extension: '.json',
+  objectNotation: true,
+  register: global,
+});
 // Set up the express app
 const app = Express();
 
 // Allow cors
 app.use(CORS());
-
+app.use(i18n.init);
 // Parse incoming requests data
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: false }));

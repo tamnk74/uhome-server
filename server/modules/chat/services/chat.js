@@ -4,6 +4,8 @@ import { twilioClient } from '../../../helpers/Twilio';
 import ChatChannel from '../../../models/chatChannel';
 import User from '../../../models/user';
 import ChatUser from '../../../models/chatUser';
+import { command, commandMessage } from '../../../constants';
+import { objectToSnake } from '../../../helpers/Util';
 
 export default class ChatService {
   static async create(user, data) {
@@ -69,5 +71,50 @@ export default class ChatService {
       channelId: chatChannel.id,
       memberSid: twilioMember.sid,
     });
+  }
+
+  static async sendCommand(chatChannel, user, data) {
+    const { commandName, startTime, totalTime, totalCost, materials } = data;
+    const chatMember = await ChatMember.findOne({
+      where: {
+        channelId: chatChannel.id,
+        userId: user.id,
+      },
+    });
+
+    if (!chatMember) {
+      throw new Error('MEMBER-0404');
+    }
+    const messageData = {
+      from: chatMember.identity,
+      channelSid: chatChannel.channelSid,
+      type: 'action',
+    };
+    const messageAttributes = {
+      type: 'command',
+      commandName,
+      data: {},
+    };
+
+    switch (commandName) {
+      case command.SUBMIT_ESTIMATION:
+        messageAttributes.data = {
+          startTime,
+          totalTime,
+        };
+        break;
+      case command.INFORM_MATERIAL_COST:
+        messageAttributes.data = {
+          totalCost,
+          materials,
+        };
+        break;
+      default:
+        break;
+    }
+    /* eslint-disable no-undef */
+    messageData.body = __(commandMessage[commandName]);
+    messageData.attributes = JSON.stringify(objectToSnake(messageAttributes));
+    await twilioClient.sendMessage(chatChannel.channelSid, messageData);
   }
 }

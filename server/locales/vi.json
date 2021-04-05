@@ -1,0 +1,12 @@
+{
+  "chat": {
+    "update_progress": "Yêu cầu cập nhập tiến độ",
+    "cancel": "Huỷ yêu cầu",
+    "send_media": "Gởi hình ảnh cho tôi",
+    "estimate": "Gởi báo giá cho tôi",
+    "submit_estimate": "Tôi gởi báo giá",
+    "approval_estimate": "Tôi đồng ý thời gian",
+    "inform_material_cost": "Thông báo chí phí nguyên vật liệu",
+    "request_acceptance": "Yêu cần nghiệm thu"
+  }
+}
