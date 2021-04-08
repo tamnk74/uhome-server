@@ -12,3 +12,15 @@ export const socialAccount = Object.freeze({
   FACEBOOK: 'FACEBOOK',
   ZALO: 'ZALO',
 });
+
+export const gender = Object.freeze({
+  MALE: 0,
+  FEMALE: 1,
+  OTHER: 2,
+});
+
+export const fileType = Object.freeze({
+  AVATAR: 'avatar',
+  IDENTITY_CARD_BEFORE: 'identity_card_before',
+  IDENTITY_CARD_AFTER: 'identity_card_after',
+});

@@ -7,6 +7,8 @@ import RedisService from '../../../helpers/Redis';
 import SpeedSMS from '../../../helpers/SpeedSMS';
 import { status as userStatus, socialAccount } from '../../../constants';
 import { randomNumber } from '../../../helpers/Util';
+import UserProfile from '../../../models/userProfile';
+import Category from '../../../models/category';
 
 export default class AuthService {
   static async authenticate({ phoneNumber = '', password }) {
@@ -70,6 +72,7 @@ export default class AuthService {
     }
 
     const user = await User.create({ phoneNumber, password, name, status: userStatus.IN_ACTIVE });
+    await UserProfile.create({ userId: user.id, identityCard: { before: null, after: null } });
     await RedisService.saveVerifyCode(user.id, verifyCode);
 
     return user;

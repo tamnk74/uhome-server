@@ -4,3 +4,6 @@ export * from './loginSchema';
 export * from './registerSchema';
 export * from './updateUser';
 export * from './verifyCodeSchema';
+export * from './updateProfileSchema';
+export * from './uploadFileSchema';
+export * from './updateSkillsSchema';
