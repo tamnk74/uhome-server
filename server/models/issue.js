@@ -6,6 +6,8 @@ import CategoryIssue from './categoryIssue';
 import Attachment from './attachment';
 import sequelize from '../databases/database';
 import { issueStatus } from '../constants';
+import RequestSupporting from './requestSupporting';
+import User from './user';
 
 class Issue extends BaseModel {
   static get searchFields() {
@@ -17,6 +19,7 @@ class Issue extends BaseModel {
       created_by: 'createdBy',
       title: 'title',
       location: 'location',
+      status: 'status',
     };
   }
 }
@@ -62,6 +65,12 @@ Issue.init(
 
 Issue.belongsToMany(Category, { as: 'categories', through: CategoryIssue });
 Issue.hasMany(Attachment, { as: 'attachments' });
+RequestSupporting.belongsTo(Issue);
+RequestSupporting.belongsTo(User);
+
+Issue.hasMany(RequestSupporting, { as: 'requestSupportings' });
+Issue.belongsToMany(User, { as: 'requestUsers', through: RequestSupporting });
+
 Issue.beforeCreate((issue) => {
   issue.id = uuid.v4();
 });
@@ -99,5 +108,39 @@ Issue.removeIssue = (issue) => {
       }),
     ]);
   });
+};
+
+Issue.buildRelation = (categoryIds = []) => {
+  let filterCategories = {};
+  if (categoryIds.length) {
+    filterCategories = {
+      id: categoryIds,
+    };
+  }
+  return [
+    {
+      model: Category,
+      required: true,
+      as: 'categories',
+      where: {
+        ...filterCategories,
+      },
+    },
+    {
+      model: Attachment,
+      as: 'attachments',
+      require: false,
+      attributes: [
+        'id',
+        'size',
+        'mimeType',
+        'createdAt',
+        'updatedAt',
+        'issueId',
+        'path',
+        Attachment.buildUrlAttribuiteSelect(),
+      ],
+    },
+  ];
 };
 module.exports = Issue;
