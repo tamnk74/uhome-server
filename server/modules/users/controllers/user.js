@@ -20,4 +20,22 @@ export default class UserController {
       return next(e);
     }
   }
+
+  static async getReceiveIssues(req, res, next) {
+    try {
+      const pagination = new Pagination(req.query);
+      const issues = await UserService.getReceiveIssues({
+        ...req.query,
+        limit: pagination.limit,
+        offset: pagination.skip,
+        userId: req.params.id,
+      });
+      return res.status(200).json({
+        meta: pagination.getMeta(),
+        data: issues.rows.map((issue) => objectToSnake(issue.toJSON())),
+      });
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

@@ -13,6 +13,8 @@ import {
   verifyCodeSchema,
 } from '../schema';
 
+import { verifyUser } from '../middlewares';
+
 const router = Router();
 
 router.route('/login').post(validator(loginSchema), AuthController.login);
@@ -24,5 +26,6 @@ router.route('/me').get(auth, AuthController.userInfo);
 router.route('/me').patch(auth, validator(updateUserSchema), AuthController.updateUser);
 router.route('/users/:userId/verify').patch(validator(verifyCodeSchema), AuthController.verifyCode);
 router.route('/me/issues').get(auth, UserController.getIssues);
+router.route('/users/:id/receive-issues').get(auth, verifyUser, UserController.getReceiveIssues);
 
 export default router;
