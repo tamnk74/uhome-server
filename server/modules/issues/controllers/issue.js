@@ -1,5 +1,6 @@
 import IssueService from '../services/issue';
-import { objectToSnake } from '../../../helpers/Util';
+import { objectToCamel, objectToSnake } from '../../../helpers/Util';
+import Pagination from '../../../helpers/Pagination';
 
 export default class AuthController {
   static async create(req, res, next) {
@@ -27,6 +28,24 @@ export default class AuthController {
     try {
       const issue = await IssueService.getDetail(req.issue.id);
       return res.status(201).json(objectToSnake(issue.toJSON()));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async index(req, res, next) {
+    try {
+      const pagination = new Pagination(req.query);
+      const issues = await IssueService.getIssues({
+        ...objectToCamel(req.query),
+        user: req.user,
+        limit: pagination.limit,
+        offset: pagination.skip,
+      });
+      return res.status(200).json({
+        meta: pagination.getMeta(),
+        data: issues.rows.map((issue) => objectToSnake(issue.toJSON())),
+      });
     } catch (e) {
       return next(e);
     }
