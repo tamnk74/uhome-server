@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Op } from 'sequelize';
 import { fileSystemConfig } from '../../../config';
 import Issue from '../../../models/issue';
 import Category from '../../../models/category';
