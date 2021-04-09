@@ -1,14 +1,11 @@
 import User from '../../../models/user';
-import DeviceToken from '../../../models/deviceToken';
 import JWT from '../../../helpers/JWT';
 import Zalo from '../../../helpers/Zalo';
 import Facebook from '../../../helpers/Facebook';
 import RedisService from '../../../helpers/Redis';
-import SpeedSMS from '../../../helpers/SpeedSMS';
 import { status as userStatus, socialAccount } from '../../../constants';
 import { randomNumber } from '../../../helpers/Util';
 import UserProfile from '../../../models/userProfile';
-import Category from '../../../models/category';
 
 export default class AuthService {
   static async authenticate({ phoneNumber = '', password }) {

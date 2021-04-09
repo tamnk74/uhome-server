@@ -137,19 +137,17 @@ export const toPlain = (response) => {
   return Array.isArray(response) ? response.map(flattenDataValues) : flattenDataValues(response);
 };
 
+export const toRad = (value) => (value * Math.PI) / 180;
+
 export const distance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
   const { sin, cos, atan2: atan, sqrt } = Math;
-  const dLatR = (lat2 - lat1).toRad();
-  const dLonR = (lon2 - lon1).toRad();
-  const lat1R = lat1.toRad();
-  const lat2R = lat2.toRad();
+  const dLatR = toRad(lat2 - lat1);
+  const dLonR = toRad(lon2 - lon1);
+  const lat1R = toRad(lat1);
+  const lat2R = toRad(lat2);
   const a =
     sin(dLatR / 2) * sin(dLatR / 2) + cos(lat1R) * cos(lat2R) * sin(dLonR / 2) * sin(dLonR / 2);
   const b = 2 * atan(sqrt(a), sqrt(1 - a));
   return R * b; // Km
-};
-
-Number.prototype.toRad = function () {
-  return (this * Math.PI) / 180;
 };
