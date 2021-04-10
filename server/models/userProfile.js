@@ -23,12 +23,6 @@ UserProfile.init(
       type: Sequelize.DataTypes.INTEGER,
       defaultValue: 0,
     },
-    gender: {
-      type: Sequelize.DataTypes.TINYINT,
-    },
-    birthday: {
-      type: Sequelize.DATE,
-    },
     identityCard: {
       type: Sequelize.DataTypes.TEXT,
     },

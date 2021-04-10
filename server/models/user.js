@@ -50,6 +50,9 @@ User.init(
     birthday: {
       type: Sequelize.DATE,
     },
+    gender: {
+      type: Sequelize.DataTypes.TINYINT,
+    },
     address: {
       type: Sequelize.STRING,
     },
