@@ -69,7 +69,7 @@ export default class AuthService {
     }
 
     const user = await User.create({ phoneNumber, password, name, status: userStatus.IN_ACTIVE });
-    await UserProfile.create({ userId: user.id, identityCard: { before: null, after: null } });
+    await UserProfile.create({ userId: user.id, identityCard: JSON.stringify({ before: null, after: null }) });
     await RedisService.saveVerifyCode(user.id, verifyCode);
 
     return user;
