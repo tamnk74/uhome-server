@@ -17,7 +17,7 @@ export default (req, res, next) => {
       return next(errorFactory.getError('ERR-0401'));
     }
 
-    if (user.status === status.INACTIVE) {
+    if (user.status === status.IN_ACTIVE) {
       return next(errorFactory.getError('USER-0001'));
     }
 

@@ -32,8 +32,18 @@ module.exports = {
         status: 1,
       },
     ];
+
+    const userProfiles = [];
+
+    for (let i = 0; i < users.length; i++) {
+      userProfiles.push({ userId: users[i].id });
+    }
+
     console.log(users);
-    return queryInterface.bulkInsert('users', users, {});
+    return Promise.all([
+      queryInterface.bulkInsert('users', users, {}),
+      queryInterface.bulkInsert('user_profiles', userProfiles, {}),
+    ]);
   },
 
   down: (queryInterface) => {
