@@ -1,6 +1,8 @@
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue } from '../../../helpers/Queue';
+import RequestSupporting from '../../../models/requestSupporting';
+import { issueStatus } from '../../../constants';
 
 export default class IssueService {
   static async create(issue) {
@@ -47,5 +49,20 @@ export default class IssueService {
       limit,
       offset,
     });
+  }
+
+  static async requestSupporting(user, issue) {
+    if (issue.status !== issueStatus.OPEN) {
+      throw new Error('ISSUE-0002');
+    }
+
+    const requestSupporting = await RequestSupporting.findOrCreate({
+      where: {
+        userId: user.id,
+        issueId: issue.id,
+      },
+    });
+    notificationQueue.add('request_supporting', { id: requestSupporting.id });
+    return requestSupporting;
   }
 }

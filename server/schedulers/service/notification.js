@@ -7,6 +7,7 @@ import User from '../../models/user';
 import { notificationType } from '../../constants';
 import Issue from '../../models/issue';
 import sequelize from '../../databases/database';
+import RequestSupporting from '../../models/requestSupporting';
 
 export default class NotificationService {
   static async pushNewIssueNotification(job, done) {
@@ -71,8 +72,53 @@ export default class NotificationService {
     }
   }
 
-  static async pushChatNotification(job, done) {
-    const { id } = job.data;
-    done(id);
+  static async pushRequestSupportingNotification(job, done) {
+    try {
+      const { id, userId } = job.data;
+      const [supporting, subscriptions] = await Promise.all([
+        RequestSupporting.findByPk(id, {
+          include: [
+            {
+              model: Issue,
+              require: true,
+            },
+            {
+              model: User,
+              require: true,
+            },
+          ],
+        }),
+        Subscription.findAll({
+          where: {
+            userId,
+          },
+        }),
+      ]);
+      const { issue } = supporting;
+      const actor = supporting.user;
+      const tokens = subscriptions.map((item) => item.token);
+      const notification = {
+        title: '',
+        body: '',
+      };
+      const data = {
+        type: notificationType.requestSupporting,
+        issue: issue.fmtRes(),
+      };
+      await Promise.all([
+        tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
+        Notificaion.create({
+          id: uuid(),
+          actorId: actor.id,
+          recipientId: userId,
+          type: notificationType.requestSupporting,
+          issueId: issue.id,
+          ...notification,
+        }),
+      ]);
+      done();
+    } catch (error) {
+      done(error);
+    }
   }
 }
