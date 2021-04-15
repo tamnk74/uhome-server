@@ -115,7 +115,7 @@ export default class Userervice {
       },
     });
     const identityCard = userProfile.identityCard
-      ? JSON.parse(userProfile.identityCard)
+      ? userProfile.identityCard
       : { before: null, after: null };
 
     Uploader.upload(file, {
