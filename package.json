@@ -50,6 +50,7 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.1.10",
     "express-validation": "^1.0.3",
+    "firebase-admin": "^9.5.0",
     "fs-extra": "^7.0.1",
     "google-auth-library": "^6.0.6",
     "http-status": "^1.4.2",
