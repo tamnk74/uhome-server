@@ -46,7 +46,7 @@ export default class NotificationService {
       };
       const data = {
         type: notificationType.issue,
-        issue:issue.fmtRes(),
+        issue: issue.fmtRes(),
       };
 
       subscriptions.forEach((item) => {

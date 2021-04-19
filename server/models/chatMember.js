@@ -79,18 +79,16 @@ ChatMember.addMember = (data) => {
   });
 };
 
-ChatMember.findMember = (userId, issueId) => {
+ChatMember.findMember = (userId, channelId) => {
   return ChatMember.findOne({
     where: {
       userId,
+      channelId,
     },
     include: [
       {
         model: ChatChannel,
         required: true,
-        where: {
-          issueId,
-        },
         as: 'chatChannel',
       },
     ],

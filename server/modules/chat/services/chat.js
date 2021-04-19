@@ -25,10 +25,8 @@ export default class ChatService {
       });
     }
 
-    const [authorChat] = await Promise.all([
-      this.addUserToChat(chatChannel, user),
-      this.addUserToChat(chatChannel, worker),
-    ]);
+    const authorChat = await this.addUserToChat(chatChannel, user);
+    await this.addUserToChat(chatChannel, worker);
 
     const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
     authorChat.setDataValue('token', twilioToken);
@@ -37,7 +35,7 @@ export default class ChatService {
   }
 
   static async addUserToChat(chatChannel, user) {
-    const member = await ChatMember.findMember(user.id, chatChannel.issueId);
+    const member = await ChatMember.findMember(user.id, chatChannel.id);
 
     if (member) {
       return member;
