@@ -81,6 +81,8 @@ RequestSupporting.belongsTo(User);
 Issue.hasMany(RequestSupporting, { as: 'requestSupportings' });
 Issue.belongsToMany(User, { as: 'requestUsers', through: RequestSupporting });
 
+Issue.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
+
 Issue.beforeCreate((issue) => {
   issue.id = uuid.v4();
 });
