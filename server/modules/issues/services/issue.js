@@ -38,6 +38,11 @@ export default class IssueService {
           as: 'requestUsers',
           attributes: ['id', 'name', 'avatar'],
         },
+        {
+          model: User,
+          as: 'creator',
+          attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'longitude', 'latitude'],
+        },
       ],
       limit,
       offset,
