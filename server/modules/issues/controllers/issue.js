@@ -44,7 +44,18 @@ export default class AuthController {
       });
       return res.status(200).json({
         meta: pagination.getMeta(),
-        data: issues.rows.map((issue) => objectToSnake(issue.toJSON())),
+        data: issues.rows.map((issue) => {
+          const item = issue.toJSON();
+          item.isRequested = false;
+
+          for (let i = 0; i < item.requestUsers.length; i++) {
+            if (req.user.id === item.requestUsers[i].id) {
+              item.isRequested = true;
+            }
+          }
+
+          return objectToSnake(item);
+        }),
       });
     } catch (e) {
       return next(e);
