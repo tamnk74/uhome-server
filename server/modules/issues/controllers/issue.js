@@ -61,4 +61,13 @@ export default class AuthController {
       return next(e);
     }
   }
+
+  static async requestSupporting(req, res, next) {
+    try {
+      await IssueService.requestSupporting(req.user, req.issue);
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
