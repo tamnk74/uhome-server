@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import IssueController from '../controllers/issue';
 import { auth, validator } from '../../../middlewares';
-import { verifyAttachments, verifyIssue } from '../middlewares';
+import { verifyAttachments, verifyIssue, validIssueSupport } from '../middlewares';
 import { createIssueSchema } from '../schema';
 
 const router = Router();
@@ -20,7 +20,7 @@ router.get('/issues', auth, IssueController.index);
 router.post(
   '/issues/:issueId/request-supportings',
   auth,
-  verifyIssue,
+  validIssueSupport,
   IssueController.requestSupporting
 );
 
