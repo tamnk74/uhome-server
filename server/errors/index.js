@@ -2,6 +2,7 @@ import { Error as JSONAPIError } from 'jsonapi-serializer';
 import { ValidationError } from 'express-validation';
 import errorFactory from './ErrorFactory';
 import ApiError from './ApiError';
+import { sentryConfig } from '../config';
 
 export const handleError = (err, req, res, next) => {
   if (err instanceof ValidationError) {
@@ -26,7 +27,10 @@ export const handleError = (err, req, res, next) => {
       errors: err,
     });
   }
-  console.log(err);
+
   const error = errorFactory.getError(err.message);
+  if (error.status >= 500) {
+    sentryConfig.Sentry.captureException(err);
+  }
   return res.status(error.status).send(new JSONAPIError(error));
 };
