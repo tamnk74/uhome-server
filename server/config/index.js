@@ -9,6 +9,7 @@ export * from './facebook';
 export * from './redis';
 export * from './file_systems';
 export * from './twilio';
+export * from './sentry';
 
 export const env = process.env.NODE_ENV || 'development';
 export const port = process.env.PORT || 'http://localhost:3000';
