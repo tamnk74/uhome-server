@@ -120,4 +120,19 @@ export default class IssueService {
       },
     });
   }
+
+  static async cancelSupporting(user, issue) {
+    if (issue.status !== issueStatus.OPEN) {
+      throw new Error('ISSUE-0002');
+    }
+
+    const requestSupporting = await RequestSupporting.findOrCreate({
+      where: {
+        userId: user.id,
+        issueId: issue.id,
+      },
+    });
+    notificationQueue.add('request_supporting', { id: requestSupporting.id });
+    return requestSupporting;
+  }
 }
