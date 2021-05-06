@@ -82,6 +82,7 @@ Issue.hasMany(RequestSupporting, { as: 'requestSupportings' });
 Issue.belongsToMany(User, { as: 'requestUsers', through: RequestSupporting });
 
 Issue.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
+User.hasMany(RequestSupporting, { as: 'requestSupportings' });
 
 Issue.beforeCreate((issue) => {
   issue.id = uuid.v4();
@@ -122,7 +123,7 @@ Issue.removeIssue = (issue) => {
   });
 };
 
-Issue.buildRelation = (categoryIds = []) => {
+Issue.buildRelation = (categoryIds = [], duplicating = true) => {
   let filterCategories = {};
   if (categoryIds.length) {
     filterCategories = {
@@ -137,6 +138,7 @@ Issue.buildRelation = (categoryIds = []) => {
       where: {
         ...filterCategories,
       },
+      duplicating
     },
     {
       model: Attachment,
@@ -152,6 +154,7 @@ Issue.buildRelation = (categoryIds = []) => {
         'path',
         Attachment.buildUrlAttribuiteSelect(),
       ],
+      duplicating
     },
   ];
 };

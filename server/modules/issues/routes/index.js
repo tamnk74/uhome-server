@@ -24,4 +24,11 @@ router.post(
   IssueController.requestSupporting
 );
 
+router.get(
+  '/issues/:issueId/request-supportings',
+  auth,
+  validIssueSupport,
+  IssueController.getRequestSupporting
+);
+
 export default router;

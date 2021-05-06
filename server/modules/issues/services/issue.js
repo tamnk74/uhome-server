@@ -3,7 +3,8 @@ import User from '../../../models/user';
 import { notificationQueue } from '../../../helpers/Queue';
 import RequestSupporting from '../../../models/requestSupporting';
 import { issueStatus } from '../../../constants';
-
+import Sequelize from 'sequelize';
+import UserProfile from '../../../models/userProfile';
 export default class IssueService {
   static async create(issue) {
     issue = await Issue.addIssue(issue);
@@ -22,7 +23,7 @@ export default class IssueService {
   }
 
   static async getIssues(query) {
-    const { limit, offset, categoryIds, status } = query;
+    const { limit, offset, categoryIds, status, user} = query;
     const filter = query.filter || {};
     if (status) {
       filter.status = status;
@@ -34,18 +35,37 @@ export default class IssueService {
     return Issue.findAndCountAll({
       ...options,
       include: [
-        ...Issue.buildRelation(categoryIds),
+        ...Issue.buildRelation(categoryIds, false),
         {
-          model: User,
-          as: 'requestUsers',
-          attributes: ['id', 'name', 'avatar'],
+          model: RequestSupporting,
+          as: 'requestSupportings',
+          attributes: [
+          ],
+          duplicating: false,
+          include: [
+            {
+              model: User,
+              duplicating: false,
+              required: false,
+              where: {
+                id: user.id
+              }
+            },
+          ]
         },
         {
           model: User,
           as: 'creator',
           attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'longitude', 'latitude'],
-        },
+        }
       ],
+      attributes: {
+        include: [
+          [Sequelize.fn("COUNT", Sequelize.col("requestSupportings.id")), "totalRequestSupporting"],
+          [Sequelize.literal('IF(`requestSupportings->user`.id is NULL, 0, 1)'), 'isRequested']
+        ]
+      },
+      group: ['issues.id'],
       limit,
       offset,
     });
@@ -64,5 +84,31 @@ export default class IssueService {
     });
     notificationQueue.add('request_supporting', { id: requestSupporting.id });
     return requestSupporting;
+  }
+
+  static async getRequestSupporting(query) {
+    const { limit, offset, id } = query;
+    return User.findAndCountAll({
+      include: [
+        {
+          model: RequestSupporting,
+          as: 'requestSupportings',
+          required: true,
+          where: {
+            issueId: id
+          }
+        },
+        {
+          model: UserProfile,
+          as: 'profile',
+          required: true,
+          attributes: ['id', 'userId', 'reliability']
+        },
+      ],
+      limit,
+      offset,
+      nest: true,
+      raw: true
+    });
   }
 }

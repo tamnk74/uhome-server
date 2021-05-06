@@ -1,6 +1,7 @@
 import IssueService from '../services/issue';
 import { objectToCamel, objectToSnake } from '../../../helpers/Util';
 import Pagination from '../../../helpers/Pagination';
+import omit from 'lodash/omit';
 
 export default class AuthController {
   static async create(req, res, next) {
@@ -46,14 +47,6 @@ export default class AuthController {
         meta: pagination.getMeta(),
         data: issues.rows.map((issue) => {
           const item = issue.toJSON();
-          item.isRequested = false;
-
-          for (let i = 0; i < item.requestUsers.length; i++) {
-            if (req.user.id === item.requestUsers[i].id) {
-              item.isRequested = true;
-            }
-          }
-
           return objectToSnake(item);
         }),
       });
@@ -66,6 +59,31 @@ export default class AuthController {
     try {
       await IssueService.requestSupporting(req.user, req.issue);
       return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async getRequestSupporting(req, res, next) {
+    try {
+      const pagination = new Pagination(req.query);
+      const requestSupports = await IssueService.getRequestSupporting({
+        ...objectToCamel(req.query),
+        id: req.issue.id,
+        limit: pagination.limit,
+        offset: pagination.skip,
+      });
+      return res.status(200).json({
+        meta: pagination.getMeta(),
+        data: requestSupports.rows.map((item) => objectToSnake(omit(item, [
+          'verify_code',
+          'password',
+          'createdAt',
+          'updatedAt',
+          'deletedAt',
+          'requestSupportings'
+        ])))
+      });
     } catch (e) {
       return next(e);
     }
