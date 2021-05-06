@@ -120,12 +120,13 @@ Category.belongsToMany(User, {
   foreignKey: 'categoryId',
 });
 
-User.prototype.toPayload = function toPayload() {
+User.prototype.toPayload = function toPayload(role = '') {
   return {
     id: this.dataValues.id,
     phoneNumber: this.dataValues.phoneNumber,
     name: this.dataValues.name,
     status: this.dataValues.status,
+    role,
   };
 };
 

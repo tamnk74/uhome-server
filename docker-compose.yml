@@ -42,18 +42,18 @@ services:
       - ~/.docker/data/redis:/data
     networks:
       - node-network
-  minio:
-    image: 'bitnami/minio:latest'
-    ports:
-      - '9000:9000'
-    volumes:
-      - '~/.docker/minio/data:/export'
-      - '~/.docker/minio/config:/root/.minio'
-    environment:
-      - MINIO_ACCESS_KEY=u-home-key
-      - MINIO_SECRET_KEY=u-home-secret
-    networks:
-      - node-network
+  # minio:
+  #   image: 'bitnami/minio:latest'
+  #   ports:
+  #     - '9000:9000'
+  #   volumes:
+  #     - '~/.docker/minio/data:/export'
+  #     - '~/.docker/minio/config:/root/.minio'
+  #   environment:
+  #     - MINIO_ACCESS_KEY=u-home-key
+  #     - MINIO_SECRET_KEY=u-home-secret
+  #   networks:
+  #     - node-network
 volumes:
   dbdata:
   node_modules:

@@ -1,4 +1,5 @@
 import omit from 'lodash/omit';
+import { ExtractJwt } from 'passport-jwt';
 import AuthService from '../services/auth';
 import { objectToSnake } from '../../../helpers/Util';
 
@@ -91,6 +92,16 @@ export default class AuthController {
       const authUser = await AuthService.register(req.body);
 
       return res.status(200).json(objectToSnake(authUser.toJSON()));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async authorize(req, res, next) {
+    try {
+      const auth = await AuthService.authorize(req.body);
+
+      return res.status(200).json(objectToSnake(auth));
     } catch (e) {
       return next(e);
     }

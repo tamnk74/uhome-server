@@ -1,7 +1,6 @@
 import passport from 'passport';
 import errorFactory from '../errors/ErrorFactory';
-import RedisService from '../helpers/Redis';
-import { status } from '../constants/user';
+import { acl, status } from '../constants';
 
 export default (req, res, next) => {
   passport.authenticate('jwt', { session: false }, async (err, jwtPayload) => {
@@ -11,10 +10,15 @@ export default (req, res, next) => {
       return next(errorFactory.getError('ERR-0401'));
     }
 
-    const token = req.headers.authorization.slice(7);
-    const isExistToken = await RedisService.isExistAccessToken(user.id, token);
-    if (!isExistToken) {
+    const { role } = user;
+
+    if (!role) {
       return next(errorFactory.getError('ERR-0401'));
+    }
+
+    const permissions = acl[req.route.path] && acl[req.route.path][req.method];
+    if (permissions && !permissions.includes(role)) {
+      return next(errorFactory.getError('ERR-0403'));
     }
 
     if (user.status === status.IN_ACTIVE) {
