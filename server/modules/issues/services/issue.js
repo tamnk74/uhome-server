@@ -1,10 +1,11 @@
+import Sequelize from 'sequelize';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue } from '../../../helpers/Queue';
 import RequestSupporting from '../../../models/requestSupporting';
 import { issueStatus } from '../../../constants';
-import Sequelize from 'sequelize';
 import UserProfile from '../../../models/userProfile';
+
 export default class IssueService {
   static async create(issue) {
     issue = await Issue.addIssue(issue);
@@ -23,7 +24,7 @@ export default class IssueService {
   }
 
   static async getIssues(query) {
-    const { limit, offset, categoryIds, status, user} = query;
+    const { limit, offset, categoryIds, status, user } = query;
     const filter = query.filter || {};
     if (status) {
       filter.status = status;
@@ -39,8 +40,7 @@ export default class IssueService {
         {
           model: RequestSupporting,
           as: 'requestSupportings',
-          attributes: [
-          ],
+          attributes: [],
           duplicating: false,
           include: [
             {
@@ -48,22 +48,22 @@ export default class IssueService {
               duplicating: false,
               required: false,
               where: {
-                id: user.id
-              }
+                id: user.id,
+              },
             },
-          ]
+          ],
         },
         {
           model: User,
           as: 'creator',
           attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'longitude', 'latitude'],
-        }
+        },
       ],
       attributes: {
         include: [
-          [Sequelize.fn("COUNT", Sequelize.col("requestSupportings.id")), "totalRequestSupporting"],
-          [Sequelize.literal('IF(`requestSupportings->user`.id is NULL, 0, 1)'), 'isRequested']
-        ]
+          [Sequelize.fn('COUNT', Sequelize.col('requestSupportings.id')), 'totalRequestSupporting'],
+          [Sequelize.literal('IF(`requestSupportings->user`.id is NULL, 0, 1)'), 'isRequested'],
+        ],
       },
       group: ['issues.id'],
       limit,
@@ -95,20 +95,29 @@ export default class IssueService {
           as: 'requestSupportings',
           required: true,
           where: {
-            issueId: id
-          }
+            issueId: id,
+          },
         },
         {
           model: UserProfile,
           as: 'profile',
           required: true,
-          attributes: ['id', 'userId', 'reliability']
+          attributes: ['id', 'userId', 'reliability'],
         },
       ],
       limit,
       offset,
       nest: true,
-      raw: true
+      raw: true,
+    });
+  }
+
+  static async cacelRequestSupporting(user, issue) {
+    return RequestSupporting.destroy({
+      where: {
+        userId: user.id,
+        issueId: issue.id,
+      },
     });
   }
 }

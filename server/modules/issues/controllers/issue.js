@@ -1,7 +1,7 @@
+import omit from 'lodash/omit';
 import IssueService from '../services/issue';
 import { objectToCamel, objectToSnake } from '../../../helpers/Util';
 import Pagination from '../../../helpers/Pagination';
-import omit from 'lodash/omit';
 
 export default class AuthController {
   static async create(req, res, next) {
@@ -75,15 +75,28 @@ export default class AuthController {
       });
       return res.status(200).json({
         meta: pagination.getMeta(),
-        data: requestSupports.rows.map((item) => objectToSnake(omit(item, [
-          'verify_code',
-          'password',
-          'createdAt',
-          'updatedAt',
-          'deletedAt',
-          'requestSupportings'
-        ])))
+        data: requestSupports.rows.map((item) =>
+          objectToSnake(
+            omit(item, [
+              'verify_code',
+              'password',
+              'createdAt',
+              'updatedAt',
+              'deletedAt',
+              'requestSupportings',
+            ])
+          )
+        ),
       });
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async cancelRequestSupporting(req, res, next) {
+    try {
+      await IssueService.cacelRequestSupporting(req.user, req.issue);
+      return res.status(204).json({});
     } catch (e) {
       return next(e);
     }

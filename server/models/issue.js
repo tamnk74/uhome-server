@@ -138,7 +138,7 @@ Issue.buildRelation = (categoryIds = [], duplicating = true) => {
       where: {
         ...filterCategories,
       },
-      duplicating
+      duplicating,
     },
     {
       model: Attachment,
@@ -154,7 +154,7 @@ Issue.buildRelation = (categoryIds = [], duplicating = true) => {
         'path',
         Attachment.buildUrlAttribuiteSelect(),
       ],
-      duplicating
+      duplicating,
     },
   ];
 };

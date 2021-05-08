@@ -1,5 +1,4 @@
 import omit from 'lodash/omit';
-import { ExtractJwt } from 'passport-jwt';
 import AuthService from '../services/auth';
 import { objectToSnake } from '../../../helpers/Util';
 
