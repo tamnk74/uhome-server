@@ -37,7 +37,7 @@ RequestSupporting.init(
     sequelize,
     underscored: true,
     timestamps: true,
-    paranoid: true,
+    paranoid: false,
     modelName: 'request_supportings',
     table: 'request_supportings',
   }

@@ -1,4 +1,3 @@
-import { ExtractJwt } from 'passport-jwt';
 import User from '../../../models/user';
 import JWT from '../../../helpers/JWT';
 import Zalo from '../../../helpers/Zalo';

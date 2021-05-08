@@ -31,4 +31,11 @@ router.get(
   IssueController.getRequestSupporting
 );
 
+router.delete(
+  '/issues/:issueId/request-supportings',
+  auth,
+  validIssueSupport,
+  IssueController.cancelRequestSupporting
+);
+
 export default router;
