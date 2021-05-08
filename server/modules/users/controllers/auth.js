@@ -72,6 +72,7 @@ export default class AuthController {
         'updatedAt',
         'deletedAt',
       ]);
+      userData.role = req.user.role || userData.role;
       return res.status(200).json(objectToSnake(userData));
     } catch (e) {
       return next(e);
