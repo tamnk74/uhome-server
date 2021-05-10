@@ -1,0 +1,8 @@
+{
+    "CHAT-0404": {
+      "status": 404,
+      "error": "Not found",
+      "tile": "Channel not found",
+      "detail": "Channel not found"
+    }
+  }

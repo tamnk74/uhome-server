@@ -15,5 +15,6 @@ router.post(
   verifyChannel,
   ChatController.sendCommand
 );
+router.get('/chat/:channelId/token', auth, verifyChannel, ChatController.getToken);
 
 export default router;
