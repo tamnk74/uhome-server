@@ -115,4 +115,22 @@ export default class ChatService {
     messageData.attributes = JSON.stringify(objectToSnake(messageAttributes));
     await twilioClient.sendMessage(chatChannel.channelSid, messageData);
   }
+
+  static async getToken(chatChannel, user) {
+    const chatMember = await ChatMember.findOne({
+      where: {
+        userId: user.id,
+        channelId: chatChannel.id,
+      },
+    });
+
+    if (!chatMember) {
+      throw new Error('CHAT-0404');
+    }
+    const twilioToken = await twilioClient.getAccessToken(chatMember.identity);
+
+    return {
+      token: twilioToken,
+    };
+  }
 }

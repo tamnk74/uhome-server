@@ -19,4 +19,13 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async getToken(req, res, next) {
+    try {
+      const data = await ChatService.getToken(req.chatChannel, req.user);
+      return res.status(200).json(objectToSnake(data));
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
