@@ -4,6 +4,7 @@ import sequelize from '../databases/database';
 import { issueStatus } from '../constants';
 import User from './user';
 import Issue from './issue';
+import CancelSupportIssue from './cancelSupportIssue';
 
 class ReceiveIssue extends BaseModel {}
 
@@ -54,5 +55,32 @@ ReceiveIssue.belongsTo(User);
 User.hasMany(ReceiveIssue);
 
 ReceiveIssue.belongsTo(Issue);
+CancelSupportIssue.belongsTo(ReceiveIssue);
+ReceiveIssue.hasMany(CancelSupportIssue);
 
+ReceiveIssue.cancel = ({ receiveIssue, reason, userId }) => {
+  return sequelize.transaction(async (t) => {
+    const options = {
+      transaction: t,
+    };
+    await Promise.all([
+      ReceiveIssue.update(
+        {
+          status: issueStatus.CANCELLED,
+        },
+        options
+      ),
+      CancelSupportIssue.create(
+        {
+          userId,
+          reason,
+          receiveIssueId: receiveIssue.id,
+        },
+        options
+      ),
+    ]);
+
+    return receiveIssue;
+  });
+};
 module.exports = ReceiveIssue;

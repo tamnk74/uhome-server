@@ -105,7 +105,11 @@ export default class AuthController {
 
   static async cancelSupporting(req, res, next) {
     try {
-      await IssueService.cancelSupporting(req.user, req.issue);
+      await IssueService.cancelSupporting({
+        user: req.user,
+        receiveIssue: req.receiveIssue,
+        data: req.body,
+      });
       return res.status(204).json({});
     } catch (e) {
       return next(e);

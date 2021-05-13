@@ -35,7 +35,7 @@ router.get(
   validIssueSupport,
   IssueController.getRequestSupporting
 );
-router.post(
+router.patch(
   '/issues/:issueId/cancel',
   validator(cancelIssueSchema),
   auth,

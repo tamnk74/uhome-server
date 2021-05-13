@@ -5,6 +5,8 @@ import { notificationQueue } from '../../../helpers/Queue';
 import RequestSupporting from '../../../models/requestSupporting';
 import { issueStatus } from '../../../constants';
 import UserProfile from '../../../models/userProfile';
+import ReceiveIsssue from '../../../models/receiveIssue';
+import CancelSupportIssue from '../../../models/cancelSupportIssue';
 
 export default class IssueService {
   static async create(issue) {
@@ -121,18 +123,19 @@ export default class IssueService {
     });
   }
 
-  static async cancelSupporting(user, issue) {
-    if (issue.status !== issueStatus.OPEN) {
-      throw new Error('ISSUE-0002');
-    }
-
-    const requestSupporting = await RequestSupporting.findOrCreate({
-      where: {
-        userId: user.id,
-        issueId: issue.id,
-      },
+  static async cancelSupporting({ user, receiveIssue, data }) {
+    const cancelSupporting = await ReceiveIsssue.cancel({
+      data,
+      receiveIssue,
+      userId: user.id,
     });
-    notificationQueue.add('request_supporting', { id: requestSupporting.id });
-    return requestSupporting;
+
+    // notificationQueue.add('cancel_supporting', {
+    //   receiveIssue,
+    //   actorId: user.id,
+    //   userId: receiveIssue.userId !== user.id ? receiveIssue.userId : receiveIssue.issue.createdBy,
+    // });
+
+    return cancelSupporting;
   }
 }
