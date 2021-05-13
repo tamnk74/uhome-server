@@ -9,3 +9,7 @@ notificationQueue.process(
   'request_supporting',
   NotificationService.pushRequestSupportingNotification
 );
+notificationQueue.process(
+  'cancel_supporting',
+  NotificationService.pushCancelRequestSupportingNotification
+);

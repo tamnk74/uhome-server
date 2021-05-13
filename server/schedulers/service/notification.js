@@ -121,4 +121,42 @@ export default class NotificationService {
       done(error);
     }
   }
+
+  static async pushCancelRequestSupportingNotification(job, done) {
+    try {
+      const { receiveIssue, actorId, userId } = job.data;
+      const [subscriptions] = await Promise.all([
+        Subscription.findAll({
+          where: {
+            userId,
+          },
+        }),
+      ]);
+      const tokens = subscriptions.map((item) => item.token);
+      const notification = {
+        title: '',
+        body: '',
+      };
+      const data = {
+        type: notificationType.cancelSupport,
+        issue: receiveIssue.fmtRes(),
+      };
+
+      await Promise.all([
+        tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
+        Notificaion.create({
+          id: uuid(),
+          actorId,
+          recipientId: userId,
+          type: notificationType.cancelSupport,
+          issueId: receiveIssue.issue.id,
+          receiveIssueId: receiveIssue.id,
+          ...notification,
+        }),
+      ]);
+      done();
+    } catch (error) {
+      done(error);
+    }
+  }
 }

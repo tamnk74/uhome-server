@@ -2,8 +2,13 @@ import { Router } from 'express';
 
 import IssueController from '../controllers/issue';
 import { auth, validator } from '../../../middlewares';
-import { verifyAttachments, verifyIssue, validIssueSupport } from '../middlewares';
-import { createIssueSchema } from '../schema';
+import {
+  verifyAttachments,
+  verifyIssue,
+  verifyIssueSupport,
+  validIssueSupport,
+} from '../middlewares';
+import { createIssueSchema, cancelIssueSchema } from '../schema';
 
 const router = Router();
 
@@ -29,6 +34,13 @@ router.get(
   auth,
   validIssueSupport,
   IssueController.getRequestSupporting
+);
+router.patch(
+  '/issues/:issueId/cancel',
+  validator(cancelIssueSchema),
+  auth,
+  verifyIssueSupport,
+  IssueController.cancelSupporting
 );
 
 router.delete(
