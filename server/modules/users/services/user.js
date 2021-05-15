@@ -73,6 +73,7 @@ export default class Userervice {
                 'path',
                 Attachment.buildUrlAttribuiteSelect(),
               ],
+              order: [[Issue, 'created', 'DESC']],
             },
           ],
         },

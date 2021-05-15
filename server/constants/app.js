@@ -6,10 +6,3 @@ export const httpError = Object.freeze({
   422: 'Unprocessable Entity',
   500: 'Internal Server Error',
 });
-
-export const issueStatus = Object.freeze({
-  OPEN: 'OPEN',
-  IN_PROGRESS: 'IN_PROGRESS',
-  DONE: 'DONE',
-  CANCELLED: 'CANCELLED',
-});

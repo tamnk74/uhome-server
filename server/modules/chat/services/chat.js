@@ -1,11 +1,12 @@
-import { v4 as uuidv4 } from 'uuid';
+import uuid, { v4 as uuidv4 } from 'uuid';
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
 import ChatChannel from '../../../models/chatChannel';
 import User from '../../../models/user';
 import ChatUser from '../../../models/chatUser';
-import { command, commandMessage } from '../../../constants';
+import { command, commandMessage, issueStatus } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
+import ReceiveIssue from '../../../models/receiveIssue';
 
 export default class ChatService {
   static async create(user, data) {
@@ -15,6 +16,7 @@ export default class ChatService {
       ChatChannel.findChannelGroup(issueId, [userId, user.id]),
       User.findByPk(userId),
     ]);
+
     if (!chatChannel) {
       const channel = await twilioClient.createChannel();
       chatChannel = await ChatChannel.addChannel({
@@ -26,7 +28,10 @@ export default class ChatService {
     }
 
     const authorChat = await this.addUserToChat(chatChannel, user);
-    await this.addUserToChat(chatChannel, worker);
+    await Promise.all([
+      this.addUserToChat(chatChannel, worker),
+      this.addToReviceIssue(issueId, worker.id),
+    ]);
 
     const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
     authorChat.setDataValue('token', twilioToken);
@@ -132,5 +137,18 @@ export default class ChatService {
     return {
       token: twilioToken,
     };
+  }
+
+  static async addToReviceIssue(issueId, userId) {
+    return ReceiveIssue.findOrCreate({
+      where: {
+        userId,
+        issueId,
+      },
+      defaults: {
+        id: uuid(),
+        status: issueStatus.IN_PROGRESS,
+      },
+    });
   }
 }
