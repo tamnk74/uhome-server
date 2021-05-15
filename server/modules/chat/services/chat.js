@@ -4,9 +4,9 @@ import { twilioClient } from '../../../helpers/Twilio';
 import ChatChannel from '../../../models/chatChannel';
 import User from '../../../models/user';
 import ChatUser from '../../../models/chatUser';
+import ReceiveIssue from '../../../models/receiveIssue';
 import { command, commandMessage, issueStatus } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
-import ReceiveIssue from '../../../models/receiveIssue';
 
 export default class ChatService {
   static async create(user, data) {
@@ -119,6 +119,33 @@ export default class ChatService {
     messageData.body = __(commandMessage[commandName]);
     messageData.attributes = JSON.stringify(objectToSnake(messageAttributes));
     await twilioClient.sendMessage(chatChannel.channelSid, messageData);
+  }
+
+  static async confirmRequest({ chatChannel, user, data }) {
+    const chatMembers = await ChatMember.findAll({
+      where: {
+        userId: user.id,
+        channelId: chatChannel.id,
+      },
+    });
+    const userIds = chatMembers.map((member) => member.userId);
+    if (userIds.length <= 2) {
+      throw new Error('CHAT-0404');
+    }
+
+    const [receiveIssue] = await Promise.all([
+      ReceiveIssue.create({
+        ...data,
+        userId: userIds[0] === user.id ? userIds[1] : userIds[0],
+        issueId: chatChannel.issue.id,
+        time: data.totalTime,
+      }),
+      chatChannel.issue.update({
+        status: issueStatus.IN_PROGRESS,
+      }),
+    ]);
+
+    return receiveIssue;
   }
 
   static async getToken(chatChannel, user) {

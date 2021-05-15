@@ -1,6 +1,7 @@
 import omit from 'lodash/omit';
 import AuthService from '../services/auth';
 import { objectToSnake } from '../../../helpers/Util';
+import { fileSystemConfig } from '../../../config';
 
 export default class AuthController {
   static async login(req, res, next) {
@@ -71,6 +72,7 @@ export default class AuthController {
         'updatedAt',
         'deletedAt',
       ]);
+      userData.avatar = `${fileSystemConfig.clout_front}/${userData.avatar}`;
       userData.role = req.user.role || userData.role;
       return res.status(200).json(objectToSnake(userData));
     } catch (e) {
