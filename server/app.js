@@ -60,6 +60,22 @@ app.use((req, res, next) => {
 });
 
 app.get('/health-check', (req, res) => res.status(200).send('ok'));
+app.use('/docs', (req, res) => {
+  return res.status(200).send(
+    ApiRouter.stack
+      .map((moduleRoutes) =>
+        moduleRoutes.handle.stack
+          .map((route) => {
+            if (route.route && route.route.path) {
+              return [Object.keys(route.route.methods), route.route.path];
+            }
+            return '';
+          })
+          .join('<br><br>')
+      )
+      .join('<br><br>')
+  );
+});
 app.use('/api', ApiRouter);
 
 /**

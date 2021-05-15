@@ -7,8 +7,9 @@ import {
   verifyIssue,
   verifyIssueSupport,
   validIssueSupport,
+  verifyReceiveIssue,
 } from '../middlewares';
-import { createIssueSchema, cancelIssueSchema } from '../schema';
+import { createIssueSchema, cancelIssueSchema, evaluateIssueSchema } from '../schema';
 
 const router = Router();
 
@@ -41,6 +42,14 @@ router.patch(
   auth,
   verifyIssueSupport,
   IssueController.cancelSupporting
+);
+
+router.post(
+  '/receive-issues/:issueId/rate',
+  validator(evaluateIssueSchema),
+  auth,
+  verifyReceiveIssue,
+  IssueController.setRating
 );
 
 router.delete(
