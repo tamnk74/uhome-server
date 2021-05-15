@@ -6,7 +6,13 @@ import User from './user';
 import Issue from './issue';
 import CancelSupportIssue from './cancelSupportIssue';
 
-class ReceiveIssue extends BaseModel {}
+class ReceiveIssue extends BaseModel {
+  static get mapFilterFields() {
+    return {
+      status: 'status',
+    };
+  }
+}
 
 ReceiveIssue.init(
   {
@@ -20,7 +26,7 @@ ReceiveIssue.init(
     },
     time: {
       type: Sequelize.FLOAT,
-      allowNull: false,
+      allowNull: true,
     },
     cost: {
       type: Sequelize.INTEGER,
