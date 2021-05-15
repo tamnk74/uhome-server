@@ -6,7 +6,7 @@ import RequestSupporting from '../../../models/requestSupporting';
 import { issueStatus } from '../../../constants';
 import UserProfile from '../../../models/userProfile';
 import ReceiveIsssue from '../../../models/receiveIssue';
-import CancelSupportIssue from '../../../models/cancelSupportIssue';
+import Rating from '../../../models/rating';
 
 export default class IssueService {
   static async create(issue) {
@@ -137,5 +137,19 @@ export default class IssueService {
     // });
 
     return cancelSupporting;
+  }
+
+  static async setRating({ receiveIssue, data }) {
+    const [rating] = await Promise.all([
+      Rating.create({
+        ...data,
+        userId: receiveIssue.userId,
+      }),
+      // Update issue status
+    ]);
+
+    // Todo: Send notification
+
+    return rating;
   }
 }

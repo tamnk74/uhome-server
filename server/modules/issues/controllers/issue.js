@@ -115,4 +115,17 @@ export default class AuthController {
       return next(e);
     }
   }
+
+  static async setRating(req, res, next) {
+    try {
+      const result = await IssueService.setRating({
+        user: req.user,
+        receiveIssue: req.receiveIssue,
+        data: req.body,
+      });
+      return res.status(200).json(objectToSnake(result));
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

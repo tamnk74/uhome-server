@@ -116,9 +116,10 @@ export default class Userervice {
         userId,
       },
     });
-    const identityCard = userProfile.identityCard
-      ? userProfile.identityCard
-      : { before: null, after: null };
+    const identityCard =
+      userProfile && userProfile.identityCard
+        ? userProfile.identityCard
+        : { before: null, after: null };
 
     Uploader.upload(file, {
       path,
