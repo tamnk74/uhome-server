@@ -1,17 +1,19 @@
 import querystring from 'querystring';
+import url from 'url';
+import { baseUrl } from '../config';
 
 class Pagination {
-  constructor(query) {
-    const { page = 1, limit = 10, ...options } = query;
+  constructor(req) {
+    const { page = 1, limit = 10, ...options } = req.query;
     this.page = parseInt(page, 10) > 0 ? parseInt(page, 10) : 1;
     this.limit = parseInt(limit, 10) >= 0 ? parseInt(limit, 10) : 10;
     this.skip = (page - 1) * limit;
     this.options = options;
-    this.originalUrl = '';
+    this.originalUrl = `${baseUrl}${url.parse(req.url).pathname}`;
   }
 
-  setOriginalUrl(url) {
-    this.originalUrl = url;
+  setOriginalUrl(originalUrl) {
+    this.originalUrl = originalUrl;
     return this;
   }
 
@@ -28,7 +30,7 @@ class Pagination {
     return page
       ? `${this.originalUrl}?${querystring.stringify({
           ...this.options,
-          page: this.page,
+          page,
           limit: this.limit,
         })}`
       : null;
@@ -50,6 +52,7 @@ class Pagination {
       total_pages: this.lastPage,
       per_page: this.limit,
       total: this.total,
+      ...this.getLinks(),
     };
   }
 }
