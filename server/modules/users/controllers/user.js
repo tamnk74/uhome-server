@@ -26,18 +26,20 @@ export default class UserController {
 
   static async getReceiveIssues(req, res, next) {
     try {
-      const pagination = new Pagination(req.query);
+      const pagination = new Pagination(req);
       const issues = await UserService.getReceiveIssues({
         ...req.query,
         limit: pagination.limit,
         offset: pagination.skip,
         userId: req.params.id,
       });
+      pagination.setTotal(issues.count);
       return res.status(200).json({
         meta: pagination.getMeta(),
         data: issues.rows.map((issue) => objectToSnake(issue.toJSON())),
       });
     } catch (e) {
+      console.log(e);
       return next(e);
     }
   }
