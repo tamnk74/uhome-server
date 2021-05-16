@@ -2,7 +2,8 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es6",
-    "baseUrl": "./server"
+    "baseUrl": "./server",
+    "resolveJsonModule": true
   },
   "include": [
     "server/**/*"

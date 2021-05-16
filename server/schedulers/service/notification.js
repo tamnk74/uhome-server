@@ -8,6 +8,7 @@ import { notificationType } from '../../constants';
 import Issue from '../../models/issue';
 import sequelize from '../../databases/database';
 import RequestSupporting from '../../models/requestSupporting';
+import { objectToSnake } from '../../helpers/Util';
 
 export default class NotificationService {
   static async pushNewIssueNotification(job, done) {
@@ -17,7 +18,7 @@ export default class NotificationService {
         attributes: ['recipient_id'],
         where: {
           issue_id: id,
-          type: notificationType.issue,
+          type: notificationType.newIssue,
         },
       }).slice(0, -1);
 
@@ -36,18 +37,28 @@ export default class NotificationService {
           ],
           limit: 25,
         }),
-        Issue.findByPk(id),
+        Issue.findByPk(id, {
+          include: [
+            {
+              model: User,
+              require: true,
+              as: 'creator',
+            },
+          ],
+        }),
       ]);
 
       const dataInssert = [];
       const tokens = [];
+      const actor = issue.creator;
       const notification = {
-        title: '',
-        body: '',
+        title: `${issue.title}`,
+        body: `${issue.title}`,
       };
       const data = {
-        type: notificationType.issue,
-        issue: issue.fmtRes(),
+        type: notificationType.newIssue,
+        issue: JSON.stringify(objectToSnake(issue.fmtRes())),
+        actor: JSON.stringify(objectToSnake(actor.toJSON())),
       };
 
       subscriptions.forEach((item) => {
@@ -56,9 +67,10 @@ export default class NotificationService {
           id: uuid(),
           actorId: issue.createdBy,
           recipientId: item.userId,
-          type: notificationType.issue,
+          type: notificationType.newIssue,
           issueId: id,
           ...notification,
+          status: true,
         });
       });
 
@@ -74,9 +86,9 @@ export default class NotificationService {
 
   static async pushRequestSupportingNotification(job, done) {
     try {
-      const { id, userId } = job.data;
+      const { requestId, userId } = job.data;
       const [supporting, subscriptions] = await Promise.all([
-        RequestSupporting.findByPk(id, {
+        RequestSupporting.findByPk(requestId, {
           include: [
             {
               model: Issue,
@@ -98,12 +110,13 @@ export default class NotificationService {
       const actor = supporting.user;
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: '',
-        body: '',
+        title: `${issue.title}`,
+        body: `${issue.title}`,
       };
       const data = {
         type: notificationType.requestSupporting,
-        issue: issue.fmtRes(),
+        issue: JSON.stringify(objectToSnake(issue.fmtRes())),
+        actor: JSON.stringify(objectToSnake(actor.toJSON())),
       };
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
@@ -114,6 +127,7 @@ export default class NotificationService {
           type: notificationType.requestSupporting,
           issueId: issue.id,
           ...notification,
+          status: true,
         }),
       ]);
       done();
@@ -124,22 +138,64 @@ export default class NotificationService {
 
   static async pushCancelRequestSupportingNotification(job, done) {
     try {
-      const { receiveIssue, actorId, userId } = job.data;
-      const [subscriptions] = await Promise.all([
+      const { issue, actorId, userId } = job.data;
+      const [subscriptions, actor] = await Promise.all([
         Subscription.findAll({
           where: {
             userId,
           },
         }),
+        User.findByPk(actorId),
       ]);
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: '',
-        body: '',
+        title: `${issue.title}`,
+        body: `${issue.title}`,
+      };
+      const data = {
+        type: notificationType.cancelRequestSupport,
+        issue: JSON.stringify(objectToSnake(issue.fmtRes())),
+        actor: JSON.stringify(objectToSnake(actor.toJSON())),
+      };
+
+      await Promise.all([
+        tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
+        Notificaion.create({
+          id: uuid(),
+          actorId,
+          recipientId: userId,
+          type: notificationType.cancelRequestSupport,
+          issueId: issue.id,
+          ...notification,
+          status: true,
+        }),
+      ]);
+      done();
+    } catch (error) {
+      done(error);
+    }
+  }
+
+  static async pushCancelSupportingNotification(job, done) {
+    try {
+      const { issue, actorId, userId } = job.data;
+      const [subscriptions, actor] = await Promise.all([
+        Subscription.findAll({
+          where: {
+            userId,
+          },
+        }),
+        User.findByPk(actorId),
+      ]);
+      const tokens = subscriptions.map((item) => item.token);
+      const notification = {
+        title: `${issue.title}`,
+        body: `${issue.title}`,
       };
       const data = {
         type: notificationType.cancelSupport,
-        issue: receiveIssue.fmtRes(),
+        issue: JSON.stringify(objectToSnake(issue.fmtRes())),
+        actor: JSON.stringify(objectToSnake(actor.toJSON())),
       };
 
       await Promise.all([
@@ -149,9 +205,9 @@ export default class NotificationService {
           actorId,
           recipientId: userId,
           type: notificationType.cancelSupport,
-          issueId: receiveIssue.issue.id,
-          receiveIssueId: receiveIssue.id,
+          issueId: issue.id,
           ...notification,
+          status: true,
         }),
       ]);
       done();
