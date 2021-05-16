@@ -7,13 +7,14 @@ import { fileSystemConfig } from '../../../config';
 export default class UserController {
   static async getIssues(req, res, next) {
     try {
-      const pagination = new Pagination(req.query);
+      const pagination = new Pagination(req);
       const issues = await UserService.getIssues({
         ...req.query,
         limit: pagination.limit,
         offset: pagination.skip,
         user: req.user,
       });
+      pagination.setTotal(issues.count);
       return res.status(200).json({
         meta: pagination.getMeta(),
         data: issues.rows.map((issue) => objectToSnake(issue.toJSON())),

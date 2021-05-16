@@ -48,9 +48,10 @@ class BaseModel extends Model {
     /**
      * Build order clause
      */
+    let order = [];
     if (typeof sort === 'string' && this.sortKeys.length) {
       const sortByData = sort.split(',');
-      optionQuery.order = sortByData.reduce((resultData, itemSort) => {
+      order = sortByData.reduce((resultData, itemSort) => {
         const operator = itemSort[0];
         const key = operator === '-' ? itemSort.substr(1) : itemSort;
 
@@ -61,6 +62,10 @@ class BaseModel extends Model {
       }, []);
     }
 
+    if (!order.length) {
+      order.push(['createdAt', 'desc']);
+    }
+    optionQuery.order = order;
     return optionQuery;
   }
 }

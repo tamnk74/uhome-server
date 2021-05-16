@@ -1,4 +1,4 @@
-import Sequelize from 'sequelize';
+import { Sequelize } from 'sequelize';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue } from '../../../helpers/Queue';
@@ -7,6 +7,7 @@ import { issueStatus } from '../../../constants';
 import UserProfile from '../../../models/userProfile';
 import ReceiveIsssue from '../../../models/receiveIssue';
 import Rating from '../../../models/rating';
+import sequelize from '../../../databases/database';
 
 export default class IssueService {
   static async create(issue) {
@@ -32,29 +33,41 @@ export default class IssueService {
       filter.status = status;
     }
     query.filter = filter;
-
     const options = Issue.buildOptionQuery(query);
+    const optionsCount = {
+      attributes: [[Sequelize.fn('COUNT', Sequelize.col('issue_id')), 'totalRequestSupporting']],
+      where: {
+        issue_id: {
+          [Sequelize.Op.eq]: sequelize.col('issues.id'),
+        },
+      },
+    };
+    const countSQL = sequelize.dialect.QueryGenerator.selectQuery(
+      'request_supportings',
+      optionsCount,
+      RequestSupporting
+    ).slice(0, -1);
+    const optionsIsrequested = {
+      attributes: [[Sequelize.fn('COUNT', Sequelize.col('issue_id')), 'isRequested']],
+      where: {
+        issue_id: {
+          [Sequelize.Op.eq]: sequelize.col('issues.id'),
+        },
+        user_id: {
+          [Sequelize.Op.eq]: user.id,
+        },
+      },
+    };
+    const isRequestedSQL = sequelize.dialect.QueryGenerator.selectQuery(
+      'request_supportings',
+      optionsIsrequested,
+      RequestSupporting
+    ).slice(0, -1);
 
     return Issue.findAndCountAll({
       ...options,
       include: [
-        ...Issue.buildRelation(categoryIds, false),
-        {
-          model: RequestSupporting,
-          as: 'requestSupportings',
-          attributes: [],
-          duplicating: false,
-          include: [
-            {
-              model: User,
-              duplicating: false,
-              required: false,
-              where: {
-                id: user.id,
-              },
-            },
-          ],
-        },
+        ...Issue.buildRelation(categoryIds),
         {
           model: User,
           as: 'creator',
@@ -63,11 +76,10 @@ export default class IssueService {
       ],
       attributes: {
         include: [
-          [Sequelize.fn('COUNT', Sequelize.col('requestSupportings.id')), 'totalRequestSupporting'],
-          [Sequelize.literal('IF(`requestSupportings->user`.id is NULL, 0, 1)'), 'isRequested'],
+          [Sequelize.literal(`(${countSQL})`), 'totalRequestSupporting'],
+          [Sequelize.literal(`(${isRequestedSQL})`), 'isRequested'],
         ],
       },
-      group: ['issues.id'],
       limit,
       offset,
     });
@@ -107,10 +119,10 @@ export default class IssueService {
           attributes: ['id', 'userId', 'reliability'],
         },
       ],
-      limit,
-      offset,
       nest: true,
       raw: true,
+      limit,
+      offset,
     });
   }
 

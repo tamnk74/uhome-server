@@ -36,13 +36,14 @@ export default class AuthController {
 
   static async index(req, res, next) {
     try {
-      const pagination = new Pagination(req.query);
+      const pagination = new Pagination(req);
       const issues = await IssueService.getIssues({
         ...objectToCamel(req.query),
         user: req.user,
         limit: pagination.limit,
         offset: pagination.skip,
       });
+      pagination.setTotal(issues.count);
       return res.status(200).json({
         meta: pagination.getMeta(),
         data: issues.rows.map((issue) => {
@@ -66,13 +67,14 @@ export default class AuthController {
 
   static async getRequestSupporting(req, res, next) {
     try {
-      const pagination = new Pagination(req.query);
+      const pagination = new Pagination(req);
       const requestSupports = await IssueService.getRequestSupporting({
         ...objectToCamel(req.query),
         id: req.issue.id,
         limit: pagination.limit,
         offset: pagination.skip,
       });
+      pagination.setTotal(requestSupports.count);
       return res.status(200).json({
         meta: pagination.getMeta(),
         data: requestSupports.rows.map((item) =>

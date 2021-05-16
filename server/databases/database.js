@@ -16,7 +16,7 @@ const DAO = new Sequelize(config.database, config.username, config.password, {
     min: 0,
     idle: 10000,
   },
-  debug,
+  logging: debug,
 });
 
 module.exports = DAO;
