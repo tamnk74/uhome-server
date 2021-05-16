@@ -12,7 +12,7 @@ import sequelize from '../../../databases/database';
 export default class IssueService {
   static async create(issue) {
     issue = await Issue.addIssue(issue);
-    notificationQueue.add('issue', { id: issue.id });
+    notificationQueue.add('new_issue', { id: issue.id });
     return this.getDetail(issue.id);
   }
 
@@ -96,7 +96,10 @@ export default class IssueService {
         issueId: issue.id,
       },
     });
-    notificationQueue.add('request_supporting', { id: requestSupporting.id });
+    notificationQueue.add('request_supporting', {
+      requestId: requestSupporting[0].id,
+      userId: issue.createdBy,
+    });
     return requestSupporting;
   }
 
@@ -127,6 +130,11 @@ export default class IssueService {
   }
 
   static async cacelRequestSupporting(user, issue) {
+    notificationQueue.add('cancel_request_supporting', {
+      issue,
+      actorId: user.id,
+      userId: issue.createdBy,
+    });
     return RequestSupporting.destroy({
       where: {
         userId: user.id,
@@ -141,13 +149,12 @@ export default class IssueService {
       receiveIssue,
       userId: user.id,
     });
-
-    // notificationQueue.add('cancel_supporting', {
-    //   receiveIssue,
-    //   actorId: user.id,
-    //   userId: receiveIssue.userId !== user.id ? receiveIssue.userId : receiveIssue.issue.createdBy,
-    // });
-
+    const { issue } = receiveIssue;
+    notificationQueue.add('cancel_supporting', {
+      issue,
+      actorId: user.id,
+      userId: issue.createdBy,
+    });
     return cancelSupporting;
   }
 

@@ -11,6 +11,7 @@ import { env } from './config';
 import { handleError } from './errors';
 import { trimObject } from './helpers/Util';
 import './config/passport';
+import './schedulers';
 
 i18n.configure({
   locales: ['vi'],
