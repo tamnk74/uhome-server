@@ -83,7 +83,7 @@ export default class Userervice {
           include: [
             {
               model: User,
-              required: true,
+              required: false,
               attributes: ['id', 'name', 'avatar'],
             },
           ],
