@@ -75,6 +75,23 @@ export default class Userervice {
               ],
               order: [[Issue, 'created', 'DESC']],
             },
+            {
+              model: Category,
+              as: 'categories',
+            },
+            {
+              model: User,
+              as: 'creator',
+              attributes: [
+                'id',
+                'phoneNumber',
+                'address',
+                'name',
+                'avatar',
+                'longitude',
+                'latitude',
+              ],
+            },
           ],
         },
         {
