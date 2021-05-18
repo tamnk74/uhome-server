@@ -140,7 +140,19 @@ export default class AuthController {
       });
       return res.status(204).json({});
     } catch (e) {
-      console.log(e);
+      return next(e);
+    }
+  }
+
+  static async noticeMaterialCost(req, res, next) {
+    try {
+      await IssueService.noticeMaterialCost({
+        user: req.user,
+        issue: req.issue,
+        data: req.body,
+      });
+      return res.status(204).json({});
+    } catch (e) {
       return next(e);
     }
   }
