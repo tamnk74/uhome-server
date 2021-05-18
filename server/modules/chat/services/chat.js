@@ -122,14 +122,16 @@ export default class ChatService {
   }
 
   static async confirmRequest({ chatChannel, user, data }) {
+    if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
+      throw new Error('CHAT-0405');
+    }
     const chatMembers = await ChatMember.findAll({
       where: {
-        userId: user.id,
         channelId: chatChannel.id,
       },
     });
     const userIds = chatMembers.map((member) => member.userId);
-    if (userIds.length <= 2) {
+    if (userIds.length < 2) {
       throw new Error('CHAT-0404');
     }
 
@@ -139,6 +141,7 @@ export default class ChatService {
         userId: userIds[0] === user.id ? userIds[1] : userIds[0],
         issueId: chatChannel.issue.id,
         time: data.totalTime,
+        status: issueStatus.IN_PROGRESS,
       }),
       chatChannel.issue.update({
         status: issueStatus.IN_PROGRESS,

@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import { issueStatus } from '../constants';
@@ -56,7 +57,9 @@ ReceiveIssue.init(
     table: 'receive_issues',
   }
 );
-
+ReceiveIssue.beforeCreate((instant) => {
+  instant.id = uuid.v4();
+});
 ReceiveIssue.belongsTo(User);
 User.hasMany(ReceiveIssue);
 
