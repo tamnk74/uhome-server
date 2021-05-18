@@ -177,8 +177,14 @@ export default class IssueService {
   }
 
   static async estimate({ user, issue, data }) {
-    const { startTime, totalTime, endTime } = data;
+    await this.sendMesage(command.SUBMIT_ESTIMATION, user, issue, data);
+  }
 
+  static async noticeMaterialCost({ user, issue, data }) {
+    await this.sendMesage(command.INFORM_MATERIAL_COST, user, issue, data);
+  }
+
+  static async sendMesage(command, user, issue, data = {}) {
     const chatMember = await ChatMember.findOne({
       where: {
         userId: user.id,
@@ -203,12 +209,8 @@ export default class IssueService {
 
     const messageAttributes = {
       type: 'command',
-      commandName: command.SUBMIT_ESTIMATION,
-      data: {
-        startTime,
-        totalTime,
-        endTime,
-      },
+      commandName: command,
+      data: data
     };
 
     /* eslint-disable no-undef */
@@ -216,7 +218,7 @@ export default class IssueService {
       from: chatMember.identity,
       channelSid: chatChannel.channelSid,
       type: 'action',
-      body: __(commandMessage[command.SUBMIT_ESTIMATION]),
+      body: __(commandMessage[command]),
       attributes: JSON.stringify(objectToSnake(messageAttributes)),
     };
 

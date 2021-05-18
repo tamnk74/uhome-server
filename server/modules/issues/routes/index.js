@@ -14,6 +14,7 @@ import {
   cancelIssueSchema,
   evaluateIssueSchema,
   estimationSchema,
+  materialCostSchema,
 } from '../schema';
 
 const router = Router();
@@ -71,4 +72,13 @@ router.post(
   validIssueSupport,
   IssueController.estimate
 );
+
+router.post(
+  '/issues/:issueId/material-cost',
+  auth,
+  validator(materialCostSchema),
+  validIssueSupport,
+  IssueController.noticeMaterialCost
+);
+
 export default router;
