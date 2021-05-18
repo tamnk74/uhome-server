@@ -210,7 +210,7 @@ export default class IssueService {
     const messageAttributes = {
       type: 'command',
       commandName: command,
-      data: data
+      data,
     };
 
     /* eslint-disable no-undef */

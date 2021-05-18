@@ -10,5 +10,11 @@
     "error": "Bad Request",
     "tile": "Status of hotfix is invalid",
     "detail": "Status of hotfix is invalid"
+  },
+  "CHAT-0103": {
+    "status": 400,
+    "error": "Bad Request",
+    "tile": "Action type is not allow",
+    "detail": "Action type is not allow"
   }
 }

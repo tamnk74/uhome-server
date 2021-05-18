@@ -76,51 +76,6 @@ export default class ChatService {
     });
   }
 
-  static async sendCommand(chatChannel, user, data) {
-    const { commandName, startTime, totalTime, totalCost, materials } = data;
-    const chatMember = await ChatMember.findOne({
-      where: {
-        channelId: chatChannel.id,
-        userId: user.id,
-      },
-    });
-
-    if (!chatMember) {
-      throw new Error('MEMBER-0404');
-    }
-    const messageData = {
-      from: chatMember.identity,
-      channelSid: chatChannel.channelSid,
-      type: 'action',
-    };
-    const messageAttributes = {
-      type: 'command',
-      commandName,
-      data: {},
-    };
-
-    switch (commandName) {
-      case command.SUBMIT_ESTIMATION:
-        messageAttributes.data = {
-          startTime,
-          totalTime,
-        };
-        break;
-      case command.INFORM_MATERIAL_COST:
-        messageAttributes.data = {
-          totalCost,
-          materials,
-        };
-        break;
-      default:
-        break;
-    }
-    /* eslint-disable no-undef */
-    messageData.body = __(commandMessage[commandName]);
-    messageData.attributes = JSON.stringify(objectToSnake(messageAttributes));
-    await twilioClient.sendMessage(chatChannel.channelSid, messageData);
-  }
-
   static async confirmRequest({ chatChannel, user, data }) {
     if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
       throw new Error('CHAT-0405');
@@ -180,5 +135,39 @@ export default class ChatService {
         status: issueStatus.IN_PROGRESS,
       },
     });
+  }
+
+  static async requestCommand(type, chatChannel, user) {
+    await this.sendMesage(type, chatChannel, user);
+  }
+
+  static async sendMesage(commandName, chatChannel, user, data = {}) {
+    const chatMember = await ChatMember.findOne({
+      where: {
+        channelId: chatChannel.id,
+        userId: user.id,
+      },
+    });
+
+    if (!chatMember) {
+      throw new Error('MEMBER-0404');
+    }
+
+    const messageAttributes = {
+      type: 'command',
+      commandName,
+      data,
+    };
+
+    /* eslint-disable no-undef */
+    const messageData = {
+      from: chatMember.identity,
+      channelSid: chatChannel.channelSid,
+      type: 'action',
+      body: __(commandMessage[commandName]),
+      attributes: JSON.stringify(objectToSnake(messageAttributes)),
+    };
+
+    await twilioClient.sendMessage(chatChannel.channelSid, messageData);
   }
 }
