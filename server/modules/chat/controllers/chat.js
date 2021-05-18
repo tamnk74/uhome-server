@@ -11,15 +11,6 @@ export default class ChatController {
     }
   }
 
-  static async sendCommand(req, res, next) {
-    try {
-      await ChatService.sendCommand(req.chatChannel, req.user, req.body);
-      return res.status(204).json();
-    } catch (e) {
-      return next(e);
-    }
-  }
-
   static async confirmRequest(req, res, next) {
     try {
       const receiveIssue = await ChatService.confirmRequest({
@@ -37,6 +28,15 @@ export default class ChatController {
     try {
       const data = await ChatService.getToken(req.chatChannel, req.user);
       return res.status(200).json(objectToSnake(data));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async requestCommand(req, res, next) {
+    try {
+      await ChatService.requestCommand(req.params.type, req.chatChannel, req.user);
+      return res.status(204).json();
     } catch (e) {
       return next(e);
     }

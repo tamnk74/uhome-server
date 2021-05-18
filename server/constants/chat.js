@@ -19,3 +19,11 @@ export const commandMessage = Object.freeze({
   INFORM_MATERIAL_COST: 'chat.inform_material_cost',
   REQUEST_ACCEPTANCE: 'chat.request_acceptance',
 });
+
+export const commandRequests = [
+  command.REQUEST_ACCEPTANCE,
+  command.REQUEST_UPDATE_PROGRESS,
+  command.REQUEST_ESTIMATION,
+  command.REQUEST_CANCEL,
+  command.REQUEST_SEND_MEDIA,
+];
