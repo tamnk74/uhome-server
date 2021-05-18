@@ -130,4 +130,18 @@ export default class AuthController {
       return next(e);
     }
   }
+
+  static async estimate(req, res, next) {
+    try {
+      await IssueService.estimate({
+        user: req.user,
+        issue: req.issue,
+        data: req.body,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      console.log(e);
+      return next(e);
+    }
+  }
 }

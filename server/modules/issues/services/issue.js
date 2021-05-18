@@ -3,11 +3,15 @@ import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue } from '../../../helpers/Queue';
 import RequestSupporting from '../../../models/requestSupporting';
-import { issueStatus } from '../../../constants';
+import { issueStatus, command, commandMessage } from '../../../constants';
 import UserProfile from '../../../models/userProfile';
 import ReceiveIsssue from '../../../models/receiveIssue';
 import Rating from '../../../models/rating';
 import sequelize from '../../../databases/database';
+import ChatChannel from '../../../models/chatChannel';
+import ChatMember from '../../../models/chatMember';
+import { twilioClient } from '../../../helpers/Twilio';
+import { objectToSnake } from '../../../helpers/Util';
 
 export default class IssueService {
   static async create(issue) {
@@ -170,5 +174,52 @@ export default class IssueService {
     // Todo: Send notification
 
     return rating;
+  }
+
+  static async estimate({ user, issue, data }) {
+    const { startTime, totalTime, endTime } = data;
+
+    const chatMember = await ChatMember.findOne({
+      where: {
+        userId: user.id,
+      },
+      include: [
+        {
+          model: ChatChannel,
+          as: 'chatChannel',
+          required: true,
+          where: {
+            issueId: issue.id,
+          },
+        },
+      ],
+    });
+
+    if (!chatMember) {
+      throw new Error('MEMBER-0404');
+    }
+
+    const { chatChannel } = chatMember;
+
+    const messageAttributes = {
+      type: 'command',
+      commandName: command.SUBMIT_ESTIMATION,
+      data: {
+        startTime,
+        totalTime,
+        endTime,
+      },
+    };
+
+    /* eslint-disable no-undef */
+    const messageData = {
+      from: chatMember.identity,
+      channelSid: chatChannel.channelSid,
+      type: 'action',
+      body: __(commandMessage[command.SUBMIT_ESTIMATION]),
+      attributes: JSON.stringify(objectToSnake(messageAttributes)),
+    };
+
+    await twilioClient.sendMessage(chatChannel.channelSid, messageData);
   }
 }

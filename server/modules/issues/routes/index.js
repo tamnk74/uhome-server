@@ -9,7 +9,12 @@ import {
   validIssueSupport,
   verifyReceiveIssue,
 } from '../middlewares';
-import { createIssueSchema, cancelIssueSchema, evaluateIssueSchema } from '../schema';
+import {
+  createIssueSchema,
+  cancelIssueSchema,
+  evaluateIssueSchema,
+  estimationSchema,
+} from '../schema';
 
 const router = Router();
 
@@ -59,4 +64,11 @@ router.delete(
   IssueController.cancelRequestSupporting
 );
 
+router.post(
+  '/issues/:issueId/estimation',
+  auth,
+  validator(estimationSchema),
+  validIssueSupport,
+  IssueController.estimate
+);
 export default router;
