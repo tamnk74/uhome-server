@@ -149,7 +149,7 @@ export default class IssueService {
 
   static async cancelSupporting({ user, receiveIssue, data }) {
     const cancelSupporting = await ReceiveIsssue.cancel({
-      data,
+      reason: data.reason,
       receiveIssue,
       userId: user.id,
     });
