@@ -77,6 +77,11 @@ ReceiveIssue.cancel = ({ receiveIssue, reason, userId }) => {
         {
           status: issueStatus.CANCELLED,
         },
+        {
+          where: {
+            id: receiveIssue.id,
+          },
+        },
         options
       ),
       CancelSupportIssue.create(

@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 
@@ -39,5 +40,9 @@ CancelSupportIssue.init(
     table: 'cancel_support_issues',
   }
 );
+
+CancelSupportIssue.beforeCreate((instant) => {
+  instant.id = uuid.v4();
+});
 
 module.exports = CancelSupportIssue;
