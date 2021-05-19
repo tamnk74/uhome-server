@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 
@@ -25,11 +26,13 @@ Rating.init(
   {
     sequelize,
     underscored: true,
-    timestamps: true,
+    timestamps: false,
     paranoid: true,
     modelName: 'ratings',
     table: 'ratings',
   }
 );
-
+Rating.beforeCreate((issue) => {
+  issue.id = uuid.v4();
+});
 module.exports = Rating;

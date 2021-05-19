@@ -51,7 +51,7 @@ router.patch(
 );
 
 router.post(
-  '/receive-issues/:issueId/rate',
+  '/receive-issues/:receiveIssueId/rate',
   validator(evaluateIssueSchema),
   auth,
   verifyReceiveIssue,
