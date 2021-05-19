@@ -166,6 +166,7 @@ export default class IssueService {
     const [rating] = await Promise.all([
       Rating.create({
         ...data,
+        receiveIssueId: receiveIssue.id,
         userId: receiveIssue.userId,
       }),
       // Update issue status

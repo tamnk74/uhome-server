@@ -125,7 +125,7 @@ export default class AuthController {
         receiveIssue: req.receiveIssue,
         data: req.body,
       });
-      return res.status(200).json(objectToSnake(result));
+      return res.status(200).json(objectToSnake(result.toJSON()));
     } catch (e) {
       return next(e);
     }
