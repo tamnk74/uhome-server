@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, Op } from 'sequelize';
 import uuid from 'uuid';
 import Notificaion from '../../models/notification';
 import Fcm from '../../helpers/Fcm';
@@ -9,6 +9,8 @@ import Issue from '../../models/issue';
 import sequelize from '../../databases/database';
 import RequestSupporting from '../../models/requestSupporting';
 import { objectToSnake } from '../../helpers/Util';
+import ChatChannel from '../../models/chatChannel';
+import ChatMember from '../../models/chatMember';
 
 export default class NotificationService {
   static async pushNewIssueNotification(job, done) {
@@ -212,6 +214,61 @@ export default class NotificationService {
       ]);
       done();
     } catch (error) {
+      done(error);
+    }
+  }
+
+  static async pushChatNotification(job, done) {
+    try {
+      const { chatChannelId, actorId } = job.data;
+      const [chatChannel, chatMembers, actor] = await Promise.all([
+        ChatChannel.findByPk(chatChannelId, {
+          include: [
+            {
+              model: Issue,
+              require: true,
+            },
+          ],
+        }),
+        ChatMember.findAll({
+          where: {
+            channelId: chatChannelId,
+            userId: {
+              [Op.ne]: actorId,
+            },
+          },
+        }),
+        User.findByPk(actorId),
+      ]);
+
+      if (!chatChannel) {
+        return done();
+      }
+
+      const { issue } = chatChannel;
+      const receiveIds = chatMembers.map((item) => item.userId);
+
+      const subscriptions = await Subscription.findAll({
+        where: {
+          userId: receiveIds,
+        },
+      });
+      const tokens = subscriptions.map((item) => item.token);
+      const notification = {
+        title: `${chatChannel.channelSid}-${chatChannel.friendlyName}`,
+        body: `${chatChannel.channelSid}-${chatChannel.friendlyName}`,
+      };
+
+      const data = {
+        type: notificationType.chat,
+        actor: JSON.stringify(objectToSnake(actor.toJSON())),
+        issue: JSON.stringify(objectToSnake(issue.fmtRes())),
+        channel: JSON.stringify(objectToSnake(chatChannel.toJSON())),
+      };
+      await Promise.all([tokens.length ? Fcm.sendNotification(tokens, data, notification) : null]);
+      return done();
+    } catch (error) {
+      console.log(error);
       done(error);
     }
   }

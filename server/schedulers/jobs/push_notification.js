@@ -18,3 +18,5 @@ notificationQueue.process(
   'cancel_supporting',
   NotificationService.pushCancelSupportingNotification
 );
+
+notificationQueue.process('chat_notification', NotificationService.pushChatNotification);
