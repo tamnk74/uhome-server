@@ -5,8 +5,9 @@ import ChatChannel from '../../../models/chatChannel';
 import User from '../../../models/user';
 import ChatUser from '../../../models/chatUser';
 import ReceiveIssue from '../../../models/receiveIssue';
-import { command, commandMessage, issueStatus } from '../../../constants';
+import { commandMessage, issueStatus } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
+import { notificationQueue } from '../../../helpers/Queue';
 
 export default class ChatService {
   static async create(user, data) {
@@ -139,6 +140,7 @@ export default class ChatService {
 
   static async requestCommand(type, chatChannel, user) {
     await this.sendMesage(type, chatChannel, user);
+    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 
   static async sendMesage(commandName, chatChannel, user, data = {}) {

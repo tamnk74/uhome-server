@@ -134,11 +134,6 @@ export default class IssueService {
   }
 
   static async cacelRequestSupporting(user, issue) {
-    notificationQueue.add('cancel_request_supporting', {
-      issue,
-      actorId: user.id,
-      userId: issue.createdBy,
-    });
     return RequestSupporting.destroy({
       where: {
         userId: user.id,
@@ -224,5 +219,6 @@ export default class IssueService {
     };
 
     await twilioClient.sendMessage(chatChannel.channelSid, messageData);
+    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 }
