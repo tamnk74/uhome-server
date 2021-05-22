@@ -188,15 +188,14 @@ export default class Userervice {
   }
 
   static async subscribe({ userId, token }) {
-    await Subscription.findOrCreate({
+    await Subscription.destroy({
       where: {
-        userId,
         token,
       },
-      defaults: {
-        userId,
-        token,
-      },
+    });
+    await Subscription.create({
+      userId,
+      token,
     });
     return Fcm.subscribeNewIssue(token);
   }
