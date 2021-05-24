@@ -4,7 +4,7 @@ import Notificaion from '../../models/notification';
 import Fcm from '../../helpers/Fcm';
 import Subscription from '../../models/subscription';
 import User from '../../models/user';
-import { notificationType } from '../../constants';
+import { notificationType, userRoles } from '../../constants';
 import Issue from '../../models/issue';
 import sequelize from '../../databases/database';
 import RequestSupporting from '../../models/requestSupporting';
@@ -30,6 +30,7 @@ export default class NotificationService {
             userId: {
               [Sequelize.Op.notIn]: Sequelize.literal(`(${tempSQL})`),
             },
+            role: userRoles.WORKER,
           },
           include: [
             {
