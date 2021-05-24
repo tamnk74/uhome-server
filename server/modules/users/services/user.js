@@ -179,6 +179,7 @@ export default class Userervice {
           through: { attributes: [] },
         },
       ],
+      attributes: User.getAttributes(),
       nest: true,
     });
   }

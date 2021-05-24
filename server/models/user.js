@@ -7,6 +7,7 @@ import SocialAccount from './socialAccount';
 import UserProfile from './userProfile';
 import Category from './category';
 import { socialAccount } from '../constants';
+import { fileSystemConfig } from '../config';
 
 class User extends BaseModel {
   static ACTIVE_STATUS = 'ACTIVE';
@@ -33,6 +34,27 @@ class User extends BaseModel {
         type: socialAccount.ZALO,
       },
     };
+  }
+
+  static getAttributes() {
+    return [
+      'id',
+      'name',
+      'phoneNumber',
+      'birthday',
+      'gender',
+      'address',
+      'longitude',
+      'latitude',
+      'status',
+      'role',
+      'verifiedAt',
+      User.buildAvatarAttribuiteSelect(),
+    ];
+  }
+
+  static buildAvatarAttribuiteSelect() {
+    return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}', avatar)`), 'avatar'];
   }
 }
 
