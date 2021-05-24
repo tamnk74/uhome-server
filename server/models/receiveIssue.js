@@ -66,6 +66,7 @@ User.hasMany(ReceiveIssue);
 ReceiveIssue.belongsTo(Issue);
 CancelSupportIssue.belongsTo(ReceiveIssue);
 ReceiveIssue.hasMany(CancelSupportIssue);
+Issue.hasOne(ReceiveIssue, { as: 'supporting', foreignKey: 'issueId' });
 
 ReceiveIssue.cancel = ({ receiveIssue, reason, userId }) => {
   return sequelize.transaction(async (t) => {

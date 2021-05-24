@@ -24,10 +24,32 @@ export default class IssueService {
     return Issue.removeIssue(issue);
   }
 
-  static async getDetail(id) {
-    return Issue.findByPk(id, {
-      include: [...Issue.buildRelation()],
+  static async getDetail(user, id) {
+    const issue = await Issue.findByPk(id, {
+      include: [
+        ...Issue.buildRelation(),
+        {
+          model: RequestSupporting,
+          required: false,
+          as: 'requestSupportings',
+          where: {
+            userId: user.id,
+          },
+        },
+      ],
     });
+
+    const requestSupporting = issue.requestSupportings.pop();
+
+    if (requestSupporting) {
+      issue.setDataValue('isRequested', 1);
+    } else {
+      issue.setDataValue('isRequested', 0);
+    }
+
+    issue.setDataValue('requestSupportings', undefined);
+
+    return issue;
   }
 
   static async getIssues(query) {

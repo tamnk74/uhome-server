@@ -41,6 +41,12 @@ export default class Userervice {
             Attachment.buildUrlAttribuiteSelect(),
           ],
         },
+        {
+          model: ReceiveIssue,
+          required: false,
+          as: 'supporting',
+          attributes: ['id', 'userId', 'issueId', 'time', 'cost'],
+        },
       ],
       attributes: Issue.baseAttibutes,
       limit,
