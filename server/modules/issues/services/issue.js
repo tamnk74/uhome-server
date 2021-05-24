@@ -32,21 +32,22 @@ export default class IssueService {
           model: RequestSupporting,
           required: false,
           as: 'requestSupportings',
-          where: {
-            userId: user.id,
-          },
+        },
+        {
+          model: User,
+          as: 'creator',
+          attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'longitude', 'latitude'],
         },
       ],
     });
 
-    const requestSupporting = issue.requestSupportings.pop();
-
-    if (requestSupporting) {
-      issue.setDataValue('isRequested', 1);
-    } else {
-      issue.setDataValue('isRequested', 0);
-    }
-
+    issue.setDataValue('totalRequestSupporting', issue.requestSupportings.length);
+    issue.setDataValue('isRequested', 0);
+    issue.requestSupportings.forEach((item) => {
+      if (item.userId === user.id) {
+        issue.setDataValue('isRequested', 1);
+      }
+    });
     issue.setDataValue('requestSupportings', undefined);
 
     return issue;
