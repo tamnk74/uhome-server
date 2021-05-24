@@ -94,6 +94,7 @@ export default class UserController {
       await UserService.subscribe({
         userId: req.user.id,
         token: req.body.deviceToken,
+        role: req.user.role,
       });
       return res.status(204).json({});
     } catch (e) {

@@ -194,16 +194,19 @@ export default class Userervice {
     return User.updateSkills(userId, payload);
   }
 
-  static async subscribe({ userId, token }) {
+  static async subscribe({ userId, token, role }) {
     await Subscription.destroy({
       where: {
         token,
       },
     });
+
     await Subscription.create({
       userId,
       token,
+      role,
     });
+
     return Fcm.subscribeNewIssue(token);
   }
 

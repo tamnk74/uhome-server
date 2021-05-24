@@ -12,6 +12,11 @@ Subscription.init(
       type: Sequelize.DataTypes.UUID,
       allowNull: false,
     },
+    role: {
+      type: Sequelize.ENUM('CUSTOMER', 'WORKER'),
+      allowNull: true,
+      defaultValue: 'CUSTOMER',
+    },
     token: {
       type: Sequelize.STRING(255),
       allowNull: false,
