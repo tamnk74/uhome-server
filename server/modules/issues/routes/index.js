@@ -8,6 +8,7 @@ import {
   verifyIssueSupport,
   validIssueSupport,
   verifyReceiveIssue,
+  verifyOwnerIssue,
 } from '../middlewares';
 import {
   createIssueSchema,
@@ -26,7 +27,7 @@ router.post(
   verifyAttachments,
   IssueController.create
 );
-router.delete('/issues/:issueId', auth, verifyIssue, IssueController.remove);
+router.delete('/issues/:issueId', auth, verifyOwnerIssue, IssueController.remove);
 router.get('/issues/:issueId', auth, verifyIssue, IssueController.show);
 router.get('/issues', auth, IssueController.index);
 router.post(

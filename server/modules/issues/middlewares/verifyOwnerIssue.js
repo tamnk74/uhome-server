@@ -1,11 +1,12 @@
 import Issue from '../../../models/issue';
 import errorFactory from '../../../errors/ErrorFactory';
 
-export const verifyIssue = async (req, res, next) => {
+export const verifyOwnerIssue = async (req, res, next) => {
   try {
     const issue = await Issue.findOne({
       where: {
         id: req.params.issueId,
+        createdBy: req.user.id,
       },
     });
 
