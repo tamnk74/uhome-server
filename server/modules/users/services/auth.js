@@ -27,7 +27,9 @@ export default class AuthService {
   }
 
   static getUserById(userId) {
-    return User.findByPk(userId);
+    return User.findByPk(userId, {
+      attributes: User.getAttributes(),
+    });
   }
 
   static updateUser(userId, data) {
