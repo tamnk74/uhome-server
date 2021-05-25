@@ -3,10 +3,15 @@
     "update_progress": "Yêu cầu cập nhập tiến độ",
     "cancel": "Huỷ yêu cầu",
     "send_media": "Gởi hình ảnh cho tôi",
-    "estimate": "Gởi báo giá cho tôi",
-    "submit_estimate": "Tôi gởi báo giá",
-    "approval_estimate": "Tôi đồng ý thời gian",
+    "estimate_time": "Gởi ước lượng thời gian cho tôi",
+    "submit_estimate_time": "Tôi gởi ước lượng thời gian",
+    "approval_estimate_time": "Tôi đồng ý ước lượng thời gian này",
+    "estimate_cost": "Gởi ước lượng chi phí cho tôi",
+    "submit_estimate_cost": "Tôi gởi ước lượng chi phí",
+    "approval_estimate_cost": "Tôi đồng ý ước lượng chi phí này",
     "inform_material_cost": "Thông báo chí phí nguyên vật liệu",
-    "request_acceptance": "Yêu cần nghiệm thu"
+    "approval_material_cost": "Tôi đồng ý với chi phí nguyên vật liệu này",
+    "request_acceptance": "Yêu cần nghiệm thu",
+    "continue_chatting": "Tiếp tục trao đổi"
   }
 }

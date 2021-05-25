@@ -54,12 +54,7 @@ export default class IssueService {
   }
 
   static async getIssues(query) {
-    const { limit, offset, categoryIds, status, user } = query;
-    const filter = query.filter || {};
-    if (status) {
-      filter.status = status;
-    }
-    query.filter = filter;
+    const { limit, offset, categoryIds, user } = query;
     const options = Issue.buildOptionQuery(query);
     const optionsCount = {
       attributes: [[Sequelize.fn('COUNT', Sequelize.col('issue_id')), 'totalRequestSupporting']],
