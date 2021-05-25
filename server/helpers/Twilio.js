@@ -62,6 +62,14 @@ export default class Twilio {
   async getMessage(channelId, id) {
     return this.client.chat.services(twilioConfig.chatId).channels(channelId).messages(id).fetch();
   }
+
+  async updateMessage(id, channelId, data) {
+    return this.client.chat
+      .services(twilioConfig.chatId)
+      .channels(channelId)
+      .messages(id)
+      .update(data);
+  }
 }
 
 export const twilioClient = new Twilio();

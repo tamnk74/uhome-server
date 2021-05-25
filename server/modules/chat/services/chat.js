@@ -5,9 +5,10 @@ import ChatChannel from '../../../models/chatChannel';
 import User from '../../../models/user';
 import ChatUser from '../../../models/chatUser';
 import ReceiveIssue from '../../../models/receiveIssue';
-import { commandMessage, issueStatus } from '../../../constants';
+import { commandMessage, issueStatus, command } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
+import Issue from '../../../models/issue';
 
 export default class ChatService {
   static async create(user, data) {
@@ -20,12 +21,24 @@ export default class ChatService {
 
     if (!chatChannel) {
       const channel = await twilioClient.createChannel();
-      chatChannel = await ChatChannel.addChannel({
-        channelSid: channel.sid,
-        friendlyName: channel.friendlyName,
-        serviceSid: channel.serviceSid,
-        issueId,
-      });
+      [chatChannel] = await Promise.all([
+        ChatChannel.addChannel({
+          channelSid: channel.sid,
+          friendlyName: channel.friendlyName,
+          serviceSid: channel.serviceSid,
+          issueId,
+        }),
+        Issue.update(
+          {
+            status: issueStatus.CHATTING,
+          },
+          {
+            where: {
+              id: issueId,
+            },
+          }
+        ),
+      ]);
     }
 
     const authorChat = await this.addUserToChat(chatChannel, user);
@@ -77,7 +90,7 @@ export default class ChatService {
     });
   }
 
-  static async confirmRequest({ chatChannel, user, data }) {
+  static async approveEstimateCost({ chatChannel, user, data }) {
     if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
       throw new Error('CHAT-0405');
     }
@@ -91,20 +104,35 @@ export default class ChatService {
       throw new Error('CHAT-0404');
     }
 
-    const [receiveIssue] = await Promise.all([
-      ReceiveIssue.create({
-        ...data,
-        userId: userIds[0] === user.id ? userIds[1] : userIds[0],
-        issueId: chatChannel.issue.id,
-        time: data.totalTime,
-        status: issueStatus.IN_PROGRESS,
-      }),
+    await Promise.all([
+      ReceiveIssue.update(
+        {
+          cost: data.cost,
+          time: data.totalTime,
+          status: issueStatus.IN_PROGRESS,
+        },
+        {
+          where: {
+            issueId: chatChannel.issue.id,
+          },
+        }
+      ),
       chatChannel.issue.update({
         status: issueStatus.IN_PROGRESS,
       }),
+      Issue.update(
+        {
+          status: issueStatus.IN_PROGRESS,
+        },
+        {
+          where: {
+            id: chatChannel.issue.id,
+          },
+        }
+      ),
     ]);
-
-    return receiveIssue;
+    await this.sendMesage(command.APPROVAL_ESTIMATION_COST, chatChannel, user, data.messageSid);
+    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 
   static async getToken(chatChannel, user) {
@@ -133,7 +161,7 @@ export default class ChatService {
       },
       defaults: {
         id: uuid(),
-        status: issueStatus.IN_PROGRESS,
+        status: issueStatus.CHATTING,
       },
     });
   }
@@ -143,7 +171,7 @@ export default class ChatService {
     notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 
-  static async sendMesage(commandName, chatChannel, user, data = {}) {
+  static async sendMesage(commandName, chatChannel, user, messageId = null, data = {}) {
     const chatMember = await ChatMember.findOne({
       where: {
         channelId: chatChannel.id,
@@ -170,6 +198,10 @@ export default class ChatService {
       attributes: JSON.stringify(objectToSnake(messageAttributes)),
     };
 
-    await twilioClient.sendMessage(chatChannel.channelSid, messageData);
+    if (messageId) {
+      await twilioClient.sendMessage(chatChannel.channelSid, messageData);
+    } else {
+      await twilioClient.updateMessage(messageId, chatChannel.channelSid, messageData);
+    }
   }
 }

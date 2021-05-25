@@ -11,14 +11,14 @@ export default class ChatController {
     }
   }
 
-  static async confirmRequest(req, res, next) {
+  static async approveEstimateCost(req, res, next) {
     try {
-      const receiveIssue = await ChatService.confirmRequest({
+      await ChatService.approveEstimateCost({
         chatChannel: req.chatChannel,
         user: req.user,
         data: req.body,
       });
-      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
+      return res.status(204).json({});
     } catch (e) {
       return next(e);
     }
