@@ -14,10 +14,10 @@ import { twilioClient } from '../../../helpers/Twilio';
 import { objectToSnake } from '../../../helpers/Util';
 
 export default class IssueService {
-  static async create(issue) {
+  static async create(user, issue) {
     issue = await Issue.addIssue(issue);
     notificationQueue.add('new_issue', { id: issue.id });
-    return this.getDetail(issue.id);
+    return this.getDetail(user, issue.id);
   }
 
   static async remove(issue) {

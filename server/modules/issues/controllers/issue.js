@@ -6,7 +6,7 @@ import Pagination from '../../../helpers/Pagination';
 export default class AuthController {
   static async create(req, res, next) {
     try {
-      const issue = await IssueService.create({
+      const issue = await IssueService.create(req.user, {
         ...req.body,
         createdBy: req.user.id,
       });
