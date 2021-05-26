@@ -6,6 +6,7 @@ import RedisService from '../../../helpers/Redis';
 import { status as userStatus, socialAccount } from '../../../constants';
 import { randomNumber } from '../../../helpers/Util';
 import UserProfile from '../../../models/userProfile';
+import Subscription from '../../../models/subscription';
 
 export default class AuthService {
   static async authenticate({ phoneNumber = '', password }) {
@@ -197,6 +198,11 @@ export default class AuthService {
   }
 
   static async logout(user, token) {
+    await Subscription.destroy({
+      where: {
+        userId: user.id,
+      },
+    });
     return RedisService.removeAccessToken(user.id, token);
   }
 }
