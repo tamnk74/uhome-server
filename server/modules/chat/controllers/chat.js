@@ -41,4 +41,30 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async approveEstimateTime(req, res, next) {
+    try {
+      await ChatService.approveEstimateTime({
+        chatChannel: req.chatChannel,
+        user: req.user,
+        data: req.body,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async approveMaterialCost(req, res, next) {
+    try {
+      await ChatService.approveMaterialCost({
+        chatChannel: req.chatChannel,
+        user: req.user,
+        data: req.body,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

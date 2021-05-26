@@ -94,15 +94,6 @@ export default class ChatService {
     if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
       throw new Error('CHAT-0405');
     }
-    const chatMembers = await ChatMember.findAll({
-      where: {
-        channelId: chatChannel.id,
-      },
-    });
-    const userIds = chatMembers.map((member) => member.userId);
-    if (userIds.length < 2) {
-      throw new Error('CHAT-0404');
-    }
 
     await Promise.all([
       ReceiveIssue.update(
@@ -131,7 +122,13 @@ export default class ChatService {
         }
       ),
     ]);
-    await this.sendMesage(command.APPROVAL_ESTIMATION_COST, chatChannel, user, data.messageSid);
+    await this.sendMesage(
+      command.APPROVAL_ESTIMATION_COST,
+      chatChannel,
+      user,
+      data.messageSid,
+      data
+    );
     notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 
@@ -203,5 +200,31 @@ export default class ChatService {
     } else {
       await twilioClient.sendMessage(chatChannel.channelSid, messageData);
     }
+  }
+
+  static async approveEstimateTime({ chatChannel, user, data }) {
+    if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
+      throw new Error('CHAT-0405');
+    }
+    await this.sendMesage(
+      command.APPROVAL_ESTIMATION_TIME,
+      chatChannel,
+      user,
+      data.messageSid,
+      data
+    );
+    await this.sendMesage(command.REQUEST_ESTIMATION_COST, chatChannel, user, null, {
+      cost: 400000,
+      totalTime: 2,
+    });
+    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
+  }
+
+  static async approveMaterialCost({ chatChannel, user, data }) {
+    if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
+      throw new Error('CHAT-0405');
+    }
+    await this.sendMesage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data);
+    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 }

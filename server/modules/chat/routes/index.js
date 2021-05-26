@@ -2,7 +2,12 @@ import { Router } from 'express';
 
 import ChatController from '../controllers/chat';
 import { auth, validator } from '../../../middlewares';
-import { createChatSchema, approveEstimateCostSchema } from '../schema';
+import {
+  createChatSchema,
+  approveEstimateCostSchema,
+  approveEstimateTimeSchema,
+  approveMaterialCostSchema,
+} from '../schema';
 import { verifyChannel, verifyRequestType } from '../middlewares';
 
 const router = Router();
@@ -24,6 +29,22 @@ router.get(
   verifyRequestType,
   verifyChannel,
   ChatController.requestCommand
+);
+
+router.post(
+  '/chat/:channelId/approval-time',
+  auth,
+  validator(approveEstimateTimeSchema),
+  verifyChannel,
+  ChatController.approveEstimateTime
+);
+
+router.post(
+  '/chat/:channelId/approval-material-cost',
+  auth,
+  validator(approveMaterialCostSchema),
+  verifyChannel,
+  ChatController.approveMaterialCost
 );
 
 export default router;
