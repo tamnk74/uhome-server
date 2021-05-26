@@ -129,6 +129,16 @@ export default class AuthController {
     }
   }
 
+  static async changePassword(req, res, next) {
+    try {
+      await AuthService.changePassword(req.body);
+
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async verifyCode(req, res, next) {
     try {
       const authUser = await AuthService.verifyCode(req.params.userId, req.body.verifyCode);

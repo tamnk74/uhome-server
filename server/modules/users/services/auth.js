@@ -238,6 +238,24 @@ export default class AuthService {
     };
   }
 
+  static async changePassword({ password, code }) {
+    const userId = await JWT.verifyAuthCode(code);
+    if (!userId) {
+      throw new Error('LOG-0007');
+    }
+
+    return User.update(
+      {
+        password,
+      },
+      {
+        where: {
+          id: userId,
+        },
+      }
+    );
+  }
+
   static async logout(user, token) {
     await Subscription.destroy({
       where: {
