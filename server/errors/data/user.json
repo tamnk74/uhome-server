@@ -55,5 +55,9 @@
   "REG-0001": {
     "status": 400,
     "detail": "The phone number is already being in use"
+  },
+  "RSPW-0001": {
+    "status": 400,
+    "detail": "The phone number doesn't exist"
   }
 }
