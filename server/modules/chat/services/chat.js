@@ -199,9 +199,9 @@ export default class ChatService {
     };
 
     if (messageId) {
-      await twilioClient.sendMessage(chatChannel.channelSid, messageData);
-    } else {
       await twilioClient.updateMessage(messageId, chatChannel.channelSid, messageData);
+    } else {
+      await twilioClient.sendMessage(chatChannel.channelSid, messageData);
     }
   }
 }
