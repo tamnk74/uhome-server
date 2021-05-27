@@ -33,14 +33,14 @@ router.get('/issues', auth, IssueController.index);
 router.post(
   '/issues/:issueId/request-supportings',
   auth,
-  validIssueSupport,
+  verifyIssue,
   IssueController.requestSupporting
 );
 
 router.get(
   '/issues/:issueId/request-supportings',
   auth,
-  validIssueSupport,
+  verifyIssue,
   IssueController.getRequestSupporting
 );
 router.patch(
