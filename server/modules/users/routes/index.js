@@ -17,6 +17,8 @@ import {
   updateSkillsSchema,
   subscriptionSchema,
   setRoleSchema,
+  resetPasswordSchema,
+  phoneNumberSchema,
 } from '../schema';
 
 import { verifyUser } from '../middlewares';
@@ -52,4 +54,17 @@ router.route('/me/subscribe').post(auth, validator(subscriptionSchema), UserCont
 router
   .route('/me/unsubscribe')
   .post(auth, validator(subscriptionSchema), UserController.unsubscribe);
+
+router.post('/forgot-password', validator(phoneNumberSchema), AuthController.resetPassword);
+router.post(
+  '/forgot-password/:userId/verify',
+  validator(verifyCodeSchema),
+  AuthController.verifyResetPassword
+);
+router.patch(
+  '/forgot-password',
+  validator(resetPasswordSchema),
+  AuthController.changePassword
+);
+
 export default router;

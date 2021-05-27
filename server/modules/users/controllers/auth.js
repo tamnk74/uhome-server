@@ -109,6 +109,36 @@ export default class AuthController {
     }
   }
 
+  static async resetPassword(req, res, next) {
+    try {
+      const user = await AuthService.resetPassword(req.body.phoneNumber);
+
+      return res.status(200).json(objectToSnake(user));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async verifyResetPassword(req, res, next) {
+    try {
+      const result = await AuthService.verifyResetPassword(req.params.userId, req.body.verifyCode);
+
+      return res.status(200).json(objectToSnake(result));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async changePassword(req, res, next) {
+    try {
+      await AuthService.changePassword(req.body);
+
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async verifyCode(req, res, next) {
     try {
       const authUser = await AuthService.verifyCode(req.params.userId, req.body.verifyCode);

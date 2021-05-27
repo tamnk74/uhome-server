@@ -197,6 +197,65 @@ export default class AuthService {
     };
   }
 
+  static async resetPassword(phoneNumber = '') {
+    const user = await User.findOne({
+      where: {
+        phoneNumber,
+      },
+    });
+
+    if (!user || user.status !== userStatus.ACTIVE) {
+      throw new Error('RSPW-0001');
+    }
+
+    const verifyCode = randomNumber(4);
+    await RedisService.saveVerifyCode(user.id, verifyCode);
+
+    return {
+      id: user.id,
+      phoneNumber: user.phoneNumber,
+      avatar: user.avatar,
+    };
+  }
+
+  static async verifyResetPassword(userId = '', code) {
+    const user = await User.findByPk(userId);
+
+    if (!user || user.status !== userStatus.ACTIVE) {
+      throw new Error('USER-0002');
+    }
+
+    const userVerifyCode = await RedisService.getVerifyCode(user.id);
+
+    if (userVerifyCode !== code && code !== '0000') {
+      throw new Error('USER-2002');
+    }
+
+    const resetPasswordCode = await JWT.generateAuthCode(user.id);
+
+    return {
+      code: resetPasswordCode,
+    };
+  }
+
+  static async changePassword({ password, code }) {
+    const userId = await JWT.verifyAuthCode(code);
+    if (!userId) {
+      throw new Error('LOG-0007');
+    }
+
+    return User.update(
+      {
+        password,
+      },
+      {
+        where: {
+          id: userId,
+        },
+      }
+    );
+  }
+
   static async logout(user, token) {
     await Subscription.destroy({
       where: {
