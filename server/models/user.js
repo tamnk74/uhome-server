@@ -54,7 +54,7 @@ class User extends BaseModel {
   }
 
   static buildAvatarAttribuiteSelect() {
-    return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}', avatar)`), 'avatar'];
+    return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}/', avatar)`), 'avatar'];
   }
 }
 
