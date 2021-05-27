@@ -199,21 +199,26 @@ export default class IssueService {
   }
 
   static async sendMesage(command, user, issue, data = {}) {
-    const chatMember = await ChatMember.findOne({
-      where: {
-        userId: user.id,
-      },
-      include: [
-        {
-          model: ChatChannel,
-          as: 'chatChannel',
-          required: true,
-          where: {
-            issueId: issue.id,
-          },
+    const [chatMember, actor] = await Promise.all([
+      ChatMember.findOne({
+        where: {
+          userId: user.id,
         },
-      ],
-    });
+        include: [
+          {
+            model: ChatChannel,
+            as: 'chatChannel',
+            required: true,
+            where: {
+              issueId: issue.id,
+            },
+          },
+        ],
+      }),
+      User.findByPk(user.id, {
+        attributes: User.getAttributes(),
+      }),
+    ]);
 
     if (!chatMember) {
       throw new Error('MEMBER-0404');
@@ -225,6 +230,7 @@ export default class IssueService {
       type: 'command',
       commandName: command,
       data,
+      actor: actor.toJSON(),
     };
     /* eslint-disable no-undef */
     const messageData = {
