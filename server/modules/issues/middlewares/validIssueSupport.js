@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import Issue from '../../../models/issue';
 import errorFactory from '../../../errors/ErrorFactory';
 import { issueStatus } from '../../../constants';
@@ -7,7 +8,9 @@ export const validIssueSupport = async (req, res, next) => {
     const issue = await Issue.findOne({
       where: {
         id: req.params.issueId,
-        status: issueStatus.OPEN,
+        status: {
+          [Op.in]: [issueStatus.IN_PROGRESS, issueStatus.CHATTING, issueStatus.WAITING_VERIFY],
+        },
       },
     });
 

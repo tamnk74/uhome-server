@@ -191,7 +191,7 @@ export default class IssueService {
   }
 
   static async estimate({ user, issue, data }) {
-    await this.sendMesage(command.SUBMIT_ESTIMATION, user, issue, data);
+    await this.sendMesage(command.SUBMIT_ESTIMATION_TIME, user, issue, data);
   }
 
   static async noticeMaterialCost({ user, issue, data }) {
@@ -226,7 +226,6 @@ export default class IssueService {
       commandName: command,
       data,
     };
-
     /* eslint-disable no-undef */
     const messageData = {
       from: chatMember.identity,
