@@ -16,7 +16,9 @@ export default class ChatService {
     /* eslint-disable prefer-const */
     let [chatChannel, worker] = await Promise.all([
       ChatChannel.findChannelGroup(issueId, [userId, user.id]),
-      User.findByPk(userId),
+      User.findByPk(userId, {
+        attributes: User.getAttributes(),
+      }),
     ]);
 
     if (!chatChannel) {
@@ -46,7 +48,7 @@ export default class ChatService {
       this.addUserToChat(chatChannel, worker),
       this.addToReviceIssue(issueId, worker.id),
     ]);
-
+    authorChat.setDataValue('supporting', worker.toJSON());
     const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
     authorChat.setDataValue('token', twilioToken);
 
@@ -169,12 +171,17 @@ export default class ChatService {
   }
 
   static async sendMesage(commandName, chatChannel, user, messageId = null, data = {}) {
-    const chatMember = await ChatMember.findOne({
-      where: {
-        channelId: chatChannel.id,
-        userId: user.id,
-      },
-    });
+    const [chatMember, actor] = await Promise.all([
+      ChatMember.findOne({
+        where: {
+          channelId: chatChannel.id,
+          userId: user.id,
+        },
+      }),
+      User.findByPk(user.id, {
+        attributes: User.getAttributes(),
+      }),
+    ]);
 
     if (!chatMember) {
       throw new Error('MEMBER-0404');
@@ -184,6 +191,7 @@ export default class ChatService {
       type: 'command',
       commandName,
       data,
+      actor: actor.toJSON(),
     };
 
     /* eslint-disable no-undef */
