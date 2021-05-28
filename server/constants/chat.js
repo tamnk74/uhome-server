@@ -12,6 +12,7 @@ export const command = Object.freeze({
   APPROVAL_MATERIAL_COST: 'APPROVAL_MATERIAL_COST',
   REQUEST_ACCEPTANCE: 'REQUEST_ACCEPTANCE',
   CONTINUE_CHATTING: 'CONTINUE_CHATTING',
+  UPDATED_PROGRESS: 'UPDATED_PROGRESS',
 });
 
 export const commandMessage = Object.freeze({
@@ -28,6 +29,7 @@ export const commandMessage = Object.freeze({
   APPROVAL_MATERIAL_COST: 'chat.approval_material_cost',
   REQUEST_ACCEPTANCE: 'chat.request_acceptance',
   CONTINUE_CHATTING: 'chat.continue_chatting',
+  UPDATED_PROGRESS: 'chat.updated_progress',
 });
 
 export const commandRequests = [
