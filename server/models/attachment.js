@@ -9,7 +9,7 @@ class Attachment extends BaseModel {
   }
 
   static buildUrlAttribuiteSelect() {
-    return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}', path)`), 'url'];
+    return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}/', path)`), 'url'];
   }
 }
 
