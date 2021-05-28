@@ -7,6 +7,7 @@ import {
   approveEstimateCostSchema,
   approveEstimateTimeSchema,
   approveMaterialCostSchema,
+  trackingSchema,
 } from '../schema';
 import { verifyChannel, verifyRequestType } from '../middlewares';
 
@@ -45,6 +46,14 @@ router.post(
   validator(approveMaterialCostSchema),
   verifyChannel,
   ChatController.approveMaterialCost
+);
+
+router.post(
+  '/chat/:channelId/tracking',
+  auth,
+  validator(trackingSchema),
+  verifyChannel,
+  ChatController.trakingProgress
 );
 
 export default router;

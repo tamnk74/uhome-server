@@ -9,6 +9,7 @@ import { commandMessage, issueStatus, command } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
+import Attachment from '../../../models/attachment';
 
 export default class ChatService {
   static async create(user, data) {
@@ -193,7 +194,6 @@ export default class ChatService {
       data,
       actor: actor.toJSON(),
     };
-
     /* eslint-disable no-undef */
     const messageData = {
       from: chatMember.identity,
@@ -233,6 +233,38 @@ export default class ChatService {
       throw new Error('CHAT-0405');
     }
     await this.sendMesage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data);
+    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
+  }
+
+  static async trakingProgress({ chatChannel, user, data }) {
+    if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
+      throw new Error('CHAT-0405');
+    }
+    const { attachmentIds, content = '', messageSid } = data;
+
+    const { issue } = chatChannel;
+    const [attachments] = await Promise.all([
+      Attachment.findAll({
+        where: {
+          id: attachmentIds || [],
+        },
+        attributes: ['id', Attachment.buildUrlAttribuiteSelect()],
+        raw: true,
+      }),
+      issue.addAttachments(attachmentIds),
+    ]);
+
+    const messageAttributes = {
+      content,
+      attachments,
+    };
+    await this.sendMesage(
+      command.UPDATED_PROGRESS,
+      chatChannel,
+      user,
+      messageSid,
+      messageAttributes
+    );
     notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 }

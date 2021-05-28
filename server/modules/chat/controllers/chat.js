@@ -67,4 +67,17 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async trakingProgress(req, res, next) {
+    try {
+      await ChatService.trakingProgress({
+        chatChannel: req.chatChannel,
+        user: req.user,
+        data: req.body,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
