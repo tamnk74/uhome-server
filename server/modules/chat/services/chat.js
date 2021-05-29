@@ -93,48 +93,6 @@ export default class ChatService {
     });
   }
 
-  static async approveEstimateCost({ chatChannel, user, data }) {
-    if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
-      throw new Error('CHAT-0405');
-    }
-
-    await Promise.all([
-      ReceiveIssue.update(
-        {
-          cost: data.cost,
-          time: data.totalTime,
-          status: issueStatus.IN_PROGRESS,
-        },
-        {
-          where: {
-            issueId: chatChannel.issue.id,
-          },
-        }
-      ),
-      chatChannel.issue.update({
-        status: issueStatus.IN_PROGRESS,
-      }),
-      Issue.update(
-        {
-          status: issueStatus.IN_PROGRESS,
-        },
-        {
-          where: {
-            id: chatChannel.issue.id,
-          },
-        }
-      ),
-    ]);
-    await this.sendMesage(
-      command.APPROVAL_ESTIMATION_COST,
-      chatChannel,
-      user,
-      data.messageSid,
-      data
-    );
-    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
-  }
-
   static async getToken(chatChannel, user) {
     const chatMember = await ChatMember.findOne({
       where: {
@@ -168,7 +126,6 @@ export default class ChatService {
 
   static async requestCommand(type, chatChannel, user) {
     await this.sendMesage(type, chatChannel, user);
-    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 
   static async sendMesage(commandName, chatChannel, user, messageId = null, data = {}) {
@@ -208,12 +165,43 @@ export default class ChatService {
     } else {
       await twilioClient.sendMessage(chatChannel.channelSid, messageData);
     }
+
+    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 
   static async approveEstimateTime({ chatChannel, user, data }) {
     if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
       throw new Error('CHAT-0405');
     }
+
+    await Promise.all([
+      ReceiveIssue.update(
+        {
+          cost: data.cost,
+          time: data.totalTime,
+          status: issueStatus.IN_PROGRESS,
+        },
+        {
+          where: {
+            issueId: chatChannel.issue.id,
+          },
+        }
+      ),
+      chatChannel.issue.update({
+        status: issueStatus.IN_PROGRESS,
+      }),
+      Issue.update(
+        {
+          status: issueStatus.IN_PROGRESS,
+        },
+        {
+          where: {
+            id: chatChannel.issue.id,
+          },
+        }
+      ),
+    ]);
+
     await this.sendMesage(
       command.APPROVAL_ESTIMATION_TIME,
       chatChannel,
@@ -221,11 +209,6 @@ export default class ChatService {
       data.messageSid,
       data
     );
-    await this.sendMesage(command.REQUEST_ESTIMATION_COST, chatChannel, user, null, {
-      cost: 400000,
-      totalTime: 2,
-    });
-    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 
   static async approveMaterialCost({ chatChannel, user, data }) {
@@ -233,7 +216,6 @@ export default class ChatService {
       throw new Error('CHAT-0405');
     }
     await this.sendMesage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data);
-    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 
   static async trakingProgress({ chatChannel, user, data }) {
@@ -265,6 +247,5 @@ export default class ChatService {
       messageSid,
       messageAttributes
     );
-    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
   }
 }

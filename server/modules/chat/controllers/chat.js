@@ -11,19 +11,6 @@ export default class ChatController {
     }
   }
 
-  static async approveEstimateCost(req, res, next) {
-    try {
-      await ChatService.approveEstimateCost({
-        chatChannel: req.chatChannel,
-        user: req.user,
-        data: req.body,
-      });
-      return res.status(204).json({});
-    } catch (e) {
-      return next(e);
-    }
-  }
-
   static async getToken(req, res, next) {
     try {
       const data = await ChatService.getToken(req.chatChannel, req.user);

@@ -191,6 +191,7 @@ export default class IssueService {
   }
 
   static async estimate({ user, issue, data }) {
+    data.cost = 40000;
     await this.sendMesage(command.SUBMIT_ESTIMATION_TIME, user, issue, data);
   }
 
