@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, Op } from 'sequelize';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue } from '../../../helpers/Queue';
@@ -56,6 +56,10 @@ export default class IssueService {
   static async getIssues(query) {
     const { limit, offset, categoryIds, user } = query;
     const options = Issue.buildOptionQuery(query);
+    options.where.createdBy = {
+      [Op.ne]: user.id,
+    };
+
     const optionsCount = {
       attributes: [[Sequelize.fn('COUNT', Sequelize.col('issue_id')), 'totalRequestSupporting']],
       where: {

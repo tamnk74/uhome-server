@@ -16,5 +16,11 @@
     "error": "Bad Request",
     "tile": "Action type is not allow",
     "detail": "Action type is not allow"
+  },
+  "CHAT-0203": {
+    "status": 403,
+    "error": "Bad Request",
+    "tile": "Action is not allow",
+    "detail": "Action is not allow"
   }
 }

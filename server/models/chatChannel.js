@@ -56,7 +56,7 @@ ChatChannel.belongsTo(Issue);
 ChatChannel.beforeCreate((channel) => {
   channel.id = uuidv4();
 });
-ChatChannel.addChannel = (data) => {
+ChatChannel.addChannel = async (data) => {
   return sequelize.transaction(async (t) => {
     const channel = await ChatChannel.create(data, {
       transaction: t,
