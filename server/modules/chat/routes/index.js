@@ -8,11 +8,17 @@ import {
   approveMaterialCostSchema,
   trackingSchema,
 } from '../schema';
-import { verifyChannel, verifyRequestType } from '../middlewares';
+import { verifyChannel, verifyRequestType, isAllowCreateGroupChat } from '../middlewares';
 
 const router = Router();
 
-router.post('/chat/chat-groups', auth, validator(createChatSchema), ChatController.create);
+router.post(
+  '/chat/chat-groups',
+  auth,
+  validator(createChatSchema),
+  isAllowCreateGroupChat,
+  ChatController.create
+);
 
 router.get('/chat/:channelId/token', auth, verifyChannel, ChatController.getToken);
 
