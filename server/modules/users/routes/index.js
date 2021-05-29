@@ -61,10 +61,6 @@ router.post(
   validator(verifyCodeSchema),
   AuthController.verifyResetPassword
 );
-router.patch(
-  '/forgot-password',
-  validator(resetPasswordSchema),
-  AuthController.changePassword
-);
+router.patch('/forgot-password', validator(resetPasswordSchema), AuthController.changePassword);
 
 export default router;

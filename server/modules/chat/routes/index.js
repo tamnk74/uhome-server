@@ -4,7 +4,6 @@ import ChatController from '../controllers/chat';
 import { auth, validator } from '../../../middlewares';
 import {
   createChatSchema,
-  approveEstimateCostSchema,
   approveEstimateTimeSchema,
   approveMaterialCostSchema,
   trackingSchema,
@@ -15,13 +14,6 @@ const router = Router();
 
 router.post('/chat/chat-groups', auth, validator(createChatSchema), ChatController.create);
 
-router.post(
-  '/chat/:channelId/approval-cost',
-  auth,
-  validator(approveEstimateCostSchema),
-  verifyChannel,
-  ChatController.approveEstimateCost
-);
 router.get('/chat/:channelId/token', auth, verifyChannel, ChatController.getToken);
 
 router.get(
