@@ -170,10 +170,6 @@ export default class ChatService {
   }
 
   static async approveEstimateTime({ chatChannel, user, data }) {
-    if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
-      throw new Error('CHAT-0405');
-    }
-
     await Promise.all([
       ReceiveIssue.update(
         {
@@ -212,16 +208,10 @@ export default class ChatService {
   }
 
   static async approveMaterialCost({ chatChannel, user, data }) {
-    if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
-      throw new Error('CHAT-0405');
-    }
     await this.sendMesage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data);
   }
 
   static async trakingProgress({ chatChannel, user, data }) {
-    if ([issueStatus.IN_PROGRESS, issueStatus.DONE].includes(chatChannel.issue.status)) {
-      throw new Error('CHAT-0405');
-    }
     const { attachmentIds, content = '', messageSid } = data;
 
     const { issue } = chatChannel;
