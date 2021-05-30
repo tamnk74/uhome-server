@@ -1,4 +1,5 @@
 import omit from 'lodash/omit';
+import { ExtractJwt } from 'passport-jwt';
 import AuthService from '../services/auth';
 import { objectToSnake } from '../../../helpers/Util';
 import { fileSystemConfig } from '../../../config';
@@ -34,16 +35,6 @@ export default class AuthController {
   static async loginZalo(req, res, next) {
     try {
       const authUser = await AuthService.handleZaloAuth(req.body.code);
-
-      return res.status(200).json(objectToSnake(authUser));
-    } catch (e) {
-      return next(e);
-    }
-  }
-
-  static async refrehToken(req, res, next) {
-    try {
-      const authUser = await AuthService.refrehToken(req.body.refresh_token);
 
       return res.status(200).json(objectToSnake(authUser));
     } catch (e) {
@@ -102,6 +93,19 @@ export default class AuthController {
   static async authorize(req, res, next) {
     try {
       const auth = await AuthService.authorize(req.body);
+
+      return res.status(200).json(objectToSnake(auth));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async refreshToken(req, res, next) {
+    try {
+      const auth = await AuthService.refreshToken({
+        ...req.body,
+        accessToken: ExtractJwt.fromAuthHeaderAsBearerToken()(req),
+      });
 
       return res.status(200).json(objectToSnake(auth));
     } catch (e) {

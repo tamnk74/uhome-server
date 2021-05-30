@@ -50,4 +50,12 @@ export default class JWT {
   static verifyRefreshToken(refreshToken) {
     return JsonWebToken.verify(refreshToken, jwtRefreshKey);
   }
+
+  static verifyAccessToken(accessToken) {
+    return JsonWebToken.verify(accessToken, jwtSecretKey);
+  }
+
+  static decodeToken(token) {
+    return JsonWebToken.decode(token, { complete: true });
+  }
 }

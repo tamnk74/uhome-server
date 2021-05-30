@@ -19,6 +19,7 @@ import {
   setRoleSchema,
   resetPasswordSchema,
   phoneNumberSchema,
+  refreshTokenSchema,
 } from '../schema';
 
 import { verifyUser } from '../middlewares';
@@ -38,6 +39,7 @@ router.route('/auth/facebook').post(validator(loginFbSchema), AuthController.log
 router.route('/auth/zalo').post(validator(loginZaloSchema), AuthController.loginZalo);
 router.route('/register').post(validator(registerSchema), AuthController.register);
 router.route('/auth/token').post(validator(setRoleSchema), AuthController.authorize);
+router.route('/refresh-token').post(validator(refreshTokenSchema), AuthController.refreshToken);
 router.route('/me').get(auth, AuthController.userInfo);
 router.route('/me').patch(auth, validator(updateUserSchema), AuthController.updateUser);
 router.route('/users/:userId/verify').patch(validator(verifyCodeSchema), AuthController.verifyCode);
