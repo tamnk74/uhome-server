@@ -275,4 +275,10 @@ export default class ChatService {
 
     return rating;
   }
+
+  static async continueChatting({ chatChannel, user, data }) {
+    const { messageSid } = data;
+
+    await this.sendMesage(command.CONTINUE_CHATTING, chatChannel, user, messageSid, data);
+  }
 }

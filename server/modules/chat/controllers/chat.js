@@ -80,4 +80,17 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async continueChatting(req, res, next) {
+    try {
+      await ChatService.continueChatting({
+        user: req.user,
+        chatChannel: req.chatChannel,
+        data: req.body,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
