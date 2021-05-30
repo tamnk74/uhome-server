@@ -1,3 +1,4 @@
+import errorFactory from '../../../errors/ErrorFactory';
 import User from '../../../models/user';
 import JWT from '../../../helpers/JWT';
 import Zalo from '../../../helpers/Zalo';
@@ -58,6 +59,25 @@ export default class AuthService {
     return {
       accessToken,
       refreshToken,
+      tokenType: 'Bearer',
+    };
+  }
+
+  static async refreshToken({ refreshToken, accessToken }) {
+    const [{ userId }, jwtdata] = await Promise.all([
+      JWT.verifyRefreshToken(refreshToken),
+      JWT.decodeToken(accessToken),
+    ]);
+    if (!jwtdata || !jwtdata.payload) {
+      throw errorFactory.getError('LOG-0008');
+    }
+    const user = await User.findByPk(userId);
+    const [newAccessToken] = await Promise.all([
+      JWT.generateToken(user.toPayload(jwtdata.payload.role)),
+    ]);
+    await RedisService.saveAccessToken(user.id, newAccessToken);
+    return {
+      accessToken: newAccessToken,
       tokenType: 'Bearer',
     };
   }

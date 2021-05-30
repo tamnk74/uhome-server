@@ -23,10 +23,13 @@
     "status": 400,
     "detail": "The zalo code is invalid"
   },
-  
   "LOG-0007": {
     "status": 400,
     "detail": "The auth code is invalid"
+  },
+  "LOG-0008": {
+    "status": 400,
+    "detail": "The access token is invalid"
   },
   "USER-0001": {
     "status": 403,

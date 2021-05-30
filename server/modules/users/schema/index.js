@@ -11,3 +11,4 @@ export * from './subscriptionSchema';
 export * from './setRole';
 export * from './phoneNumberSchema';
 export * from './resetPasswordSchema';
+export * from './refreshTokenSchema';

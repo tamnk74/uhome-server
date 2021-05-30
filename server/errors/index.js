@@ -29,8 +29,12 @@ export const handleError = (err, req, res, next) => {
   }
 
   const error = errorFactory.getError(err.message);
+  error.stack = err.stack;
   if (error.status >= 500 && sentryConfig.Sentry.DSN) {
     sentryConfig.Sentry.captureException(err);
+  } else {
+    console.error(err);
   }
+
   return res.status(error.status).send(new JSONAPIError(error));
 };
