@@ -15,10 +15,10 @@ module.exports = {
         },
         allowNull: false,
       },
-      receive_issue_id: {
+      issue_id: {
         type: Sequelize.DataTypes.UUID,
         references: {
-          model: 'receive_issues',
+          model: 'issues',
           key: 'id',
         },
         allowNull: false,

@@ -6,7 +6,6 @@ import RequestSupporting from '../../../models/requestSupporting';
 import { issueStatus, command, commandMessage } from '../../../constants';
 import UserProfile from '../../../models/userProfile';
 import ReceiveIsssue from '../../../models/receiveIssue';
-import Rating from '../../../models/rating';
 import sequelize from '../../../databases/database';
 import ChatChannel from '../../../models/chatChannel';
 import ChatMember from '../../../models/chatMember';
@@ -177,21 +176,6 @@ export default class IssueService {
       userId: issue.createdBy,
     });
     return cancelSupporting;
-  }
-
-  static async setRating({ receiveIssue, data }) {
-    const [rating] = await Promise.all([
-      Rating.create({
-        ...data,
-        receiveIssueId: receiveIssue.id,
-        userId: receiveIssue.userId,
-      }),
-      // Update issue status
-    ]);
-
-    // Todo: Send notification
-
-    return rating;
   }
 
   static async estimate({ user, issue, data }) {

@@ -7,6 +7,7 @@ import {
   approveEstimateTimeSchema,
   approveMaterialCostSchema,
   trackingSchema,
+  evaluateIssueSchema,
 } from '../schema';
 import { verifyChannel, verifyRequestType, isAllowCreateGroupChat } from '../middlewares';
 
@@ -52,6 +53,14 @@ router.post(
   validator(trackingSchema),
   verifyChannel,
   ChatController.trakingProgress
+);
+
+router.post(
+  '/chat/:channelId/rating',
+  validator(evaluateIssueSchema),
+  auth,
+  verifyChannel,
+  ChatController.setRating
 );
 
 export default router;

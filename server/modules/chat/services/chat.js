@@ -10,6 +10,7 @@ import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
 import Attachment from '../../../models/attachment';
+import Rating from '../../../models/rating';
 
 export default class ChatService {
   static async create(user, data) {
@@ -237,5 +238,41 @@ export default class ChatService {
       messageSid,
       messageAttributes
     );
+  }
+
+  static async setRating({ chatChannel, user, data }) {
+    const { issue } = chatChannel;
+    const { rate, comment = '', messageSid } = data;
+    const supporter = await ReceiveIssue.findOne({
+      where: {
+        issueId: issue.id,
+      },
+    });
+
+    const [rating] = await Promise.all([
+      Rating.create({
+        rate,
+        comment,
+        issueId: issue.id,
+        userId: supporter.userId,
+      }),
+      Issue.update(
+        {
+          status: issueStatus.DONE,
+        },
+        {
+          where: {
+            id: issue.id,
+          },
+        }
+      ),
+      supporter.update({
+        status: issueStatus.DONE,
+      }),
+    ]);
+
+    await this.sendMesage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
+
+    return rating;
   }
 }

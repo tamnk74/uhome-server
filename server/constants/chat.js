@@ -10,6 +10,7 @@ export const command = Object.freeze({
   REQUEST_ACCEPTANCE: 'REQUEST_ACCEPTANCE',
   CONTINUE_CHATTING: 'CONTINUE_CHATTING',
   UPDATED_PROGRESS: 'UPDATED_PROGRESS',
+  ACCEPTANCE: 'ACCEPTANCE',
 });
 
 export const commandMessage = Object.freeze({
@@ -24,6 +25,7 @@ export const commandMessage = Object.freeze({
   REQUEST_ACCEPTANCE: 'chat.request_acceptance',
   CONTINUE_CHATTING: 'chat.continue_chatting',
   UPDATED_PROGRESS: 'chat.updated_progress',
+  ACCEPTANCE: 'chat.acceptance',
 });
 
 export const commandRequests = [

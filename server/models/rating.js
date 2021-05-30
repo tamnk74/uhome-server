@@ -11,7 +11,7 @@ Rating.init(
       type: Sequelize.DataTypes.UUID,
       allowNull: false,
     },
-    receiveIssueId: {
+    issueId: {
       type: Sequelize.DataTypes.UUID,
       allowNull: false,
     },
@@ -19,7 +19,7 @@ Rating.init(
       type: Sequelize.DataTypes.DECIMAL(2),
       allowNull: false,
     },
-    reason: {
+    comment: {
       type: Sequelize.STRING(2048),
     },
   },

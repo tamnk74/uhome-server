@@ -7,13 +7,11 @@ import {
   verifyIssue,
   verifyIssueSupport,
   validIssueSupport,
-  verifyReceiveIssue,
   verifyOwnerIssue,
 } from '../middlewares';
 import {
   createIssueSchema,
   cancelIssueSchema,
-  evaluateIssueSchema,
   estimationSchema,
   materialCostSchema,
 } from '../schema';
@@ -49,14 +47,6 @@ router.patch(
   auth,
   verifyIssueSupport,
   IssueController.cancelSupporting
-);
-
-router.post(
-  '/receive-issues/:receiveIssueId/rate',
-  validator(evaluateIssueSchema),
-  auth,
-  verifyReceiveIssue,
-  IssueController.setRating
 );
 
 router.delete(
