@@ -8,6 +8,7 @@ import {
   approveMaterialCostSchema,
   trackingSchema,
   evaluateIssueSchema,
+  continueChattingchema,
 } from '../schema';
 import { verifyChannel, verifyRequestType, isAllowCreateGroupChat } from '../middlewares';
 
@@ -61,6 +62,14 @@ router.post(
   auth,
   verifyChannel,
   ChatController.setRating
+);
+
+router.post(
+  '/chat/:channelId/continue',
+  validator(continueChattingchema),
+  auth,
+  verifyChannel,
+  ChatController.continueChatting
 );
 
 export default router;
