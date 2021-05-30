@@ -118,19 +118,6 @@ export default class AuthController {
     }
   }
 
-  static async setRating(req, res, next) {
-    try {
-      const result = await IssueService.setRating({
-        user: req.user,
-        receiveIssue: req.receiveIssue,
-        data: req.body,
-      });
-      return res.status(200).json(objectToSnake(result.toJSON()));
-    } catch (e) {
-      return next(e);
-    }
-  }
-
   static async estimate(req, res, next) {
     try {
       await IssueService.estimate({
