@@ -278,7 +278,16 @@ export default class ChatService {
 
   static async continueChatting({ chatChannel, user, data }) {
     const { messageSid } = data;
-
-    await this.sendMesage(command.CONTINUE_CHATTING, chatChannel, user, messageSid, data);
+    const message = await twilioClient.fetchMessage(messageId, chatChannel.channelSid);
+    const attributes = JSON.parse(message.attributes);
+    data = attributes.data || {};
+    data.isContinuing = true;
+    await this.sendMesage(
+      attributes.command_name || command.CONTINUE_CHATTING,
+      chatChannel,
+      user,
+      messageSid,
+      data
+    );
   }
 }

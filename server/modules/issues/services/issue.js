@@ -180,10 +180,12 @@ export default class IssueService {
 
   static async estimate({ user, issue, data }) {
     data.cost = 40000;
+    data.isContinuing = false;
     await this.sendMesage(command.SUBMIT_ESTIMATION_TIME, user, issue, data);
   }
 
   static async noticeMaterialCost({ user, issue, data }) {
+    data.isContinuing = false;
     await this.sendMesage(command.INFORM_MATERIAL_COST, user, issue, data);
   }
 
