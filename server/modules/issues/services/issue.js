@@ -222,6 +222,7 @@ export default class IssueService {
       commandName: command,
       data,
       actor: actor.toJSON(),
+      isContinuing: data.isContinuing || false,
     };
     /* eslint-disable no-undef */
     const messageData = {

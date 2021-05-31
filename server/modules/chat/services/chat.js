@@ -151,6 +151,7 @@ export default class ChatService {
       commandName,
       data,
       actor: actor.toJSON(),
+      isContinuing: data.isContinuing || false,
     };
     /* eslint-disable no-undef */
     const messageData = {
