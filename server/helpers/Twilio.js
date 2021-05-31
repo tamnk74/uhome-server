@@ -70,6 +70,10 @@ export default class Twilio {
       .messages(id)
       .update(data);
   }
+
+  async fetchMessage(id, channelId) {
+    return this.client.chat.services(twilioConfig.chatId).channels(channelId).messages(id).fetch();
+  }
 }
 
 export const twilioClient = new Twilio();
