@@ -24,6 +24,12 @@ module.exports = {
       location: {
         type: Sequelize.DataTypes.STRING(1024),
       },
+      lat: {
+        type: Sequelize.DataTypes.DECIMAL(9, 6),
+      },
+      lon: {
+        type: Sequelize.DataTypes.DECIMAL(9, 6),
+      },
       status: {
         type: Sequelize.ENUM(Object.values(issueStatus)),
         defaultValue: issueStatus.OPEN,

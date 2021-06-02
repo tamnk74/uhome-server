@@ -5,4 +5,6 @@ export const createIssueSchema = Joi.object().keys({
   location: Joi.string().max(1048).required(),
   category_ids: Joi.array().items(Joi.string()),
   attachment_ids: Joi.array().items(Joi.string()),
+  lat: Joi.number(),
+  lon: Joi.number(),
 });

@@ -47,6 +47,12 @@ Issue.init(
     location: {
       type: Sequelize.DataTypes.STRING,
     },
+    lat: {
+      type: Sequelize.DataTypes.DECIMAL(9, 6),
+    },
+    lon: {
+      type: Sequelize.DataTypes.DECIMAL(9, 6),
+    },
     status: {
       type: Sequelize.ENUM(Object.values(issueStatus)),
       defaultValue: issueStatus.OPEN,
