@@ -10,7 +10,9 @@ const DAO = new Sequelize(config.database, config.username, config.password, {
       ? {
           ssl: { rejectUnauthorized: false },
         }
-      : undefined,
+      : {
+          decimalNumbers: true,
+        },
   pool: {
     max: 5,
     min: 0,

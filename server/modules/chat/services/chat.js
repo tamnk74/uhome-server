@@ -16,11 +16,12 @@ export default class ChatService {
   static async create(user, data) {
     const { userId, issueId } = data;
     /* eslint-disable prefer-const */
-    let [chatChannel, worker] = await Promise.all([
+    let [chatChannel, worker, issue] = await Promise.all([
       ChatChannel.findChannelGroup(issueId, [userId, user.id]),
       User.findByPk(userId, {
         attributes: User.getAttributes(),
       }),
+      Issue.findByPk(issueId),
     ]);
 
     if (!chatChannel) {
@@ -48,7 +49,7 @@ export default class ChatService {
     const authorChat = await this.addUserToChat(chatChannel, user);
     await Promise.all([
       this.addUserToChat(chatChannel, worker),
-      this.addToReviceIssue(issueId, worker.id),
+      worker.id !== issue.createdBy ? this.addToReviceIssue(issueId, worker.id) : null,
     ]);
     authorChat.setDataValue('supporting', worker.toJSON());
     const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
