@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
 export const materialCostSchema = Joi.object().keys({
-  total_cost: Joi.number().integer().required(),
+  total_cost: Joi.number().integer().min(0).required(),
   materials: Joi.string().required(),
 });
