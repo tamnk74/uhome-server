@@ -1,14 +1,11 @@
 import Issue from '../../../models/issue';
 import ReceiveIssue from '../../../models/receiveIssue';
 import errorFactory from '../../../errors/ErrorFactory';
-import { issueStatus, userRoles } from '../../../constants';
+import { userRoles } from '../../../constants';
 
 export const verifyIssueSupport = async (req, res, next) => {
   try {
     const receiveIssue = await ReceiveIssue.findOne({
-      where: {
-        status: issueStatus.IN_PROGRESS,
-      },
       include: [
         {
           model: Issue,
