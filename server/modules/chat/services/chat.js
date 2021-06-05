@@ -173,6 +173,8 @@ export default class ChatService {
   }
 
   static async approveEstimateTime({ chatChannel, user, data }) {
+    data.totalTime = +data.totalTime;
+    data.cost = +data.cost;
     await Promise.all([
       ReceiveIssue.update(
         {
@@ -211,6 +213,7 @@ export default class ChatService {
   }
 
   static async approveMaterialCost({ chatChannel, user, data }) {
+    data.totalCost = +data.totalCost;
     await this.sendMesage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data);
   }
 
