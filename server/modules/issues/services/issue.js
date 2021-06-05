@@ -35,7 +35,7 @@ export default class IssueService {
         {
           model: User,
           as: 'creator',
-          attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'longitude', 'latitude'],
+          attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
         },
       ],
     });
@@ -96,7 +96,7 @@ export default class IssueService {
         {
           model: User,
           as: 'creator',
-          attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'longitude', 'latitude'],
+          attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
         },
       ],
       attributes: {

@@ -28,11 +28,11 @@ module.exports = {
         type: Sequelize.DataTypes.STRING(127),
         allowNull: false,
       },
-      longitude: {
-        type: Sequelize.DataTypes.FLOAT,
+      lon: {
+        type: Sequelize.DataTypes.DECIMAL(9, 6),
       },
-      latitude: {
-        type: Sequelize.DataTypes.FLOAT,
+      lat: {
+        type: Sequelize.DataTypes.DECIMAL(9, 6),
       },
       role: {
         type: Sequelize.ENUM('ADMIN', 'USER'),
