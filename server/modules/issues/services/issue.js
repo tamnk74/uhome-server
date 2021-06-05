@@ -155,11 +155,16 @@ export default class IssueService {
   }
 
   static async cacelRequestSupporting(user, issue) {
-    return RequestSupporting.destroy({
+    await RequestSupporting.destroy({
       where: {
         userId: user.id,
         issueId: issue.id,
       },
+    });
+    notificationQueue.add('cancel_request_supporting', {
+      issue,
+      actorId: user.id,
+      userId: issue.createdBy,
     });
   }
 
