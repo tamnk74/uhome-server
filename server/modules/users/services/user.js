@@ -88,15 +88,7 @@ export default class Userervice {
             {
               model: User,
               as: 'creator',
-              attributes: [
-                'id',
-                'phoneNumber',
-                'address',
-                'name',
-                'avatar',
-                'longitude',
-                'latitude',
-              ],
+              attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
             },
           ],
         },
@@ -215,5 +207,13 @@ export default class Userervice {
       where: { userId, token },
     });
     return Fcm.unsubscribeNewIssue(token);
+  }
+
+  static async updateLatestLocation({ userId, data }) {
+    await User.update(data, {
+      where: {
+        id: userId,
+      },
+    });
   }
 }

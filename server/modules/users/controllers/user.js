@@ -123,4 +123,16 @@ export default class UserController {
       return next(e);
     }
   }
+
+  static async storeLatestLocation(req, res, next) {
+    try {
+      await UserService.updateLatestLocation({
+        userId: req.user.id,
+        data: req.body,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

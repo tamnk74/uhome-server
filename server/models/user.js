@@ -44,8 +44,8 @@ class User extends BaseModel {
       'birthday',
       'gender',
       'address',
-      'longitude',
-      'latitude',
+      'lon',
+      'lat',
       'status',
       'role',
       'verifiedAt',
@@ -87,11 +87,11 @@ User.init(
       type: Sequelize.STRING,
       allowNull: true,
     },
-    longitude: {
-      type: Sequelize.DataTypes.FLOAT,
+    lon: {
+      type: Sequelize.DataTypes.DECIMAL(9, 6),
     },
-    latitude: {
-      type: Sequelize.DataTypes.FLOAT,
+    lat: {
+      type: Sequelize.DataTypes.DECIMAL(9, 6),
     },
     role: {
       type: Sequelize.ENUM('USER', 'ADMIN'),
