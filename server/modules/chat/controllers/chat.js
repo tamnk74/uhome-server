@@ -93,4 +93,17 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async addMoreInformation(req, res, next) {
+    try {
+      await ChatService.addInformation({
+        user: req.user,
+        chatChannel: req.chatChannel,
+        data: req.body,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
