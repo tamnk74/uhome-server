@@ -161,11 +161,6 @@ export default class IssueService {
         issueId: issue.id,
       },
     });
-    notificationQueue.add('cancel_request_supporting', {
-      issue,
-      actorId: user.id,
-      userId: issue.createdBy,
-    });
   }
 
   static async cancelSupporting({ user, receiveIssue, data }) {
