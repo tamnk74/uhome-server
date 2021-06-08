@@ -295,4 +295,32 @@ export default class ChatService {
       data
     );
   }
+
+  static async addInformation({ chatChannel, user, data }) {
+    const { attachmentIds, content = '', messageSid } = data;
+
+    const { issue } = chatChannel;
+    const [attachments] = await Promise.all([
+      Attachment.findAll({
+        where: {
+          id: attachmentIds || [],
+        },
+        attributes: ['id', Attachment.buildUrlAttribuiteSelect()],
+        raw: true,
+      }),
+      issue.addAttachments(attachmentIds),
+    ]);
+
+    const messageAttributes = {
+      content,
+      attachments,
+    };
+    await this.sendMesage(
+      command.ADDED_MORE_INFORMATION,
+      chatChannel,
+      user,
+      messageSid,
+      messageAttributes
+    );
+  }
 }

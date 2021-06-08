@@ -11,6 +11,8 @@
 		"request_acceptance": "Yêu cần nghiệm thu",
 		"continue_chatting": "Tiếp tục trao đổi",
 		"updated_progress": "Tôi cập nhập tiến độ",
-		"acceptance": "Nghiệm thu"
+		"acceptance": "Nghiệm thu",
+		"request_add_more_information": "Tôi cần thêm hình ảnh, thông tin",
+		"added_more_information": "Tôi thêm thông tin hình ảnh"
 	}
 }

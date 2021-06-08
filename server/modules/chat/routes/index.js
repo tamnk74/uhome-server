@@ -72,4 +72,12 @@ router.post(
   ChatController.continueChatting
 );
 
+router.post(
+  '/chat/:channelId/informations',
+  validator(trackingSchema),
+  auth,
+  verifyChannel,
+  ChatController.addMoreInformation
+);
+
 export default router;

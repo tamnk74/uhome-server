@@ -11,6 +11,8 @@ export const command = Object.freeze({
   CONTINUE_CHATTING: 'CONTINUE_CHATTING',
   UPDATED_PROGRESS: 'UPDATED_PROGRESS',
   ACCEPTANCE: 'ACCEPTANCE',
+  REQUEST_ADD_MORE_INFORMATION: 'REQUEST_ADD_MORE_INFORMATION',
+  ADDED_MORE_INFORMATION: 'ADDED_MORE_INFORMATION',
 });
 
 export const commandMessage = Object.freeze({
@@ -26,6 +28,8 @@ export const commandMessage = Object.freeze({
   CONTINUE_CHATTING: 'chat.continue_chatting',
   UPDATED_PROGRESS: 'chat.updated_progress',
   ACCEPTANCE: 'chat.acceptance',
+  REQUEST_ADD_MORE_INFORMATION: 'chat.request_add_more_information',
+  ADDED_MORE_INFORMATION: 'chat.added_more_information',
 });
 
 export const commandRequests = [
@@ -35,4 +39,5 @@ export const commandRequests = [
   command.REQUEST_CANCEL,
   command.REQUEST_SEND_MEDIA,
   command.CONTINUE_CHATTING,
+  command.REQUEST_ADD_MORE_INFORMATION,
 ];
