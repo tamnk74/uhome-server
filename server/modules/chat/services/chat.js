@@ -45,11 +45,10 @@ export default class ChatService {
         ),
       ]);
     }
-
     const authorChat = await this.addUserToChat(chatChannel, user);
     await Promise.all([
       this.addUserToChat(chatChannel, worker),
-      worker.id !== issue.createdBy ? this.addToReviceIssue(issueId, worker.id) : null,
+      this.addToReviceIssue(issueId, issue.createdBy === user.id ? worker.id : user.id),
     ]);
     authorChat.setDataValue('supporting', worker.toJSON());
     const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
