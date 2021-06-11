@@ -33,7 +33,6 @@ ReceiveIssue.init(
     },
     reason: {
       type: Sequelize.STRING(2048),
-      allowNull: false,
     },
     status: {
       type: Sequelize.ENUM(Object.values(issueStatus)),
