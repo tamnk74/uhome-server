@@ -5,7 +5,6 @@ import sequelize from '../databases/database';
 import { issueStatus } from '../constants';
 import User from './user';
 import Issue from './issue';
-import CancelSupportIssue from './cancelSupportIssue';
 
 class ReceiveIssue extends BaseModel {
   static get mapFilterFields() {
@@ -31,6 +30,10 @@ ReceiveIssue.init(
     },
     cost: {
       type: Sequelize.INTEGER,
+    },
+    reason: {
+      type: Sequelize.STRING(2048),
+      allowNull: false,
     },
     status: {
       type: Sequelize.ENUM(Object.values(issueStatus)),
@@ -64,11 +67,9 @@ ReceiveIssue.belongsTo(User);
 User.hasMany(ReceiveIssue);
 
 ReceiveIssue.belongsTo(Issue);
-CancelSupportIssue.belongsTo(ReceiveIssue);
-ReceiveIssue.hasMany(CancelSupportIssue);
 Issue.hasOne(ReceiveIssue, { as: 'supporting', foreignKey: 'issueId' });
 
-ReceiveIssue.cancel = ({ receiveIssue, reason, userId }) => {
+ReceiveIssue.cancel = ({ receiveIssue, reason }) => {
   return sequelize.transaction(async (t) => {
     const options = {
       transaction: t,
@@ -77,19 +78,12 @@ ReceiveIssue.cancel = ({ receiveIssue, reason, userId }) => {
       ReceiveIssue.update(
         {
           status: issueStatus.CANCELLED,
+          reason,
         },
         {
           where: {
             id: receiveIssue.id,
           },
-        },
-        options
-      ),
-      CancelSupportIssue.create(
-        {
-          userId,
-          reason,
-          receiveIssueId: receiveIssue.id,
         },
         options
       ),

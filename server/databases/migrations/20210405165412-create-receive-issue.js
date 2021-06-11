@@ -37,6 +37,9 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: 0,
       },
+      reason: {
+        type: Sequelize.STRING(2048),
+      },
       created_at: {
         type: Sequelize.DATE,
         defautValue: Sequelize.NOW,
