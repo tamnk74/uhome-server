@@ -12,6 +12,8 @@ import { fileType } from '../../../constants/user';
 import Uploader from '../../../helpers/Uploader';
 import Subscription from '../../../models/subscription';
 import Fcm from '../../../helpers/Fcm';
+import { idCardStatus } from '../../../constants';
+import IdentifyCard from '../../../models/identifyCard';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -131,34 +133,45 @@ export default class Userervice {
       where: {
         userId,
       },
+      include: [
+        {
+          model: User,
+          required: false,
+        },
+      ],
     });
     const identityCard =
       userProfile && userProfile.identityCard
         ? userProfile.identityCard
         : { before: null, after: null };
 
-    Uploader.upload(file, {
+    await Uploader.upload(file, {
       path,
       'x-amz-meta-mimeType': file.mimetype,
       'x-amz-meta-size': file.size.toString(),
     });
-
+    const { user } = userProfile;
+    let pathAvatar = user.avatar;
+    let idStatus = 0;
     switch (type) {
       case fileType.AVATAR:
-        User.update({ avatar: path }, { where: { id: userId } });
+        pathAvatar = path;
         break;
       case fileType.IDENTITY_CARD_BEFORE:
         identityCard.before = path;
-        UserProfile.update({ identityCard: JSON.stringify(identityCard) }, { where: { userId } });
+        idStatus = idCardStatus.WAITING_VERIFY_CARD;
         break;
       case fileType.IDENTITY_CARD_AFTER:
         identityCard.after = path;
-        UserProfile.update({ identityCard: JSON.stringify(identityCard) }, { where: { userId } });
+        idStatus = idCardStatus.WAITING_VERIFY_CARD;
         break;
       default:
-      //
     }
 
+    await Promise.all([
+      UserProfile.update({ identityCard: JSON.stringify(identityCard) }, { where: { userId } }),
+      User.update({ idCardStatus: idStatus, avatar: pathAvatar }, { where: { id: userId } }),
+    ]);
     return `${fileSystemConfig.clout_front}/${path}`;
   }
 
@@ -175,6 +188,11 @@ export default class Userervice {
           required: false,
           through: { attributes: [] },
         },
+        {
+          model: IdentifyCard,
+          as: 'profile',
+          attributes: ['id', 'idNum', 'dob', 'name', 'hometown', 'address'],
+        },
       ],
       attributes: User.getAttributes(),
       nest: true,
@@ -185,7 +203,17 @@ export default class Userervice {
         identityCard: JSON.stringify({ before: null, after: null }),
       });
       user.profile = profile;
+    } else {
+      const { identityCard } = user.profile;
+      identityCard.before = identityCard.before
+        ? `${fileSystemConfig.clout_front}/${identityCard.before}`
+        : null;
+      identityCard.after = identityCard.after
+        ? `${fileSystemConfig.clout_front}/${identityCard.after}`
+        : null;
+      user.profile.identityCard = identityCard;
     }
+
     return user;
   }
 

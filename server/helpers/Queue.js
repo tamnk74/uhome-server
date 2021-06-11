@@ -14,3 +14,10 @@ export const notificationQueue = new Queue('Push notificaion', {
     port: redisConfig.port,
   },
 });
+
+export const verifyIdentifyCardQueue = new Queue('Verify identify card', {
+  redis: {
+    host: redisConfig.host,
+    port: redisConfig.port,
+  },
+});
