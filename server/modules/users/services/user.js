@@ -162,13 +162,12 @@ export default class Userervice {
     return `${fileSystemConfig.clout_front}/${path}`;
   }
 
-  static getUserById(userId) {
-    return User.findByPk(userId, {
+  static async getUserById(userId) {
+    const user = await User.findByPk(userId, {
       include: [
         {
           model: UserProfile,
           as: 'profile',
-          required: true,
         },
         {
           model: Category,
@@ -180,6 +179,14 @@ export default class Userervice {
       attributes: User.getAttributes(),
       nest: true,
     });
+    if (!user.profile) {
+      const profile = await user.createProfile({
+        userId: user.id,
+        identityCard: JSON.stringify({ before: null, after: null }),
+      });
+      user.profile = profile;
+    }
+    return user;
   }
 
   static async createOrUpdateSkills(userId, payload) {

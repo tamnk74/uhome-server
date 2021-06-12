@@ -1,4 +1,5 @@
 const { snakeCase, camelCase } = require('lodash');
+const Sequelize = require('sequelize');
 
 exports.mapKeys = (mapKeys, obj) => {
   const result = {};
@@ -83,6 +84,9 @@ export const objectToCamel = (obj) => {
 
 export const objectToSnake = (obj) => {
   const result = {};
+  if (obj instanceof Sequelize.Model) {
+    obj = obj.toJSON();
+  }
   Object.keys(obj).forEach((key) => {
     const snakeKey = snakeCase(key);
     if (Array.isArray(obj[key])) {

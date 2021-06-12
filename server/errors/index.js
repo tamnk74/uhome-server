@@ -36,5 +36,5 @@ export const handleError = (err, req, res, next) => {
     console.error(err);
   }
 
-  return res.status(error.status).send(new JSONAPIError(error));
+  return res.status(error.status).send(error);
 };
