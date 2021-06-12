@@ -86,6 +86,17 @@ ReceiveIssue.cancel = ({ receiveIssue, reason }) => {
         },
         options
       ),
+      Issue.update(
+        {
+          status: issueStatus.OPEN,
+        },
+        {
+          where: {
+            id: receiveIssue.issueId,
+          },
+        },
+        options
+      ),
     ]);
 
     return receiveIssue;

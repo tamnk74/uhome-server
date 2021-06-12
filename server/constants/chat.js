@@ -13,6 +13,7 @@ export const command = Object.freeze({
   ACCEPTANCE: 'ACCEPTANCE',
   REQUEST_ADD_MORE_INFORMATION: 'REQUEST_ADD_MORE_INFORMATION',
   ADDED_MORE_INFORMATION: 'ADDED_MORE_INFORMATION',
+  CANCELED: 'CANCELED',
 });
 
 export const commandMessage = Object.freeze({
@@ -30,6 +31,7 @@ export const commandMessage = Object.freeze({
   ACCEPTANCE: 'chat.acceptance',
   REQUEST_ADD_MORE_INFORMATION: 'chat.request_add_more_information',
   ADDED_MORE_INFORMATION: 'chat.added_more_information',
+  CANCELED: 'chat.canceled',
 });
 
 export const commandRequests = [
