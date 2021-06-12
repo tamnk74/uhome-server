@@ -175,6 +175,7 @@ export default class IssueService {
       actorId: user.id,
       userId: issue.createdBy,
     });
+    await this.sendMesage(command.CANCELED, user, issue, data);
     return cancelSupporting;
   }
 
