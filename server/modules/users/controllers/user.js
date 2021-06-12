@@ -1,7 +1,7 @@
 import omit from 'lodash/omit';
 import Pagination from '../../../helpers/Pagination';
 import UserService from '../services/user';
-import { objectToSnake, toPlain, distance } from '../../../helpers/Util';
+import { objectToSnake, distance } from '../../../helpers/Util';
 import { fileSystemConfig } from '../../../config';
 
 export default class UserController {
@@ -67,7 +67,7 @@ export default class UserController {
   static async getUserProfile(req, res, next) {
     try {
       const user = await UserService.getUserById(req.params.userId);
-      const userData = omit(toPlain(user), [
+      const userData = omit(user.toJSON(), [
         'verify_code',
         'password',
         'createdAt',
@@ -75,7 +75,10 @@ export default class UserController {
         'deletedAt',
       ]);
       userData.distance = distance(0.0001, 0.0001, 0.0002, 0.0002);
-
+      if (!userData.profile) {
+        userData.profile = user.profile.toJSON();
+        userData.profile.identityCard = JSON.parse(userData.profile.identityCard);
+      }
       if (userData.profile.identityCard.before) {
         userData.profile.identityCard.before = `${fileSystemConfig.clout_front}/${userData.profile.identityCard.before}`;
       }
