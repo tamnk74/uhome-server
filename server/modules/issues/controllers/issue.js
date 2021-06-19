@@ -79,7 +79,7 @@ export default class AuthController {
         meta: pagination.getMeta(),
         data: requestSupports.rows.map((item) =>
           objectToSnake(
-            omit(item, [
+            omit(item.toJSON(), [
               'verify_code',
               'password',
               'createdAt',
