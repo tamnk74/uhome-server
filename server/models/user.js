@@ -49,12 +49,8 @@ class User extends BaseModel {
       'status',
       'role',
       'verifiedAt',
-      User.buildAvatarAttribuiteSelect(),
+      'avatar',
     ];
-  }
-
-  static buildAvatarAttribuiteSelect() {
-    return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}/', avatar)`), 'avatar'];
   }
 }
 
@@ -82,6 +78,13 @@ User.init(
       type: Sequelize.STRING,
       allowNull: true,
       defaultValue: 'default.png',
+      get() {
+        const avatar = this.getDataValue('avatar');
+        if (!avatar.startsWith('http')) {
+          return `${fileSystemConfig.clout_front}/${avatar}`;
+        }
+        return avatar;
+      },
     },
     password: {
       type: Sequelize.STRING,
