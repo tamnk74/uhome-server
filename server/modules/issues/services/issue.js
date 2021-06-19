@@ -144,11 +144,10 @@ export default class IssueService {
           model: UserProfile,
           as: 'profile',
           required: true,
-          attributes: ['id', 'userId', 'reliability'],
+          attributes: ['id', 'userId', 'reliability', 'totalIssueCompleted'],
         },
       ],
       nest: true,
-      raw: true,
       limit,
       offset,
     });
