@@ -2,7 +2,6 @@ import omit from 'lodash/omit';
 import { ExtractJwt } from 'passport-jwt';
 import AuthService from '../services/auth';
 import { objectToSnake } from '../../../helpers/Util';
-import { fileSystemConfig } from '../../../config';
 
 export default class AuthController {
   static async login(req, res, next) {
