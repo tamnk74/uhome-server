@@ -29,3 +29,10 @@ export const fileType = Object.freeze({
   IDENTITY_CARD_BEFORE: 'identity_card_before',
   IDENTITY_CARD_AFTER: 'identity_card_after',
 });
+
+export const idCardStatus = Object.freeze({
+  NOT_VERIFY: 0,
+  WAITING_VERIFY_CARD: 1,
+  VERIFIED: 2,
+  FAIL_VERIFIED: 3,
+});

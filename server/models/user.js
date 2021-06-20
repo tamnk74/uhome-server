@@ -50,6 +50,7 @@ class User extends BaseModel {
       'role',
       'verifiedAt',
       'avatar',
+      'idCardStatus',
     ];
   }
 }
@@ -102,8 +103,12 @@ User.init(
       defaultValue: 'USER',
     },
     status: {
-      type: Sequelize.ENUM(0, 1),
+      type: Sequelize.INTEGER,
       allowNull: true,
+      defaultValue: 0,
+    },
+    idCardStatus: {
+      type: Sequelize.INTEGER,
       defaultValue: 0,
     },
     verifiedAt: {
@@ -144,6 +149,7 @@ Category.belongsToMany(User, {
   through: 'user_category',
   foreignKey: 'categoryId',
 });
+UserProfile.belongsTo(User);
 
 User.prototype.toPayload = function toPayload(role = '') {
   return {

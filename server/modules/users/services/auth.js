@@ -8,6 +8,8 @@ import { status as userStatus, socialAccount } from '../../../constants';
 import { randomNumber } from '../../../helpers/Util';
 import UserProfile from '../../../models/userProfile';
 import Subscription from '../../../models/subscription';
+import IdentifyCard from '../../../models/identifyCard';
+import { fileSystemConfig } from '../../../config';
 
 export default class AuthService {
   static async authenticate({ phoneNumber = '', password }) {
@@ -28,10 +30,33 @@ export default class AuthService {
     };
   }
 
-  static getUserById(userId) {
-    return User.findByPk(userId, {
+  static async getUserById(userId) {
+    const user = await User.findByPk(userId, {
       attributes: User.getAttributes(),
+      include: [
+        {
+          model: UserProfile,
+          as: 'profile',
+        },
+        {
+          model: IdentifyCard,
+          attributes: ['id', 'idNum', 'dob', 'name', 'hometown', 'address'],
+        },
+      ],
     });
+
+    if (user.profile) {
+      const { identityCard } = user.profile;
+      identityCard.before = identityCard.before
+        ? `${fileSystemConfig.clout_front}/${identityCard.before}`
+        : null;
+      identityCard.after = identityCard.after
+        ? `${fileSystemConfig.clout_front}/${identityCard.after}`
+        : null;
+      user.profile.identityCard = identityCard;
+    }
+
+    return user;
   }
 
   static updateUser(userId, data) {
