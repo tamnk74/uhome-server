@@ -190,7 +190,6 @@ export default class Userervice {
         },
         {
           model: IdentifyCard,
-          as: 'profile',
           attributes: ['id', 'idNum', 'dob', 'name', 'hometown', 'address'],
         },
       ],
