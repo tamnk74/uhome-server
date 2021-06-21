@@ -35,4 +35,17 @@ jobs:
       - run: npm install
       - run: npm run lint
       - name: Build
-        run: npm build
+        run: npm run build
+  deploy:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Push to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: 112.78.4.141
+          username: root
+          password: p+8~b;3>>Z7U6JSY
+          script: cd u-home-server/ && git pull && docker-compose exec app npm run build &&  docker-compose exec app pm2 restart all
+
