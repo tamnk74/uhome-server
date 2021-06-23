@@ -33,6 +33,12 @@
       "eslint"
     ]
   },
+  "_moduleAliases": {
+    "@"      : ".",
+    "modules" : "./server/modules",
+    "server/config" : "./server/config",
+    "server/helpers" : "./server/helpers"
+  },
   "dependencies": {
     "@sentry/node": "^6.3.5",
     "aws-sdk": "^2.863.0",
@@ -52,6 +58,7 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.1.10",
     "express-validation": "^1.0.3",
+    "fast-json-stringify": "^2.7.6",
     "firebase-admin": "^9.5.0",
     "fs-extra": "^7.0.1",
     "google-auth-library": "^6.0.6",
@@ -64,9 +71,11 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "minio": "^7.0.18",
+    "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "mysql2": "^2.1.0",
+    "node-rsa": "^1.1.1",
     "node-schedule": "^2.0.0",
     "npm": "^6.14.7",
     "otplib": "^12.0.1",

@@ -4,6 +4,7 @@ import CategoryRouter from '../../modules/categories/routes';
 import AttchmentRouter from '../../modules/attachments/routes';
 import IssueRouter from '../../modules/issues/routes';
 import ChatRouter from '../../modules/chat/routes';
+import PaymentRouter from '../../modules/payment/routes';
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use('/', CategoryRouter);
 router.use('/', AttchmentRouter);
 router.use('/', IssueRouter);
 router.use('/', ChatRouter);
+router.use('/', PaymentRouter);
 
 export default router;

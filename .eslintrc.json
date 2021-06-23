@@ -1,4 +1,11 @@
 {
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  },
   "extends": ["airbnb-base", "plugin:prettier/recommended"],
   "env": {
     "node": true,
@@ -18,6 +25,7 @@
     "no-console": 0,
     "no-plusplus": 0,
     "import/prefer-default-export": 0,
+    "import/no-unresolved": [2, { "ignore": ["server/config", "server/helpers"] }],
     "no-unused-expressions": 0,
     "no-unused-vars": [
       "error",

@@ -1,3 +1,6 @@
+import fs from 'fs';
+import util from 'util';
+
 const { snakeCase, camelCase } = require('lodash');
 const Sequelize = require('sequelize');
 
@@ -155,3 +158,5 @@ export const distance = (lat1, lon1, lat2, lon2) => {
   const b = 2 * atan(sqrt(a), sqrt(1 - a));
   return R * b; // Km
 };
+
+export const readFile = util.promisify(fs.readFile);

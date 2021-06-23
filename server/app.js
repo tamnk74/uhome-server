@@ -1,3 +1,4 @@
+import 'module-alias/register';
 import Express from 'express';
 import Morgan from 'morgan';
 import passport from 'passport';
