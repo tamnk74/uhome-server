@@ -12,7 +12,7 @@ export class PaymentService {
       description: 'Thanh toan dich vu uhome qua momo',
     });
 
-    const res = await axios.post(momoConfig.requestPaymentUrl, {
+    const payment = await axios.post(momoConfig.requestPaymentUrl, {
       partnerCode: momoConfig.partnerCode,
       partnerRefId: momoConfig.partnerRefId,
       customerNumber: data.phoneNumber,
@@ -22,7 +22,19 @@ export class PaymentService {
       payType: 3,
       description: 'Thanh toan dich vu uhome qua momo',
     });
-    console.log(res.data);
+
+    const res = await axios.post(momoConfig.confirmPaymentUrl, {
+      partnerCode: momoConfig.partnerCode,
+      partnerRefId: momoConfig.partnerRefId,
+      transid: payment.transid,
+      customerNumber: data.phoneNumber,
+      appData: data.token,
+      hash: hashData,
+      version: 2.0,
+      payType: 3,
+      description: 'Thanh toan dich vu uhome qua momo',
+    });
+
     return res.data;
   }
 }
