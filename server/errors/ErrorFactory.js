@@ -1,49 +1,39 @@
+import httpStatus from 'http-status';
 import errors from './data';
-import ApiError from './ApiError';
-import { env } from '../config';
+import BadRequestError from './BadRequestError';
+import ForbidenError from './ForbidenError';
+import InternalServerError from './InternalServerError';
+import NotfoundError from './NotfoundError';
+import UnauthorizedError from './UnauthorizedError';
+import ValidationError from './ValidationError';
 
 class ErrorFactory {
-  getError = (code) => {
+  getError = (code = 'ERR-0500') => {
     const error = errors[code];
+    if (!error) {
+      return new InternalServerError({});
+    }
 
-    if (error) {
-      return new ApiError({
-        code,
-        ...error,
-      });
+    switch (error.status) {
+      case httpStatus.BAD_REQUEST:
+        return new BadRequestError({ code, detail: error.detail });
+      case httpStatus.FORBIDDEN:
+        return new ForbidenError({ code, detail: error.detail });
+      case httpStatus.NOT_FOUND:
+        return new NotfoundError({ code, detail: error.detail });
+      case httpStatus.UNAUTHORIZED:
+        return new UnauthorizedError({ code, detail: error.detail });
+      default:
+        return new InternalServerError({});
     }
-    if (env !== 'production') {
-      console.log(env, code);
-    }
-    return new ApiError({
-      ...errors['ERR-0500'],
-      code: 'ERR-0500',
-      detail: code || 'Internal Server Error',
-    });
   };
 
   getJoiErrors = (joiErrors = []) => {
-    if (env !== 'production') {
-      console.log(env, joiErrors);
-    }
-    return joiErrors.map((joiError) => {
-      const {
-        type,
-        context: { label: key },
-      } = joiError;
-      const code = `${key}.${type}`;
-      const error = errors[code];
-      if (error) {
-        return new ApiError(error);
-      }
-
-      // Handle undefined error
-      return new ApiError({
-        code: 'ERR-0422',
-        ...errors['ERR-0422'],
-        detail: joiError.message,
-      });
-    });
+    const errors = joiErrors.map((joiError) => ({
+      message: joiError.message,
+      field: joiError.context.key,
+    }));
+    return new ValidationError({ code: 'ERR-0422', errors });
   };
 }
 

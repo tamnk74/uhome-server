@@ -1,40 +1,42 @@
-import { Error as JSONAPIError } from 'jsonapi-serializer';
-import { ValidationError } from 'express-validation';
-import errorFactory from './ErrorFactory';
+import httpStatus from 'http-status';
+import { sentryConfig, env } from '../config';
+import InternalServerError from './InternalServerError';
+import BadRequestError from './BadRequestError';
+import ValidationError from './ValidationError';
+import ForbidenError from './ForbidenError';
+import NotfoundError from './NotfoundError';
+import UnauthorizedError from './UnauthorizedError';
 import ApiError from './ApiError';
-import { sentryConfig } from '../config';
+import errorFactory from './ErrorFactory';
 
 export const handleError = (err, req, res, next) => {
-  if (err instanceof ValidationError) {
-    return res.status(422).json(
-      new JSONAPIError(
-        err.errors.map((error) => ({
-          code: 'ERR-0422',
-          title: 'Invalid data',
-          detail: error.messages[0],
-        }))
-      )
-    );
+  switch (err.constructor) {
+    case BadRequestError:
+    case ValidationError:
+    case ForbidenError:
+    case NotfoundError:
+    case UnauthorizedError:
+    case ApiError:
+      break;
+    default:
+      err = errorFactory.getError(err.message);
+      break;
+  }
+  const status = err.status || httpStatus.INTERNAL_SERVER_ERROR;
+
+  const response = {
+    code: err.code,
+    message: err.message,
+    errors: err.errors || [],
+  };
+
+  if (env !== 'production') {
+    response.stack = err.stack;
   }
 
-  if (err instanceof ApiError) {
-    return res.status(err.status).send({
-      errors: [err],
-    });
-  }
-  if (Array.isArray(err) && err.length) {
-    return res.status(err[0].status).send({
-      errors: err,
-    });
-  }
-
-  const error = errorFactory.getError(err.message);
-  error.stack = err.stack;
-  if (error.status >= 500 && sentryConfig.Sentry.DSN) {
+  if (err instanceof InternalServerError || status === httpStatus.INTERNAL_SERVER_ERROR) {
     sentryConfig.Sentry.captureException(err);
-  } else {
-    console.error(err);
   }
 
-  return res.status(error.status).send(error);
+  return res.status(status).send(response);
 };
