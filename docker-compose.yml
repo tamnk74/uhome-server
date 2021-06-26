@@ -9,15 +9,15 @@ services:
       - NODE_ENV=development
       - DB_HOST=mysql
       - REDIS_HOST=redis
-      - MINIO_ACCESS_KEY=u-home-key
-      - MINIO_SECRET_KEY=u-home-secret
+    tty: true
     ports:
-      - '3000:3000'
+      - 3000:3000
     depends_on:
       - mysql
       - redis
     volumes:
       - .:/var/www
+      - '~/logs/:/.pm2/logs/'
     networks:
       - node-network
   mysql:
@@ -42,18 +42,6 @@ services:
       - ~/.docker/data/redis:/data
     networks:
       - node-network
-  # minio:
-  #   image: 'bitnami/minio:latest'
-  #   ports:
-  #     - '9000:9000'
-  #   volumes:
-  #     - '~/.docker/minio/data:/export'
-  #     - '~/.docker/minio/config:/root/.minio'
-  #   environment:
-  #     - MINIO_ACCESS_KEY=u-home-key
-  #     - MINIO_SECRET_KEY=u-home-secret
-  #   networks:
-  #     - node-network
 volumes:
   dbdata:
   node_modules:

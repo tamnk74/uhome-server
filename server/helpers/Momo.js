@@ -1,15 +1,26 @@
+import fs from 'fs';
 import { momoConfig } from '../config';
-import { readFile } from './Util';
 
 const NodeRSA = require('node-rsa');
-const fastJson = require('fast-json-stringify');
+const crypto = require('crypto');
 
 export class Momo {
-  static async ecryptRSA(data) {
-    const publicKey = await readFile(momoConfig.publicKeyFile);
+  static async encryptRSA(data) {
+    const publicKey = await fs.readFileSync(momoConfig.publicKeyFile, {
+      encoding: 'utf8',
+      flag: 'r',
+    });
     const key = new NodeRSA(publicKey, { encryptionScheme: 'pkcs1' });
-    const encryptData = key.encrypt(fastJson(data), 'base64');
+    const encryptData = key.encrypt(JSON.stringify(data), 'base64');
 
     return encryptData.toString('base64');
+  }
+
+  static createSignature(data) {
+    const rawSignature = Object.keys(data)
+      .map((key) => `${key}=${data[key]}`)
+      .join('&');
+
+    return crypto.createHmac('sha256', momoConfig.secretKey).update(rawSignature).digest('hex');
   }
 }

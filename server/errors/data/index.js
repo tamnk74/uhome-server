@@ -4,6 +4,7 @@ import issue from './issue.json';
 import common from './common.json';
 import joi from './joi.json';
 import chat from './chat.json';
+import payment from './payment.json';
 
 export default {
   ...joi,
@@ -12,4 +13,5 @@ export default {
   ...issue,
   ...attachment,
   ...chat,
+  ...payment,
 };

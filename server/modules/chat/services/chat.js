@@ -11,6 +11,7 @@ import { notificationQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
 import Attachment from '../../../models/attachment';
 import Rating from '../../../models/rating';
+import Payment from '../../../models/payment';
 
 export default class ChatService {
   static async create(user, data) {
@@ -274,7 +275,13 @@ export default class ChatService {
         status: issueStatus.DONE,
       }),
     ]);
-
+    await Payment.create({
+      receiveIssueId: supporter.id,
+      issueId: issue.id,
+      userId: Issue.createdBy,
+      total: supporter.cost,
+      totalCost: supporter.cost,
+    });
     await this.sendMesage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
 
     return rating;

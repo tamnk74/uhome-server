@@ -1,0 +1,12 @@
+{
+  "PAY-0001": {
+    "status": 400,
+    "title": "Request payment to momo failed",
+    "detail": "Request payment to momo failed"
+  },
+  "PAY-0002": {
+    "status": 400,
+    "title": "Failed to confirm momo payment",
+    "detail": "Failed to confirm momo payment"
+  }
+}
