@@ -34,10 +34,10 @@
     ]
   },
   "_moduleAliases": {
-    "@"      : ".",
-    "modules" : "./server/modules",
-    "server/config" : "./server/config",
-    "server/helpers" : "./server/helpers"
+    "@": ".",
+    "modules": "./server/modules",
+    "server/config": "./server/config",
+    "server/helpers": "./server/helpers"
   },
   "dependencies": {
     "@sentry/node": "^6.3.5",
@@ -62,7 +62,7 @@
     "firebase-admin": "^9.5.0",
     "fs-extra": "^7.0.1",
     "google-auth-library": "^6.0.6",
-    "http-status": "^1.4.2",
+    "http-status": "^1.5.0",
     "i18n": "^0.13.2",
     "install": "^0.13.0",
     "ioredis": "^4.23.0",
