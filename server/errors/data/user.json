@@ -62,5 +62,9 @@
   "RSPW-0001": {
     "status": 400,
     "detail": "The phone number doesn't exist"
+  },
+  "PW-0410": {
+    "status": 400,
+    "detail": "Current password is invalid"
   }
 }

@@ -21,6 +21,7 @@ import {
   phoneNumberSchema,
   refreshTokenSchema,
   latestLocationSchema,
+  updatePasswordSchema,
 } from '../schema';
 
 import { verifyUser } from '../middlewares';
@@ -69,5 +70,9 @@ router.patch('/forgot-password', validator(resetPasswordSchema), AuthController.
 router
   .route('/me/latest-location')
   .put(auth, validator(latestLocationSchema), UserController.storeLatestLocation);
+
+router
+  .route('/me/password')
+  .put(auth, validator(updatePasswordSchema), UserController.updatePassword);
 
 export default router;
