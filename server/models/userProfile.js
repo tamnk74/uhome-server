@@ -35,6 +35,9 @@ UserProfile.init(
     yearExperience: {
       type: Sequelize.DataTypes.INTEGER,
     },
+    accountBalance: {
+      type: Sequelize.DataTypes.DECIMAL(12),
+    },
     createdAt: {
       defaultValue: Sequelize.NOW,
       type: Sequelize.DATE,
