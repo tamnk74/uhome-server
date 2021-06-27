@@ -250,4 +250,23 @@ export default class Userervice {
       },
     });
   }
+
+  static async updatePassword({ userId, data }) {
+    const { currentPassword, password } = data;
+    const user = await User.findByPk(userId);
+    const isValidCurrentPassword = user && (await user.comparePassword(currentPassword));
+
+    if (!isValidCurrentPassword) {
+      throw new Error('PW-0410');
+    }
+
+    return User.update(
+      { password },
+      {
+        where: {
+          id: userId,
+        },
+      }
+    );
+  }
 }
