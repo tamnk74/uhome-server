@@ -2,25 +2,25 @@
   "CHAT-0404": {
     "status": 404,
     "error": "Not found",
-    "tile": "Channel not found",
+    "title": "Channel not found",
     "detail": "Channel not found"
   },
   "CHAT-0405": {
     "status": 400,
     "error": "Bad Request",
-    "tile": "Status of hotfix is invalid",
+    "title": "Status of hotfix is invalid",
     "detail": "Status of hotfix is invalid"
   },
   "CHAT-0103": {
     "status": 400,
     "error": "Bad Request",
-    "tile": "Action type is not allow",
+    "title": "Action type is not allow",
     "detail": "Action type is not allow"
   },
   "CHAT-0203": {
     "status": 403,
     "error": "Bad Request",
-    "tile": "Action is not allow",
+    "title": "Action is not allow",
     "detail": "Action is not allow"
   }
 }
