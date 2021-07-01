@@ -1,4 +1,6 @@
 import Sequelize from 'sequelize';
+import uuid from 'uuid';
+import { currencies } from 'constants';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import ReceiveIssue from './receiveIssue';
@@ -59,6 +61,11 @@ Payment.init(
     table: 'payments',
   }
 );
+
+Payment.beforeCreate((payment) => {
+  payment.id = uuid.v4();
+  payment.currency = payment.currency || currencies.VND;
+});
 
 Payment.belongsTo(ReceiveIssue);
 ReceiveIssue.hasOne(Payment);
