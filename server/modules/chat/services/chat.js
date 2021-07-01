@@ -5,7 +5,13 @@ import ChatChannel from '../../../models/chatChannel';
 import User from '../../../models/user';
 import ChatUser from '../../../models/chatUser';
 import ReceiveIssue from '../../../models/receiveIssue';
-import { commandMessage, issueStatus, command } from '../../../constants';
+import {
+  commandMessage,
+  issueStatus,
+  command,
+  currencies,
+  paymentStatus,
+} from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
@@ -281,6 +287,8 @@ export default class ChatService {
       userId: issue.createdBy,
       total: supporter.cost,
       totalCost: supporter.cost,
+      currency: currencies.VND,
+      status: paymentStatus.OPEN,
     });
     await this.sendMesage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
 

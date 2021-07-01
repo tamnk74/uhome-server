@@ -6,3 +6,13 @@ export const httpError = Object.freeze({
   422: 'Unprocessable Entity',
   500: 'Internal Server Error',
 });
+
+export const paymentStatus = Object.freeze({
+  OPEN: 'OPEN',
+  PAID: 'PAID',
+});
+
+export const currencies = Object.freeze({
+  VND: 'VND',
+  USD: 'USD',
+});

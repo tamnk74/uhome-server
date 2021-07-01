@@ -29,7 +29,7 @@ export const handleError = (err, req, res, next) => {
     message: err.message,
     errors: err.errors || [],
   };
-
+  console.error(err);
   if (env !== 'production') {
     response.stack = err.stack;
   }
