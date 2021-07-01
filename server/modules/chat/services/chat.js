@@ -278,7 +278,7 @@ export default class ChatService {
     await Payment.create({
       receiveIssueId: supporter.id,
       issueId: issue.id,
-      userId: Issue.createdBy,
+      userId: issue.createdBy,
       total: supporter.cost,
       totalCost: supporter.cost,
     });
