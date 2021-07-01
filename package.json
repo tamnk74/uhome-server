@@ -34,10 +34,10 @@
     ]
   },
   "_moduleAliases": {
-    "@"      : ".",
-    "modules" : "./server/modules",
-    "server/config" : "./server/config",
-    "server/helpers" : "./server/helpers"
+    "@": ".",
+    "modules": "./server/modules",
+    "server/config": "./server/config",
+    "server/helpers": "./server/helpers"
   },
   "dependencies": {
     "@sentry/node": "^6.3.5",
@@ -58,6 +58,7 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.1.10",
     "express-validation": "^1.0.3",
+    "excel4node": "^1.7.2",
     "fast-json-stringify": "^2.7.6",
     "firebase-admin": "^9.5.0",
     "fs-extra": "^7.0.1",
