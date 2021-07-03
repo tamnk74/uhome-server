@@ -11,7 +11,7 @@ class ErrorFactory {
   getError = (code = 'ERR-0500') => {
     const error = errors[code];
     if (!error) {
-      return new InternalServerError({});
+      return new InternalServerError({ detail: code });
     }
 
     switch (error.status) {
@@ -24,7 +24,9 @@ class ErrorFactory {
       case httpStatus.UNAUTHORIZED:
         return new UnauthorizedError({ code, detail: error.detail });
       default:
-        return new InternalServerError({});
+        return new InternalServerError({
+          detail: error.detail,
+        });
     }
   };
 

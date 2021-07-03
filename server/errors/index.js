@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { sentryConfig, env } from '../config';
+import { sentryConfig } from '../config';
 import InternalServerError from './InternalServerError';
 import BadRequestError from './BadRequestError';
 import ValidationError from './ValidationError';
@@ -10,6 +10,7 @@ import ApiError from './ApiError';
 import errorFactory from './ErrorFactory';
 
 export const handleError = (err, req, res, next) => {
+  let error = null;
   switch (err.constructor) {
     case BadRequestError:
     case ValidationError:
@@ -17,25 +18,26 @@ export const handleError = (err, req, res, next) => {
     case NotfoundError:
     case UnauthorizedError:
     case ApiError:
+      error = err;
       break;
     default:
-      err = errorFactory.getError(err.message);
+      error = errorFactory.getError(err.message);
       break;
   }
-  const status = err.status || httpStatus.INTERNAL_SERVER_ERROR;
+
+  const status = error.status || httpStatus.INTERNAL_SERVER_ERROR;
 
   const response = {
-    code: err.code,
-    message: err.message,
-    errors: err.errors || [],
+    code: error.code,
+    message: error.message,
+    errors: error.errors || [error.detail],
   };
-  console.error(err);
-  if (env !== 'production') {
-    response.stack = err.stack;
-  }
 
-  if (err instanceof InternalServerError || status === httpStatus.INTERNAL_SERVER_ERROR) {
+  if (error instanceof InternalServerError || status === httpStatus.INTERNAL_SERVER_ERROR) {
+    console.error(err);
     sentryConfig.Sentry.captureException(err);
+  } else {
+    console.info(err);
   }
 
   return res.status(status).send(response);
