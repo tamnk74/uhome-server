@@ -22,5 +22,9 @@
   "ERR-0500": {
     "status": 500,
     "detail": "Internal Server Error"
+  },
+  "ERR-0410": {
+    "status": 403,
+    "detail": "Do not have session role"
   }
 }

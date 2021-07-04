@@ -269,4 +269,21 @@ export default class Userervice {
       }
     );
   }
+
+  static async changeSesionRole({ user, role }) {
+    await User.update(
+      {
+        sessionRole: role,
+      },
+      {
+        where: {
+          id: user.id,
+        },
+      }
+    );
+
+    user.seesionRole = role;
+
+    return user;
+  }
 }

@@ -16,15 +16,16 @@ class ErrorFactory {
 
     switch (error.status) {
       case httpStatus.BAD_REQUEST:
-        return new BadRequestError({ code, detail: error.detail });
+        return new BadRequestError({ code, message: error.detail, detail: error.detail });
       case httpStatus.FORBIDDEN:
-        return new ForbidenError({ code, detail: error.detail });
+        return new ForbidenError({ code, message: error.detail, detail: error.detail });
       case httpStatus.NOT_FOUND:
-        return new NotfoundError({ code, detail: error.detail });
+        return new NotfoundError({ code, message: error.detail, detail: error.detail });
       case httpStatus.UNAUTHORIZED:
-        return new UnauthorizedError({ code, detail: error.detail });
+        return new UnauthorizedError({ code, message: error.detail, detail: error.detail });
       default:
         return new InternalServerError({
+          message: error.detail,
           detail: error.detail,
         });
     }

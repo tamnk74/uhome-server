@@ -97,7 +97,7 @@ export default class UserController {
       await UserService.subscribe({
         userId: req.user.id,
         token: req.body.deviceToken,
-        role: req.user.role,
+        role: req.user.sessionRole,
       });
       return res.status(204).json({});
     } catch (e) {
@@ -146,6 +146,19 @@ export default class UserController {
         data: req.body,
       });
       return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async changeSessionRole(req, res, next) {
+    try {
+      const user = await UserService.changeSesionRole({
+        user: req.user,
+        role: req.body.role,
+      });
+
+      return res.status(200).json(objectToSnake(user));
     } catch (e) {
       return next(e);
     }
