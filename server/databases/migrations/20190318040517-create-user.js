@@ -42,7 +42,7 @@ module.exports = {
       status: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        default: 0,
+        defaultValue: 0,
       },
       created_at: {
         type: Sequelize.DATE,

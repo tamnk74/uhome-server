@@ -89,16 +89,6 @@ export default class AuthController {
     }
   }
 
-  static async authorize(req, res, next) {
-    try {
-      const auth = await AuthService.authorize(req.body);
-
-      return res.status(200).json(objectToSnake(auth));
-    } catch (e) {
-      return next(e);
-    }
-  }
-
   static async refreshToken(req, res, next) {
     try {
       const auth = await AuthService.refreshToken({

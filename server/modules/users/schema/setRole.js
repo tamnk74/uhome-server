@@ -6,5 +6,4 @@ export const setRoleSchema = Joi.object().keys({
   role: Joi.string()
     .valid(...Object.values(userRoles))
     .required(),
-  code: Joi.string().max(1024).required(),
 });

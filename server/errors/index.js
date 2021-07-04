@@ -30,11 +30,10 @@ export const handleError = (err, req, res, next) => {
   const response = {
     code: error.code,
     message: error.message,
-    errors: error.errors || [error.detail],
+    errors: error.errors || [],
   };
 
   if (error instanceof InternalServerError || status === httpStatus.INTERNAL_SERVER_ERROR) {
-    console.error(err);
     sentryConfig.Sentry.captureException(err);
   } else {
     console.info(err);

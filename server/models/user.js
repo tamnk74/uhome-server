@@ -51,6 +51,7 @@ class User extends BaseModel {
       'verifiedAt',
       'avatar',
       'idCardStatus',
+      'sessionRole',
     ];
   }
 }
@@ -102,6 +103,11 @@ User.init(
       allowNull: true,
       defaultValue: 'USER',
     },
+    sessionRole: {
+      type: Sequelize.ENUM('CUSTOMER', 'WORKER'),
+      allowNull: true,
+      defaultValue: 'CUSTOMER',
+    },
     status: {
       type: Sequelize.INTEGER,
       allowNull: true,
@@ -151,13 +157,12 @@ Category.belongsToMany(User, {
 });
 UserProfile.belongsTo(User);
 
-User.prototype.toPayload = function toPayload(role = '') {
+User.prototype.toPayload = function toPayload() {
   return {
     id: this.dataValues.id,
     phoneNumber: this.dataValues.phoneNumber,
     name: this.dataValues.name,
     status: this.dataValues.status,
-    role,
   };
 };
 

@@ -40,7 +40,9 @@ router.route('/logout').post(auth, AuthController.logout);
 router.route('/auth/facebook').post(validator(loginFbSchema), AuthController.loginFb);
 router.route('/auth/zalo').post(validator(loginZaloSchema), AuthController.loginZalo);
 router.route('/register').post(validator(registerSchema), AuthController.register);
-router.route('/auth/token').post(validator(setRoleSchema), AuthController.authorize);
+router
+  .route('/me/session-roles')
+  .put(auth, validator(setRoleSchema), UserController.changeSessionRole);
 router.route('/refresh-token').post(validator(refreshTokenSchema), AuthController.refreshToken);
 router.route('/me').get(auth, AuthController.userInfo);
 router.route('/me').patch(auth, validator(updateUserSchema), AuthController.updateUser);

@@ -3,7 +3,7 @@ module.exports = {
     return queryInterface.addColumn('subscriptions', 'role', {
       type: Sequelize.ENUM('CUSTOMER', 'WORKER'),
       after: 'user_id',
-      default: 'CUSTOMER',
+      defaultValue: 'CUSTOMER',
     });
   },
 
