@@ -8,6 +8,12 @@ class IdentifyCard extends BaseModel {}
 
 IdentifyCard.init(
   {
+    id: {
+      allowNull: false,
+      primaryKey: true,
+      type: Sequelize.DataTypes.UUID,
+      defaultValue: Sequelize.UUIDV4,
+    },
     userId: {
       type: Sequelize.DataTypes.UUID,
       allowNull: false,
@@ -35,6 +41,17 @@ IdentifyCard.init(
     raw: {
       type: Sequelize.DataTypes.JSON,
       allowNull: false,
+    },
+    createdAt: {
+      defaultValue: Sequelize.NOW,
+      type: Sequelize.DATE,
+    },
+    updatedAt: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.NOW,
+    },
+    deletedAt: {
+      type: Sequelize.DATE,
     },
   },
   {
