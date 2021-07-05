@@ -37,6 +37,7 @@ UserProfile.init(
     },
     accountBalance: {
       type: Sequelize.DataTypes.DECIMAL(12),
+      defaultValue: 0,
     },
     createdAt: {
       defaultValue: Sequelize.NOW,
