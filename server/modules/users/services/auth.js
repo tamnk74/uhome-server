@@ -207,10 +207,16 @@ export default class AuthService {
       );
     }
 
-    const code = await JWT.generateAuthCode(user.id);
+    const [accessToken, refreshToken] = await Promise.all([
+      JWT.generateToken(user.toPayload()),
+      JWT.generateRefreshToken(user.id),
+    ]);
+    await RedisService.saveAccessToken(user.id, accessToken);
 
     return {
-      code,
+      accessToken,
+      refreshToken,
+      tokenType: 'Bearer',
     };
   }
 
@@ -240,10 +246,16 @@ export default class AuthService {
       );
     }
 
-    const code = await JWT.generateAuthCode(user.id);
+    const [accessToken, refreshToken] = await Promise.all([
+      JWT.generateToken(user.toPayload()),
+      JWT.generateRefreshToken(user.id),
+    ]);
+    await RedisService.saveAccessToken(user.id, accessToken);
 
     return {
-      code,
+      accessToken,
+      refreshToken,
+      tokenType: 'Bearer',
     };
   }
 
