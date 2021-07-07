@@ -14,7 +14,7 @@ export const verifyChannel = async (req, res, next) => {
     });
 
     if (!chatChannel) {
-      throw errorFactory.getError('CHAT-0001');
+      throw errorFactory.getError('CHAT-0404');
     }
 
     req.chatChannel = chatChannel;
