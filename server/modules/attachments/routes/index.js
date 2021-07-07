@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 
 import AttachmentController from '../controllers/attachment';
-import { auth } from '../../../middlewares';
+import { auth, active } from '../../../middlewares';
 import validAttachment from '../middlewares/valid_attachment';
 
 const router = Router();
@@ -15,6 +15,6 @@ const multipleUpload = multer({ storage }).array('files');
 
 router
   .route('/attachments')
-  .post(auth, multipleUpload, validAttachment, AttachmentController.store);
+  .post(auth, active, multipleUpload, validAttachment, AttachmentController.store);
 
 export default router;

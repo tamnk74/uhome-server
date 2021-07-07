@@ -4,7 +4,7 @@ import multer from 'multer';
 import AuthController from '../controllers/auth';
 import UserController from '../controllers/user';
 
-import { auth, validator } from '../../../middlewares';
+import { auth, validator, active } from '../../../middlewares';
 import validFile from '../middlewares/validFile';
 import {
   loginSchema,
@@ -42,24 +42,28 @@ router.route('/auth/zalo').post(validator(loginZaloSchema), AuthController.login
 router.route('/register').post(validator(registerSchema), AuthController.register);
 router
   .route('/me/session-roles')
-  .put(auth, validator(setRoleSchema), UserController.changeSessionRole);
+  .put(auth, active, validator(setRoleSchema), UserController.changeSessionRole);
 router.route('/refresh-token').post(validator(refreshTokenSchema), AuthController.refreshToken);
 router.route('/me').get(auth, AuthController.userInfo);
-router.route('/me').patch(auth, validator(updateUserSchema), AuthController.updateUser);
+router.route('/me').patch(auth, active, validator(updateUserSchema), AuthController.updateUser);
 router.route('/users/:userId/verify').patch(validator(verifyCodeSchema), AuthController.verifyCode);
-router.route('/me/issues').get(auth, UserController.getIssues);
-router.route('/users/:id/receive-issues').get(auth, verifyUser, UserController.getReceiveIssues);
-router.route('/users/:userId').get(auth, UserController.getUserProfile);
-router.route('/me/skills').post(auth, validator(updateSkillsSchema), UserController.skills);
+router.route('/me/issues').get(auth, active, UserController.getIssues);
+router
+  .route('/users/:id/receive-issues')
+  .get(auth, active, verifyUser, UserController.getReceiveIssues);
+router.route('/users/:userId').get(auth, active, UserController.getUserProfile);
+router.route('/me/skills').post(auth, active, validator(updateSkillsSchema), UserController.skills);
 
 router
   .route('/me/upload-file')
-  .post(auth, upload, validFile, validator(uploadFileschema), UserController.uploadFile);
+  .post(auth, active, upload, validFile, validator(uploadFileschema), UserController.uploadFile);
 
-router.route('/me/subscribe').post(auth, validator(subscriptionSchema), UserController.subscribe);
+router
+  .route('/me/subscribe')
+  .post(auth, active, validator(subscriptionSchema), UserController.subscribe);
 router
   .route('/me/unsubscribe')
-  .post(auth, validator(subscriptionSchema), UserController.unsubscribe);
+  .post(auth, active, validator(subscriptionSchema), UserController.unsubscribe);
 
 router.post('/forgot-password', validator(phoneNumberSchema), AuthController.resetPassword);
 router.post(
@@ -71,10 +75,10 @@ router.patch('/forgot-password', validator(resetPasswordSchema), AuthController.
 
 router
   .route('/me/latest-location')
-  .put(auth, validator(latestLocationSchema), UserController.storeLatestLocation);
+  .put(auth, active, validator(latestLocationSchema), UserController.storeLatestLocation);
 
 router
   .route('/me/password')
-  .put(auth, validator(updatePasswordSchema), UserController.updatePassword);
+  .put(auth, active, validator(updatePasswordSchema), UserController.updatePassword);
 
 export default router;

@@ -1,4 +1,5 @@
 import auth from './auth';
 import validator from './validator';
+import active from './active';
 
-export { auth, validator };
+export { auth, validator, active };

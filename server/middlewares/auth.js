@@ -1,6 +1,6 @@
 import passport from 'passport';
 import errorFactory from '../errors/ErrorFactory';
-import { acl, status } from '../constants';
+import { acl } from '../constants';
 import User from '../models/user';
 
 export default (req, res, next) => {
@@ -22,10 +22,6 @@ export default (req, res, next) => {
 
     if (permissions && !permissions.includes(sessionRole)) {
       return next(errorFactory.getError('ERR-0403'));
-    }
-
-    if (user.status === status.IN_ACTIVE) {
-      return next(errorFactory.getError('USER-0001'));
     }
 
     req.user = user;
