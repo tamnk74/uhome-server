@@ -2,10 +2,10 @@ import httpStatus from 'http-status';
 import ApiError from './ApiError';
 
 class ForbiddenError extends ApiError {
-  constructor({ message = httpStatus[httpStatus.FORBIDDEN], detail = '' }) {
+  constructor({ code = 'ER-0403', message = httpStatus[httpStatus.FORBIDDEN], detail = '' }) {
     super({
       message,
-      code: 'ER-0403',
+      code,
       detail,
       status: httpStatus.FORBIDDEN,
       title: httpStatus[httpStatus.FORBIDDEN],
