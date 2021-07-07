@@ -2,10 +2,10 @@ import httpStatus from 'http-status';
 import ApiError from './ApiError';
 
 class UnauthorizedError extends ApiError {
-  constructor({ message = httpStatus[httpStatus.UNAUTHORIZED], detail = '' }) {
+  constructor({ code = 'ER-0401', message = httpStatus[httpStatus.UNAUTHORIZED], detail = '' }) {
     super({
       message,
-      code: 'ER-0401',
+      code,
       detail,
       status: httpStatus.UNAUTHORIZED,
       title: httpStatus[httpStatus.UNAUTHORIZED],
