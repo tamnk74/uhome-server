@@ -1,4 +1,5 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
+import { Op } from 'sequelize';
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
 import ChatChannel from '../../../models/chatChannel';
@@ -18,6 +19,8 @@ import Issue from '../../../models/issue';
 import Attachment from '../../../models/attachment';
 import Rating from '../../../models/rating';
 import Payment from '../../../models/payment';
+import ReceiveIssueComment from '../../../models/receiveIssueComment';
+import IssueMaterial from '../../../models/issueMaterial';
 
 export default class ChatService {
   static async create(user, data) {
@@ -133,6 +136,31 @@ export default class ChatService {
   }
 
   static async requestCommand(type, chatChannel, user) {
+    if (type === command.REQUEST_ACCEPTANCE) {
+      await Promise.all([
+        ReceiveIssue.update(
+          {
+            status: issueStatus.WAITING_VERIFY,
+          },
+          {
+            where: {
+              issueId: chatChannel.issue.id,
+            },
+          }
+        ),
+        Issue.update(
+          {
+            status: issueStatus.WAITING_VERIFY,
+          },
+          {
+            where: {
+              id: chatChannel.issue.id,
+            },
+          }
+        ),
+      ]);
+    }
+
     await this.sendMesage(type, chatChannel, user);
   }
 
@@ -220,7 +248,39 @@ export default class ChatService {
 
   static async approveMaterialCost({ chatChannel, user, data }) {
     data.totalCost = +data.totalCost;
-    await this.sendMesage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data);
+
+    const { issue } = chatChannel;
+    const member = await ChatMember.findOne({
+      where: {
+        channelId: chatChannel.id,
+        userId: {
+          [Op.ne]: user.id,
+        },
+      },
+    });
+
+    await Promise.all([
+      ReceiveIssue.update(
+        {
+          cost: issue.cost + data.totalCost,
+        },
+        {
+          where: {
+            issueId: issue.id,
+            userId: member ? member.userId : null,
+          },
+        }
+      ),
+      member
+        ? IssueMaterial.create({
+            userId: member.userId,
+            issueId: issue.id,
+            cost: data.totalCost,
+            material: data.materials,
+          })
+        : null,
+      this.sendMesage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data),
+    ]);
   }
 
   static async trakingProgress({ chatChannel, user, data }) {
@@ -279,6 +339,11 @@ export default class ChatService {
       ),
       supporter.update({
         status: issueStatus.DONE,
+      }),
+      ReceiveIssueComment.create({
+        userId: user.id,
+        receiveIssueId: supporter.id,
+        comment,
       }),
     ]);
     await Payment.create({
