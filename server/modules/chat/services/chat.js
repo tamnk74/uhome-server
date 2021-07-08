@@ -340,11 +340,13 @@ export default class ChatService {
       supporter.update({
         status: issueStatus.DONE,
       }),
-      ReceiveIssueComment.create({
-        userId: user.id,
-        receiveIssueId: supporter.id,
-        comment,
-      }),
+      comment
+        ? ReceiveIssueComment.create({
+            userId: user.id,
+            receiveIssueId: supporter.id,
+            comment,
+          })
+        : null,
     ]);
     await Payment.create({
       receiveIssueId: supporter.id,
