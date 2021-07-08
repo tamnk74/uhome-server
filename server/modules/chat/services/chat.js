@@ -344,7 +344,7 @@ export default class ChatService {
         ? ReceiveIssueComment.create({
             userId: user.id,
             receiveIssueId: supporter.id,
-            comment,
+            content: comment,
           })
         : null,
     ]);
