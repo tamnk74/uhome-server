@@ -282,7 +282,7 @@ export default class Userervice {
       }
     );
 
-    user.seesionRole = role;
+    user.sessionRole = role;
 
     return user;
   }
