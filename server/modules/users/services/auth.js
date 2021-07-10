@@ -98,17 +98,20 @@ export default class AuthService {
       JWT.verifyRefreshToken(refreshToken),
       JWT.decodeToken(accessToken),
     ]);
+
     if (!jwtdata || !jwtdata.payload) {
       throw errorFactory.getError('LOG-0008');
     }
     const user = await User.findByPk(userId);
-    const [newAccessToken] = await Promise.all([
+    const [newAccessToken, newRefreshToken] = await Promise.all([
       JWT.generateToken(user.toPayload(jwtdata.payload.role)),
+      JWT.generateRefreshToken(user.id),
     ]);
     await RedisService.saveAccessToken(user.id, newAccessToken);
     return {
       accessToken: newAccessToken,
       tokenType: 'Bearer',
+      refreshToken: newRefreshToken,
     };
   }
 
