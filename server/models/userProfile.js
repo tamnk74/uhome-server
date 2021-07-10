@@ -19,6 +19,10 @@ UserProfile.init(
       type: Sequelize.DataTypes.DECIMAL(12),
       defaultValue: 0,
     },
+    totalRating: {
+      type: Sequelize.DataTypes.INTEGER,
+      defaultValue: 0,
+    },
     totalIssueCompleted: {
       type: Sequelize.DataTypes.INTEGER,
       defaultValue: 0,

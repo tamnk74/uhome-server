@@ -21,6 +21,7 @@ import Rating from '../../../models/rating';
 import Payment from '../../../models/payment';
 import ReceiveIssueComment from '../../../models/receiveIssueComment';
 import IssueMaterial from '../../../models/issueMaterial';
+import UserProfile from '../../../models/userProfile';
 
 export default class ChatService {
   static async create(user, data) {
@@ -314,11 +315,20 @@ export default class ChatService {
   static async setRating({ chatChannel, user, data }) {
     const { issue } = chatChannel;
     const { rate, comment = '', messageSid } = data;
-    const supporter = await ReceiveIssue.findOne({
-      where: {
-        issueId: issue.id,
-      },
-    });
+    const [supporter, profile] = await Promise.all([
+      ReceiveIssue.findOne({
+        where: {
+          issueId: issue.id,
+        },
+      }),
+      UserProfile.findOne({
+        where: {
+          userId: user.id,
+        },
+      }),
+    ]);
+    const totalRating = profile.totalRating + rate;
+    const totalIssueCompleted = profile.totalIssueCompleted + 1;
 
     const [rating] = await Promise.all([
       Rating.create({
@@ -347,6 +357,18 @@ export default class ChatService {
             content: comment,
           })
         : null,
+      UserProfile.update(
+        {
+          totalIssueCompleted,
+          totalRating,
+          reliability: Math.round(totalRating / totalIssueCompleted, -1),
+        },
+        {
+          where: {
+            id: profile.id,
+          },
+        }
+      ),
     ]);
     await Payment.create({
       receiveIssueId: supporter.id,
