@@ -227,15 +227,20 @@ export default class IssueService {
       isContinuing: data.isContinuing || false,
     };
     /* eslint-disable no-undef */
+    const message = __(commandMessage[command]);
     const messageData = {
       from: chatMember.identity,
       channelSid: chatChannel.channelSid,
       type: 'action',
-      body: __(commandMessage[command]),
+      body: message,
       attributes: JSON.stringify(objectToSnake(messageAttributes)),
     };
 
     await twilioClient.sendMessage(chatChannel.channelSid, messageData);
-    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
+    notificationQueue.add('chat_notification', {
+      chatChannelId: chatChannel.id,
+      actorId: user.id,
+      message,
+    });
   }
 }

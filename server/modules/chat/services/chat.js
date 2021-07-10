@@ -189,12 +189,14 @@ export default class ChatService {
       actor: actor.toJSON(),
       isContinuing: data.isContinuing || false,
     };
+
     /* eslint-disable no-undef */
+    const message = __(commandMessage[commandName]);
     const messageData = {
       from: chatMember.identity,
       channelSid: chatChannel.channelSid,
       type: 'action',
-      body: __(commandMessage[commandName]),
+      body: message,
       attributes: JSON.stringify(objectToSnake(messageAttributes)),
     };
 
@@ -204,7 +206,11 @@ export default class ChatService {
       await twilioClient.sendMessage(chatChannel.channelSid, messageData);
     }
 
-    notificationQueue.add('chat_notification', { chatChannelId: chatChannel.id, actorId: user.id });
+    notificationQueue.add('chat_notification', {
+      chatChannelId: chatChannel.id,
+      actorId: user.id,
+      message,
+    });
   }
 
   static async approveEstimateTime({ chatChannel, user, data }) {
