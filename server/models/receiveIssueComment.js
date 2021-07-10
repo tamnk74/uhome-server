@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import ReceiveIssue from './receiveIssue';
@@ -45,5 +46,9 @@ ReceiveIssueComment.init(
 ReceiveIssueComment.belongsTo(ReceiveIssue);
 ReceiveIssue.hasMany(ReceiveIssueComment);
 ReceiveIssueComment.belongsTo(User);
+
+ReceiveIssueComment.beforeCreate((instance) => {
+  instance.id = uuid.v4();
+});
 
 module.exports = ReceiveIssueComment;

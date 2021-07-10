@@ -3,7 +3,7 @@ import ApiError from './ApiError';
 
 class InternalServerError extends ApiError {
   constructor({
-    code = 'ER-0500',
+    code = 'ERR-0500',
     message = httpStatus[httpStatus.INTERNAL_SERVER_ERROR],
     detail = '',
   }) {

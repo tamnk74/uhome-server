@@ -4,7 +4,7 @@ import ApiError from './ApiError';
 class ValidationError extends ApiError {
   constructor({
     message = httpStatus[httpStatus.UNPROCESSABLE_ENTITY],
-    code = 'ER-0422',
+    code = 'ERR-0422',
     detail = '',
     errors = [],
   }) {
