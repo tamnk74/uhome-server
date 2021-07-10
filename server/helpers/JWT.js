@@ -1,6 +1,7 @@
 import JsonWebToken from 'jsonwebtoken';
 import { authenticator } from 'otplib';
 import Redis from './Redis';
+import errorFactory from '../errors/ErrorFactory';
 
 import { jwtExpireTime, jwtSecretKey, jwtRefreshKey, jwtRefreshExpireTime } from '../config';
 
@@ -48,7 +49,11 @@ export default class JWT {
   }
 
   static verifyRefreshToken(refreshToken) {
-    return JsonWebToken.verify(refreshToken, jwtRefreshKey);
+    try {
+      return JsonWebToken.verify(refreshToken, jwtRefreshKey);
+    } catch (error) {
+      throw errorFactory.getError('ERR-0401');
+    }
   }
 
   static verifyAccessToken(accessToken) {
