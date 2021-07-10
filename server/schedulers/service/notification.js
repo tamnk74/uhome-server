@@ -221,7 +221,7 @@ export default class NotificationService {
 
   static async pushChatNotification(job, done) {
     try {
-      const { chatChannelId, actorId } = job.data;
+      const { chatChannelId, actorId, message = '' } = job.data;
       const [chatChannel, chatMembers, actor] = await Promise.all([
         ChatChannel.findByPk(chatChannelId, {
           include: [
@@ -256,8 +256,8 @@ export default class NotificationService {
       });
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: `${chatChannel.channelSid}-${chatChannel.friendlyName}`,
-        body: `${chatChannel.channelSid}-${chatChannel.friendlyName}`,
+        title: `${issue.title}`,
+        body: message,
       };
 
       const data = {
@@ -269,7 +269,6 @@ export default class NotificationService {
       await Promise.all([tokens.length ? Fcm.sendNotification(tokens, data, notification) : null]);
       return done();
     } catch (error) {
-      console.log(error);
       done(error);
     }
   }
