@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import ApiError from './ApiError';
 
 class NotFoundError extends ApiError {
-  constructor({ message = httpStatus[httpStatus.NOT_FOUND], code = 'ER-0404', detail = '' }) {
+  constructor({ message = httpStatus[httpStatus.NOT_FOUND], code = 'ERR-0404', detail = '' }) {
     super({
       message,
       code,
