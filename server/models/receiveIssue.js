@@ -31,6 +31,10 @@ ReceiveIssue.init(
     cost: {
       type: Sequelize.INTEGER,
     },
+    rating: {
+      type: Sequelize.DECIMAL(2),
+      defaultValue: 0,
+    },
     reason: {
       type: Sequelize.STRING(2048),
     },

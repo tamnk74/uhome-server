@@ -17,7 +17,6 @@ import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
 import Attachment from '../../../models/attachment';
-import Rating from '../../../models/rating';
 import Payment from '../../../models/payment';
 import ReceiveIssueComment from '../../../models/receiveIssueComment';
 import IssueMaterial from '../../../models/issueMaterial';
@@ -336,13 +335,7 @@ export default class ChatService {
     const totalRating = profile.totalRating + rate;
     const totalIssueCompleted = profile.totalIssueCompleted + 1;
 
-    const [rating] = await Promise.all([
-      Rating.create({
-        rate,
-        comment,
-        issueId: issue.id,
-        userId: supporter.userId,
-      }),
+    await Promise.all([
       Issue.update(
         {
           status: issueStatus.DONE,
@@ -355,6 +348,7 @@ export default class ChatService {
       ),
       supporter.update({
         status: issueStatus.DONE,
+        rating: rate,
       }),
       comment
         ? ReceiveIssueComment.create({
@@ -386,8 +380,6 @@ export default class ChatService {
       status: paymentStatus.OPEN,
     });
     await this.sendMesage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
-
-    return rating;
   }
 
   static async continueChatting({ chatChannel, user, data }) {

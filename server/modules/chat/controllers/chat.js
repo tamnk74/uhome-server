@@ -70,12 +70,12 @@ export default class ChatController {
 
   static async setRating(req, res, next) {
     try {
-      const result = await ChatService.setRating({
+      await ChatService.setRating({
         user: req.user,
         chatChannel: req.chatChannel,
         data: req.body,
       });
-      return res.status(200).json(objectToSnake(result.toJSON()));
+      return res.status(204).json({});
     } catch (e) {
       return next(e);
     }
