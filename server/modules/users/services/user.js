@@ -20,7 +20,7 @@ export default class Userervice {
     const { limit, offset, user } = query;
     const options = Issue.buildOptionQuery(query);
     options.where.createdBy = user.id;
-    return Issue.findAndCountAll({
+    const result = await Issue.findAndCountAll({
       ...options,
       include: [
         {
@@ -48,12 +48,38 @@ export default class Userervice {
           required: false,
           as: 'supporting',
           attributes: ['id', 'userId', 'issueId', 'time', 'cost'],
+          include: [
+            {
+              model: User,
+              required: false,
+              attributes: ['id', 'avatar'],
+            },
+          ],
         },
       ],
       attributes: Issue.baseAttibutes,
       limit,
       offset,
     });
+
+    const rows = result.rows.map((issue) => {
+      const { supporting = {} } = issue;
+
+      if (!supporting) {
+        return issue;
+      }
+
+      const { user = {} } = supporting;
+      supporting.setDataValue('avatar', user.avatar);
+      supporting.setDataValue('user', undefined);
+      issue.supporting = supporting;
+
+      return issue;
+    });
+
+    result.rows = rows;
+
+    return result;
   }
 
   static async getReceiveIssues(query) {
