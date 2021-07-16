@@ -2,7 +2,6 @@ import Sequelize from 'sequelize';
 import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
-import Event from './event';
 
 class EventDetail extends BaseModel {}
 
@@ -15,7 +14,7 @@ EventDetail.init(
     value: {
       type: Sequelize.DECIMAL(10, 2),
     },
-    max_value: {
+    maxValue: {
       type: Sequelize.DECIMAL(10, 2),
     },
     gift: {
@@ -45,6 +44,6 @@ EventDetail.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
 
-EventDetail.belongsTo(Event);
+EventDetail.baseAttibutes = ['id', 'value', 'maxValue', 'gift'];
 
 module.exports = EventDetail;

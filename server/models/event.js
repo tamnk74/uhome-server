@@ -3,6 +3,7 @@ import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import EventType from './eventType';
+import EventDetail from './eventDetail';
 
 class Event extends BaseModel {}
 
@@ -59,5 +60,22 @@ Event.beforeCreate((instance) => {
 });
 
 Event.belongsTo(EventType);
+Event.hasOne(EventDetail);
+
+Event.baseAttibutes = ['id', 'title', 'description', 'image', 'status', 'from', 'to'];
+Event.buildRelation = () => {
+  return [
+    {
+      model: EventType,
+      required: true,
+      attributes: EventType.baseAttibutes,
+    },
+    {
+      model: EventDetail,
+      required: true,
+      attributes: EventDetail.baseAttibutes,
+    },
+  ];
+};
 
 module.exports = Event;
