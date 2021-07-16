@@ -34,5 +34,6 @@ EventType.init(
 EventType.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
+EventType.baseAttibutes = ['id', 'name'];
 
 module.exports = EventType;
