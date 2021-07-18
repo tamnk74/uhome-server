@@ -4,8 +4,8 @@ import { PaymentService } from '../services';
 export default class PaymentController {
   static async process(req, res, next) {
     try {
-      const { receiveIssue } = req;
-      const result = await PaymentService.process(receiveIssue, req.body);
+      const { receiveIssue, user } = req;
+      const result = await PaymentService.process(receiveIssue, req.body, { user });
       return res.status(201).json(objectToSnake(result));
     } catch (e) {
       return next(e);

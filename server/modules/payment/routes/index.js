@@ -1,15 +1,16 @@
 import { Router } from 'express';
 
 import PaymentController from '../controllers/payment';
-import { validator } from '../../../middlewares';
+import { validator, auth } from '../../../middlewares';
 import { paymentSchema, confirmPaymentSchema } from '../schema';
 import { verifyReceiveIssue } from '../middlewares';
 
 const router = Router();
 
 router.post(
-  '/:receiveIssueId/payment',
+  '/issues/:issueId/payment',
   validator(paymentSchema),
+  auth,
   verifyReceiveIssue,
   PaymentController.process
 );

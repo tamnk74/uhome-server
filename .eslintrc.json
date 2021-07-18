@@ -2,6 +2,7 @@
   "settings": {
     "import/resolver": {
       "node": {
+        "paths": ["server"],
         "extensions": [".js", ".jsx", ".ts", ".tsx"]
       }
     }
