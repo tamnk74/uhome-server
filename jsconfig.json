@@ -5,14 +5,13 @@
     "baseUrl": "./server",
     "resolveJsonModule": true,
     "paths": {
-      "@/*": ["./*"],
-      "server/*": ["./server/*"],
       "constants/*": ["./server/constants/*"],
       "models/*": ["./server/models/*"],
       "config/*": ["./server/config/*"],
       "modules/*": ["./server/modules/*"],
       "helpers/*": ["./server/helpers/*"],
       "locales/*": ["./server/locales/*"],
+      "@": ["."],
     }
   },
   "include": [
