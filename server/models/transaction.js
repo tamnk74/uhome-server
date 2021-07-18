@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import Payment from './payment';
@@ -75,5 +76,9 @@ Transaction.init(
 Transaction.belongsTo(Payment);
 Payment.hasMany(Transaction);
 Transaction.belongsTo(User);
+
+Transaction.beforeCreate((instant) => {
+  instant.id = uuid.v4();
+});
 
 module.exports = Transaction;
