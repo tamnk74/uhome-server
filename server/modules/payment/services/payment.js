@@ -7,19 +7,20 @@ import UserProfile from 'models/userProfile';
 import sequelize from 'databases/database';
 
 export class PaymentService {
-  static async process(issueId, data, { user }) {
+  static async process(issue, data, { user }) {
+    console.log(issue);
     const paymentReq = {
       partnerCode: momoConfig.partnerCode,
-      partnerRefId: issueId.id,
-      partnerTransId: issueId.id,
-      amount: issueId.payment.total,
+      partnerRefId: issue.id,
+      partnerTransId: issue.id,
+      amount: issue.payment.total,
       description: 'Thanh toan dich vu uhome qua momo',
     };
     const hashData = await Momo.encryptRSA(paymentReq);
 
     const { data: payment } = await axios.post(momoConfig.requestPaymentUrl, {
       partnerCode: momoConfig.partnerCode,
-      partnerRefId: issueId.id,
+      partnerRefId: issue.id,
       customerNumber: data.phoneNumber,
       appData: data.token,
       hash: hashData,
@@ -38,10 +39,10 @@ export class PaymentService {
       });
       throw new Error('PAY-0001');
     }
-    const requestId = issueId.id;
+    const requestId = issue.id;
     const confirmRequest = {
       partnerCode: momoConfig.partnerCode,
-      partnerRefId: issueId.id,
+      partnerRefId: issue.id,
       requestType: 'capture',
       requestId,
       momoTransId: payment.transid,
@@ -66,15 +67,31 @@ export class PaymentService {
     }
 
     return sequelize.transaction(async (t) => {
-      await issueId.payment.update({ status: 'PAID' }, { transaction: t });
+      await issue.payment.update({ status: 'PAID' }, { transaction: t });
       await Transaction.create(
         {
-          paymentId: issueId.payment.id,
+          paymentId: issue.payment.id,
           userId: user,
-          type: paymentType.INBOUND,
+          type: paymentType.OUTBOUND,
           method: paymentMethod.MOMO,
           transid: confirmResult.data.momoTransId,
-          amount: 0,
+          amount: confirmResult.data.amount,
+          fee: 0,
+          currency: currencies.VND,
+          extra: JSON.stringify({
+            ...confirmResult.data,
+          }),
+        },
+        { transaction: t }
+      );
+      await Transaction.create(
+        {
+          paymentId: issue.payment.id,
+          userId: issue.supporting.userId,
+          type: paymentType.INBOUND,
+          method: paymentMethod.SYSTEM,
+          transid: confirmResult.data.momoTransId,
+          amount: confirmResult.data.amount,
           fee: 0,
           currency: currencies.VND,
           extra: JSON.stringify({
@@ -85,7 +102,7 @@ export class PaymentService {
       );
       await UserProfile.increment('accountBalance', {
         by: confirmResult.data.amount,
-        where: { userId: user.id },
+        where: { userId: issue.supporting.userId },
         transaction: t,
       });
       paymentLogger.log({

@@ -34,14 +34,14 @@
     ]
   },
   "_moduleAliases": {
-    "@": ".",
     "modules": "./server/modules",
     "constants": "./server/constants",
     "config": "./server/config",
     "helpers": "./server/helpers",
     "models": "./server/models",
     "databases": "./server/databases",
-    "server/": "./server/"
+    "server/": "./server/",
+    "@": "./server"
   },
   "dependencies": {
     "@sentry/node": "^6.3.5",
@@ -105,8 +105,9 @@
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
+    "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-chai-friendly": "^0.6.0",
-    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prettier": "^3.1.4",
     "gulp-babel": "^8.0.0",
     "html-webpack-plugin": "^4.4.1",
