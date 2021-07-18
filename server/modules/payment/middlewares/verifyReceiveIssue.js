@@ -1,16 +1,11 @@
-import ReceiveIssue from '../../../models/receiveIssue';
 import Issue from '../../../models/issue';
 import Payment from '../../../models/payment';
 import errorFactory from '../../../errors/ErrorFactory';
 
 export const verifyReceiveIssue = async (req, res, next) => {
   try {
-    const receiveIssue = await ReceiveIssue.findByPk(req.params.receiveIssueId, {
+    const receiveIssue = await Issue.findByPk(req.params.issueId, {
       include: [
-        {
-          model: Issue,
-          required: true,
-        },
         {
           model: Payment,
           required: true,

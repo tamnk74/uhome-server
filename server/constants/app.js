@@ -12,6 +12,16 @@ export const paymentStatus = Object.freeze({
   PAID: 'PAID',
 });
 
+export const paymentType = Object.freeze({
+  INBOUND: 'INBOUND',
+  OUTBOUND: 'OUTBOUND',
+});
+
+export const paymentMethod = Object.freeze({
+  SYSTEM: 'system',
+  MOMO: 'momo',
+});
+
 export const currencies = Object.freeze({
   VND: 'VND',
   USD: 'USD',

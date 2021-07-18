@@ -4,6 +4,7 @@ import { currencies } from 'constants';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import ReceiveIssue from './receiveIssue';
+import Issue from './issue';
 import User from './user';
 
 class Payment extends BaseModel {}
@@ -68,7 +69,9 @@ Payment.beforeCreate((payment) => {
 });
 
 Payment.belongsTo(ReceiveIssue);
+Payment.belongsTo(Issue);
 ReceiveIssue.hasOne(Payment);
+Issue.hasOne(Payment);
 Payment.belongsTo(User);
 
 module.exports = Payment;
