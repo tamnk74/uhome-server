@@ -36,8 +36,12 @@
   "_moduleAliases": {
     "@": ".",
     "modules": "./server/modules",
-    "server/config": "./server/config",
-    "server/helpers": "./server/helpers"
+    "constants": "./server/constants",
+    "config": "./server/config",
+    "helpers": "./server/helpers",
+    "models": "./server/models",
+    "databases": "./server/databases",
+    "server/": "./server/"
   },
   "dependencies": {
     "@sentry/node": "^6.3.5",
