@@ -1,0 +1,67 @@
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.createTable('transaction_histories', {
+      id: {
+        allowNull: false,
+        primaryKey: true,
+        type: Sequelize.DataTypes.UUID,
+        defaultValue: Sequelize.UUIDV4,
+      },
+      user_id: {
+        type: Sequelize.DataTypes.UUID,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        allowNull: false,
+      },
+      amount: {
+        type: Sequelize.DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+      },
+      issue_id: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: false,
+        references: {
+          model: 'issues',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'no action',
+      },
+      type: {
+        type: Sequelize.DataTypes.ENUM('DEPOSIT', 'WITHDRAW', 'WAGE', 'PAY'),
+      },
+      method: {
+        type: Sequelize.ENUM('system', 'momo'),
+        allowNull: false,
+        defautValue: 'system',
+      },
+      currency: {
+        type: Sequelize.ENUM('VND', 'USD'),
+        allowNull: false,
+        defautValue: 'VND',
+      },
+      extra: {
+        type: Sequelize.DataTypes.JSON,
+        allowNull: false,
+        defautValue: '{}',
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        defautValue: Sequelize.NOW,
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        defautValue: Sequelize.NOW,
+      },
+      deleted_at: {
+        type: Sequelize.DATE,
+      },
+    });
+  },
+
+  down: (queryInterface) => {
+    return queryInterface.dropTable('transaction_histories');
+  },
+};
