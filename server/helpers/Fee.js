@@ -46,7 +46,7 @@ export default class Fee {
   static getFee(configuration, classFee, starTime, endtime, distance = 0) {
     const basicFee = Fee.getBasicFee(configuration, classFee, starTime, endtime);
     const workerFee = Fee.getWokerFee(basicFee, configuration, distance);
-    const customerFee = Fee.getWokerFee(workerFee, configuration);
+    const customerFee = Fee.getCustomerFee(workerFee, configuration);
 
     return {
       workerFee,
