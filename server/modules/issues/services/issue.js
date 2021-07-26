@@ -1,4 +1,6 @@
 import { Sequelize, Op } from 'sequelize';
+import dayjs from 'dayjs';
+import { first } from 'lodash';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue } from '../../../helpers/Queue';
@@ -11,6 +13,9 @@ import ChatChannel from '../../../models/chatChannel';
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
 import { objectToSnake } from '../../../helpers/Util';
+import FeeConfiguration from '../../../models/feeConfiguration';
+import FeeCategory from '../../../models/feeCategory';
+import Fee from '../../../helpers/Fee';
 
 export default class IssueService {
   static async create(user, issue) {
@@ -179,9 +184,20 @@ export default class IssueService {
   }
 
   static async estimate({ user, issue, data }) {
-    data.cost = 40000;
     data.isContinuing = false;
     data.totalTime = +data.totalTime;
+    const { startTime, endTime } = data;
+    const catefory = first(issue.categories);
+    const [feeConfiguration, feeCategory] = await Promise.all([
+      FeeConfiguration.findOne({}),
+      FeeCategory.findOne({
+        where: {
+          categoryId: catefory.id,
+        },
+      }),
+    ]);
+    data.fee = Fee.getFee(feeConfiguration, feeCategory, dayjs(startTime), dayjs(endTime), 0);
+
     await this.sendMesage(command.SUBMIT_ESTIMATION_TIME, user, issue, data);
   }
 
