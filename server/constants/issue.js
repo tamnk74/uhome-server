@@ -32,3 +32,10 @@ export const workingTime = Object.freeze({
     },
   ],
 });
+
+export const transactionType = Object.freeze({
+  DEPOSIT: 'DEPOSIT',
+  WITHDRAW: 'WITHDRAW',
+  WAGE: 'WAGE',
+  PAY: 'PAY',
+});
