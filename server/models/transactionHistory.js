@@ -27,7 +27,7 @@ TransactionHistory.init(
     method: {
       type: Sequelize.ENUM('system', 'momo'),
       allowNull: false,
-      defautValue: 'system',
+      defaultValue: 'system',
     },
     currency: {
       type: Sequelize.ENUM('VND', 'USD'),
@@ -37,7 +37,7 @@ TransactionHistory.init(
     extra: {
       type: Sequelize.DataTypes.JSON,
       allowNull: false,
-      defautValue: '{}',
+      defaultValue: '{}',
     },
     createdAt: {
       defaultValue: Sequelize.NOW,

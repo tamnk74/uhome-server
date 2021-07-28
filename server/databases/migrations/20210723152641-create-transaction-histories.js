@@ -35,25 +35,25 @@ module.exports = {
       method: {
         type: Sequelize.ENUM('system', 'momo'),
         allowNull: false,
-        defautValue: 'system',
+        defaultValue: 'system',
       },
       currency: {
         type: Sequelize.ENUM('VND', 'USD'),
         allowNull: false,
-        defautValue: 'VND',
+        defaultValue: 'VND',
       },
       extra: {
         type: Sequelize.DataTypes.JSON,
         allowNull: false,
-        defautValue: '{}',
+        defaultValue: '{}',
       },
       created_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       updated_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       deleted_at: {
         type: Sequelize.DATE,
