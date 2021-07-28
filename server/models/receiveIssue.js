@@ -28,12 +28,21 @@ ReceiveIssue.init(
       type: Sequelize.FLOAT,
       allowNull: true,
     },
-    cost: {
-      type: Sequelize.INTEGER,
+    workerFee: {
+      type: Sequelize.DECIMAL(10, 2),
+    },
+    customerFee: {
+      type: Sequelize.DECIMAL(10, 2),
     },
     rating: {
       type: Sequelize.DECIMAL(2),
       defaultValue: 0,
+    },
+    startTime: {
+      type: Sequelize.DATE,
+    },
+    endTime: {
+      type: Sequelize.DATE,
     },
     reason: {
       type: Sequelize.STRING(2048),
