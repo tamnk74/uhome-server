@@ -1,26 +1,22 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
-import { Op } from 'sequelize';
+import Sequelize, { Op } from 'sequelize';
+
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
 import ChatChannel from '../../../models/chatChannel';
 import User from '../../../models/user';
 import ChatUser from '../../../models/chatUser';
 import ReceiveIssue from '../../../models/receiveIssue';
-import {
-  commandMessage,
-  issueStatus,
-  command,
-  currencies,
-  paymentStatus,
-} from '../../../constants';
+import { commandMessage, issueStatus, command, transactionType } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
 import Attachment from '../../../models/attachment';
-import Payment from '../../../models/payment';
 import ReceiveIssueComment from '../../../models/receiveIssueComment';
 import IssueMaterial from '../../../models/issueMaterial';
 import UserProfile from '../../../models/userProfile';
+import TransactionHistory from '../../../models/transactionHistory';
+import sequelize from '../../../databases/database';
 
 export default class ChatService {
   static async create(user, data) {
@@ -332,20 +328,11 @@ export default class ChatService {
   static async setRating({ chatChannel, user, data }) {
     const { issue } = chatChannel;
     const { rate, comment = '', messageSid } = data;
-    const [supporter, profile] = await Promise.all([
-      ReceiveIssue.findOne({
-        where: {
-          issueId: issue.id,
-        },
-      }),
-      UserProfile.findOne({
-        where: {
-          userId: user.id,
-        },
-      }),
-    ]);
-    const totalRating = profile.totalRating + rate;
-    const totalIssueCompleted = profile.totalIssueCompleted + 1;
+    const receiveIssue = await ReceiveIssue.findOne({
+      where: {
+        issueId: issue.id,
+      },
+    });
 
     await Promise.all([
       Issue.update(
@@ -358,39 +345,19 @@ export default class ChatService {
           },
         }
       ),
-      supporter.update({
+      receiveIssue.update({
         status: issueStatus.DONE,
         rating: rate,
       }),
       comment
         ? ReceiveIssueComment.create({
             userId: user.id,
-            receiveIssueId: supporter.id,
+            receiveIssueId: receiveIssue.id,
             content: comment,
           })
         : null,
-      UserProfile.update(
-        {
-          totalIssueCompleted,
-          totalRating,
-          reliability: Math.round(totalRating / totalIssueCompleted, -1),
-        },
-        {
-          where: {
-            id: profile.id,
-          },
-        }
-      ),
+      ChatService.finishIssue({ user, receiveIssue, rate }),
     ]);
-    await Payment.create({
-      receiveIssueId: supporter.id,
-      issueId: issue.id,
-      userId: issue.createdBy,
-      total: supporter.cost,
-      totalCost: supporter.cost,
-      currency: currencies.VND,
-      status: paymentStatus.OPEN,
-    });
     await this.sendMesage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
   }
 
@@ -435,5 +402,60 @@ export default class ChatService {
       messageSid,
       messageAttributes
     );
+  }
+
+  static async finishIssue({ user, receiveIssue, rate }) {
+    const { workerFee, customerFee, issueId } = receiveIssue;
+    const transactionHistories = [
+      {
+        id: uuidv4(),
+        userId: receiveIssue.userId,
+        amount: workerFee,
+        issueId,
+        type: transactionType.WAGE,
+      },
+      {
+        id: uuidv4(),
+        userId: user.id,
+        amount: customerFee,
+        issueId,
+        type: transactionType.PAY,
+      },
+    ];
+
+    return sequelize.transaction(async (t) => {
+      return Promise.all([
+        UserProfile.update(
+          {
+            accountBalance: Sequelize.literal(`account_balance + ${workerFee}`),
+            totalIssueCompleted: Sequelize.literal(`total_issue_completed + 1`),
+            totalRating: Sequelize.literal(`total_rating + ${rate}`),
+            reliability: Sequelize.literal(
+              `(total_rating + ${rate}) / (total_issue_completed + 1)`
+            ),
+          },
+          {
+            where: {
+              userId: receiveIssue.userId,
+            },
+            transaction: t,
+          }
+        ),
+        UserProfile.update(
+          {
+            accountBalance: Sequelize.literal(`account_balance + ${customerFee}`),
+          },
+          {
+            where: {
+              userId: user.id,
+            },
+            transaction: t,
+          }
+        ),
+        TransactionHistory.bulkCreate(transactionHistories, {
+          transaction: t,
+        }),
+      ]);
+    });
   }
 }
