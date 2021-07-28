@@ -214,12 +214,18 @@ export default class ChatService {
 
   static async approveEstimateTime({ chatChannel, user, data }) {
     data.totalTime = +data.totalTime;
-    data.cost = +data.cost;
+    data.workerFee = +data.workerFee;
+    data.customerFee = +data.customerFee;
+    const { startTime, endTime, workerFee, customerFee } = data;
     await Promise.all([
       ReceiveIssue.update(
         {
           cost: data.cost,
           time: data.totalTime,
+          startTime,
+          endTime,
+          workerFee,
+          customerFee,
           status: issueStatus.IN_PROGRESS,
         },
         {
@@ -243,6 +249,12 @@ export default class ChatService {
       ),
     ]);
 
+    data.fee = {
+      workerFee,
+      customerFee,
+    };
+    delete data.workerFee;
+    delete data.customerFee;
     await this.sendMesage(
       command.APPROVAL_ESTIMATION_TIME,
       chatChannel,
