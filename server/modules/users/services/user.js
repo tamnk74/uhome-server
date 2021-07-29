@@ -319,6 +319,25 @@ export default class Userervice {
     const { limit, offset, from, to } = query;
     const options = TransactionHistory.buildOptionQuery(query);
     options.where.userId = user.id;
+    options.include = [
+      {
+        model: User,
+        attributes: ['id', 'name'],
+        required: true,
+      },
+      {
+        model: Issue,
+        attributes: ['id', 'location', 'title'],
+        required: false,
+        include: [
+          {
+            model: Category,
+            as: 'categories',
+            attributes: ['id', 'name'],
+          },
+        ],
+      },
+    ];
 
     if (from) {
       options.where.createdAt = {
