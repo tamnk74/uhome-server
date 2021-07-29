@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { Op } from 'sequelize';
 import { fileSystemConfig } from '../../../config';
 import Issue from '../../../models/issue';
 import Category from '../../../models/category';
@@ -14,6 +15,7 @@ import Subscription from '../../../models/subscription';
 import Fcm from '../../../helpers/Fcm';
 import { idCardStatus } from '../../../constants';
 import IdentifyCard from '../../../models/identifyCard';
+import TransactionHistory from '../../../models/transactionHistory';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -311,5 +313,31 @@ export default class Userervice {
     user.sessionRole = role;
 
     return user;
+  }
+
+  static async getTransactionHistories({ user, query }) {
+    const { limit, offset, from, to } = query;
+    const options = TransactionHistory.buildOptionQuery(query);
+    options.where.userId = user.id;
+
+    if (from) {
+      options.where.createdAt = {
+        [Op.gte]: from,
+      };
+    }
+
+    if (to) {
+      options.where.createdAt = {
+        [Op.lte]: to,
+      };
+    }
+
+    const result = await TransactionHistory.findAndCountAll({
+      ...options,
+      limit,
+      offset,
+    });
+
+    return result;
   }
 }

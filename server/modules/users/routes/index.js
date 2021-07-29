@@ -81,4 +81,5 @@ router
   .route('/me/password')
   .put(auth, active, validator(updatePasswordSchema), UserController.updatePassword);
 
+router.route('/me/transaction-histories').get(auth, active, UserController.getTransactionHistories);
 export default router;
