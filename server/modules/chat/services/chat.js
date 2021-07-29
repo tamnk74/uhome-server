@@ -216,7 +216,6 @@ export default class ChatService {
     await Promise.all([
       ReceiveIssue.update(
         {
-          cost: data.cost,
           time: data.totalTime,
           startTime,
           endTime,
@@ -261,8 +260,6 @@ export default class ChatService {
   }
 
   static async approveMaterialCost({ chatChannel, user, data }) {
-    data.totalCost = +data.totalCost;
-
     const { issue } = chatChannel;
     const member = await ChatMember.findOne({
       where: {
@@ -274,17 +271,6 @@ export default class ChatService {
     });
 
     await Promise.all([
-      ReceiveIssue.update(
-        {
-          cost: issue.cost + data.totalCost,
-        },
-        {
-          where: {
-            issueId: issue.id,
-            userId: member ? member.userId : null,
-          },
-        }
-      ),
       member
         ? IssueMaterial.create({
             userId: member.userId,

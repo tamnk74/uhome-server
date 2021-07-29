@@ -47,7 +47,7 @@ export default class Userervice {
           model: ReceiveIssue,
           required: false,
           as: 'supporting',
-          attributes: ['id', 'userId', 'issueId', 'time', 'cost'],
+          attributes: ['id', 'userId', 'issueId', 'time', 'workerFee', 'customerFee'],
           include: [
             {
               model: User,
