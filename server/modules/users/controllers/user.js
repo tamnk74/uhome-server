@@ -163,4 +163,21 @@ export default class UserController {
       return next(e);
     }
   }
+
+  static async getTransactionHistories(req, res, next) {
+    try {
+      const histories = await UserService.getTransactionHistories({
+        user: req.user,
+        query: req.query,
+      });
+      const pagination = new Pagination(req);
+      pagination.setTotal(histories.count);
+      return res.status(200).json({
+        meta: pagination.getMeta(),
+        data: histories.rows.map((history) => objectToSnake(history.toJSON())),
+      });
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
