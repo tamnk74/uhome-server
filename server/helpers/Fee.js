@@ -49,8 +49,8 @@ export default class Fee {
     const customerFee = Fee.getCustomerFee(workerFee, configuration);
 
     return {
-      workerFee,
-      customerFee,
+      workerFee: Math.round(workerFee),
+      customerFee: Math.round(customerFee),
     };
   }
 
