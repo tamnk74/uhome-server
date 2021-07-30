@@ -180,4 +180,16 @@ export default class UserController {
       return next(e);
     }
   }
+
+  static async sendOTP(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      await UserService.reSendOTP(id);
+
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

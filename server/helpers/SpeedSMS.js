@@ -26,8 +26,6 @@ export default class SpeedSMS {
       }
     );
 
-    console.log('res', res);
-
     return res.data;
   }
 }

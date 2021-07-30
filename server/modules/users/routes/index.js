@@ -82,4 +82,6 @@ router
   .put(auth, active, validator(updatePasswordSchema), UserController.updatePassword);
 
 router.route('/me/transaction-histories').get(auth, active, UserController.getTransactionHistories);
+router.route('/users/:id/send-otp').put(auth, UserController.sendOTP);
+
 export default router;
