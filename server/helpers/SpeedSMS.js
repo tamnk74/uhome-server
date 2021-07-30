@@ -13,6 +13,7 @@ export default class SpeedSMS {
         to,
         content,
         sms_type: SMS_TYPE_CSKH,
+        sender: speedSMSConfig.branchName,
       },
       {
         headers: {
