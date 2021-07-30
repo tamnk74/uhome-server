@@ -81,4 +81,6 @@ router
   .route('/me/password')
   .put(auth, active, validator(updatePasswordSchema), UserController.updatePassword);
 
+router.route('/users/:id/send-otp').put(auth, UserController.sendOTP);
+
 export default router;
