@@ -5,7 +5,7 @@ import Zalo from '../../../helpers/Zalo';
 import Facebook from '../../../helpers/Facebook';
 import RedisService from '../../../helpers/Redis';
 import { status as userStatus, socialAccount } from '../../../constants';
-import { randomNumber } from '../../../helpers/Util';
+import { sendOTP } from '../../../helpers/Util';
 import UserProfile from '../../../models/userProfile';
 import Subscription from '../../../models/subscription';
 import IdentifyCard from '../../../models/identifyCard';
@@ -116,36 +116,26 @@ export default class AuthService {
   }
 
   static async register({ phoneNumber, password, name }) {
-    const existUser = await User.findOne({
+    let user = await User.findOne({
       attributes: { exclude: ['password'] },
       where: {
         phoneNumber,
       },
     });
-    if (existUser && existUser.status === userStatus.ACTIVE) {
+
+    if (user && user.status === userStatus.ACTIVE) {
       throw new Error('REG-0001');
     }
-    const verifyCode = randomNumber(4);
 
-    // Todo send SMS
-    // const sms = await SpeedSMS.sendSMS({
-    //   to: phoneNumber,
-    //   content: `Your verify code: ${verifyCode}`,
-    // });
-    // console.log(sms);
-
-    if (existUser) {
-      await RedisService.saveVerifyCode(existUser.id, verifyCode);
-
-      return existUser;
+    if (!user) {
+      user = await User.create({ phoneNumber, password, name, status: userStatus.IN_ACTIVE });
+      await UserProfile.create({
+        userId: user.id,
+        identityCard: JSON.stringify({ before: null, after: null }),
+      });
     }
 
-    const user = await User.create({ phoneNumber, password, name, status: userStatus.IN_ACTIVE });
-    await UserProfile.create({
-      userId: user.id,
-      identityCard: JSON.stringify({ before: null, after: null }),
-    });
-    await RedisService.saveVerifyCode(user.id, verifyCode);
+    await sendOTP(user.id, phoneNumber);
 
     return user;
   }
@@ -163,21 +153,15 @@ export default class AuthService {
 
     const userVerifyCode = await RedisService.getVerifyCode(user.id);
 
-    if (userVerifyCode !== verifyCode && verifyCode !== '0000') {
+    if (userVerifyCode !== verifyCode) {
       throw new Error('USER-2002');
     }
 
     user.status = userStatus.ACTIVE;
     user.verifiedAt = new Date();
 
-    await user.save();
+    await Promise.all([user.save(), RedisService.removeVerifyCode(user.id)]);
 
-    // const [accessToken, refreshToken] = await Promise.all([
-    //   JWT.generateToken(user.toPayload()),
-    //   JWT.generateRefreshToken(user.id),
-    //   user.save(),
-    // ]);
-    // await RedisService.saveAccessToken(user.id, accessToken);
     return {
       user,
     };
@@ -273,8 +257,7 @@ export default class AuthService {
       throw new Error('RSPW-0001');
     }
 
-    const verifyCode = randomNumber(4);
-    await RedisService.saveVerifyCode(user.id, verifyCode);
+    await sendOTP(user.id, phoneNumber);
 
     return {
       id: user.id,
