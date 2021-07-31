@@ -25,5 +25,3 @@ export const googleClientId = process.env.GOOGLE_ID;
 export const googleSecret = process.env.GOOGLE_SECRET;
 export const dbConfig = databaseConfig;
 export const verifyCodeExpiredTime = process.env.VERIFY_CODE_EXPIRE_TIME || '300';
-export const appUsername = process.env.APP_USERNAME || '';
-export const appPassword = process.env.APP_PASSWORD || '';
