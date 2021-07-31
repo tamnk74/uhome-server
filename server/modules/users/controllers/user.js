@@ -166,15 +166,20 @@ export default class UserController {
 
   static async getTransactionHistories(req, res, next) {
     try {
+      const pagination = new Pagination(req);
       const histories = await UserService.getTransactionHistories({
         user: req.user,
-        query: req.query,
+        query: {
+          ...req.query,
+          limit: pagination.limit,
+          offset: pagination.skip,
+        },
       });
-      const pagination = new Pagination(req);
+
       pagination.setTotal(histories.count);
       return res.status(200).json({
         meta: pagination.getMeta(),
-        data: histories.rows.map((history) => objectToSnake(history.toJSON())),
+        data: histories.rows.map((history) => objectToSnake(history)),
       });
     } catch (e) {
       return next(e);
