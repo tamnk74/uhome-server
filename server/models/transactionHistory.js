@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import { get } from 'lodash';
 import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
@@ -37,7 +38,7 @@ TransactionHistory.init(
     extra: {
       type: Sequelize.DataTypes.JSON,
       allowNull: false,
-      defaultValue: '{}',
+      defaultValue: {},
     },
     createdAt: {
       defaultValue: Sequelize.NOW,
@@ -66,4 +67,24 @@ TransactionHistory.baseAttibutes = ['id', 'amount', 'type', 'method', 'currency'
 TransactionHistory.belongsTo(User);
 TransactionHistory.belongsTo(Issue);
 
+TransactionHistory.tranformResponseData = (transactions = []) => {
+  const result = transactions.map((item) => {
+    item = item.toJSON();
+    const { issue } = item;
+    if (issue) {
+      const categories = get(issue, 'categories', []);
+      const categoriesTran = categories.map((cat) => {
+        delete cat.category_issues;
+        return cat;
+      });
+      issue.categories = categoriesTran;
+    }
+
+    item.issue = issue;
+
+    return item;
+  });
+
+  return result;
+};
 module.exports = TransactionHistory;

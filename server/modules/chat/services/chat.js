@@ -391,7 +391,13 @@ export default class ChatService {
   }
 
   static async finishIssue({ user, receiveIssue, rate }) {
-    const { workerFee, customerFee, issueId } = receiveIssue;
+    const { workerFee, customerFee, issueId, startTime, endTime, time } = receiveIssue;
+    const extra = {
+      startTime,
+      endTime,
+      totalTime: time,
+    };
+
     const transactionHistories = [
       {
         id: uuidv4(),
@@ -399,6 +405,7 @@ export default class ChatService {
         amount: workerFee,
         issueId,
         type: transactionType.WAGE,
+        extra,
       },
       {
         id: uuidv4(),
@@ -406,6 +413,7 @@ export default class ChatService {
         amount: customerFee,
         issueId,
         type: transactionType.PAY,
+        extra,
       },
     ];
 
