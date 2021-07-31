@@ -45,7 +45,7 @@ module.exports = {
       extra: {
         type: Sequelize.DataTypes.JSON,
         allowNull: false,
-        defaultValue: '{}',
+        defaultValue: {},
       },
       created_at: {
         type: Sequelize.DATE,

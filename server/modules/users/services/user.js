@@ -322,21 +322,22 @@ export default class Userervice {
     options.where.userId = user.id;
     options.include = [
       {
-        model: User,
-        attributes: ['id', 'name'],
-        required: true,
-      },
-      {
         model: Issue,
         attributes: ['id', 'location', 'title'],
         required: false,
         include: [
           {
             model: Category,
-            as: 'categories',
+            required: false,
             attributes: ['id', 'name'],
+            as: 'categories',
           },
         ],
+      },
+      {
+        model: User,
+        attributes: ['id', 'name'],
+        required: true,
       },
     ];
 
@@ -357,6 +358,9 @@ export default class Userervice {
       limit,
       offset,
     });
+
+    const rows = TransactionHistory.tranformResponseData(result.rows);
+    result.rows = rows;
 
     return result;
   }
