@@ -20,7 +20,7 @@ TransactionHistory.init(
     },
     issueId: {
       type: Sequelize.UUID,
-      allowNull: false,
+      allowNull: true,
     },
     type: {
       type: Sequelize.ENUM('DEPOSIT', 'WITHDRAW', 'WAGE', 'PAY'),
