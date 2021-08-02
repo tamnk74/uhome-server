@@ -18,6 +18,6 @@
 	},
 	"otp": {
 		"branch": "U-HOME",
-		"sms": "[U-HOME] Mã OTP của quý khách là {{code}}. Sẽ hết hạn sau 5 phút"
+		"sms": "[U-HOME] Mã OTP của quý khách là {{code}}. Sẽ hết hạn sau {{time}} phút"
 	}
 }
