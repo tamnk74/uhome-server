@@ -2,7 +2,7 @@ import fs from 'fs';
 import util from 'util';
 import SpeedSMS from './SpeedSMS';
 import RedisService from './Redis';
-import { verifyCodeExpiredTime } from '../config';
+import { verifyCodeExpiredTime, otpLength } from '../config';
 
 const { snakeCase, camelCase } = require('lodash');
 const Sequelize = require('sequelize');
@@ -165,7 +165,7 @@ export const distance = (lat1, lon1, lat2, lon2) => {
 export const readFile = util.promisify(fs.readFile);
 
 export const sendOTP = async (id, phoneNumber) => {
-  const verifyCode = randomNumber(6);
+  const verifyCode = randomNumber(otpLength);
 
   await RedisService.saveVerifyCode(id, verifyCode);
 
