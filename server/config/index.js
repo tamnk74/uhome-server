@@ -27,3 +27,4 @@ export const dbConfig = databaseConfig;
 export const verifyCodeExpiredTime = process.env.VERIFY_CODE_EXPIRE_TIME || '300';
 export const appUsername = process.env.APP_USERNAME || '';
 export const appPassword = process.env.APP_PASSWORD || '';
+export const otpLength = parseInt(process.env.SMS_OTP_LENGTH, 10) || 4;
