@@ -18,6 +18,6 @@
 	},
 	"otp": {
 		"branch": "U-HOME",
-		"sms": "[U-HOME] Ma OTP cua quy khach la {{code}}. Se het han sau {{time}} phut"
+		"sms": "[U-HOME] Mã OTP của quý khách là {{code}}"
 	}
 }
