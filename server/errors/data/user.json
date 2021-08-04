@@ -48,11 +48,11 @@
     "detail": "Password is invalid"
   },
   "USER-2001": {
-    "status": 422,
+    "status": 400,
     "detail": "The account was already verified"
   },
   "USER-2002": {
-    "status": 422,
+    "status": 400,
     "detail": "The verify code isn't match"
   },
   "REG-0001": {
