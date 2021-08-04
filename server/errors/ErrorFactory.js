@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import { get } from 'lodash';
 import errors from './data';
 import BadRequestError from './BadRequestError';
 import ForbidenError from './ForbidenError';
@@ -9,7 +10,7 @@ import ValidationError from './ValidationError';
 
 class ErrorFactory {
   getError = (code = 'ERR-0500') => {
-    const error = errors[code];
+    const error = get(errors, code);
     if (!error) {
       return new InternalServerError({ detail: code });
     }
