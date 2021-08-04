@@ -2,7 +2,7 @@ import fs from 'fs';
 import util from 'util';
 import SpeedSMS from './SpeedSMS';
 import RedisService from './Redis';
-import { verifyCodeExpiredTime, otpLength } from '../config';
+import { otpLength } from '../config';
 
 const { snakeCase, camelCase } = require('lodash');
 const Sequelize = require('sequelize');
@@ -172,6 +172,6 @@ export const sendOTP = async (id, phoneNumber) => {
   await SpeedSMS.sendSMS({
     to: [phoneNumber],
     // eslint-disable-next-line no-undef
-    content: __('otp.sms', { code: verifyCode, time: verifyCodeExpiredTime / 60 }),
+    content: __('otp.sms', { code: verifyCode }),
   });
 };
