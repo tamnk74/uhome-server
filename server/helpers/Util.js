@@ -1,8 +1,5 @@
 import fs from 'fs';
 import util from 'util';
-import SpeedSMS from './SpeedSMS';
-import RedisService from './Redis';
-import { otpLength } from '../config';
 
 const { snakeCase, camelCase } = require('lodash');
 const Sequelize = require('sequelize');
@@ -163,15 +160,3 @@ export const distance = (lat1, lon1, lat2, lon2) => {
 };
 
 export const readFile = util.promisify(fs.readFile);
-
-export const sendOTP = async (id, phoneNumber) => {
-  const verifyCode = randomNumber(otpLength);
-
-  await RedisService.saveVerifyCode(id, verifyCode);
-
-  await SpeedSMS.sendSMS({
-    to: [phoneNumber],
-    // eslint-disable-next-line no-undef
-    content: __('otp.sms', { code: verifyCode }),
-  });
-};

@@ -66,5 +66,9 @@
   "PW-0410": {
     "status": 400,
     "detail": "Current password is invalid"
+  },
+  "USER-0429": {
+    "status": 400,
+    "detail": "Too many request"
   }
 }
