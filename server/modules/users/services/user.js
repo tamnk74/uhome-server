@@ -14,7 +14,7 @@ import Subscription from '../../../models/subscription';
 import Fcm from '../../../helpers/Fcm';
 import { idCardStatus } from '../../../constants';
 import IdentifyCard from '../../../models/identifyCard';
-import { sendOTP } from '../../../helpers/Util';
+import { sendOTP } from '../../../helpers/SmsOTP';
 
 export default class Userervice {
   static async getIssues(query) {
