@@ -48,4 +48,12 @@ export default class RedisService {
   static removeVerifyCode(userId) {
     return redis.del(`${userPrefix + userId}:verify_code`);
   }
+
+  static getSmsCounter(userId) {
+    return redis.get(`${userPrefix + userId}:otp_counter`);
+  }
+
+  static saveSmsCounter(userId, counter) {
+    return redis.set(`${userPrefix + userId}:otp_counter`, counter);
+  }
 }
