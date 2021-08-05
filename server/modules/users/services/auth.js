@@ -5,7 +5,7 @@ import Zalo from '../../../helpers/Zalo';
 import Facebook from '../../../helpers/Facebook';
 import RedisService from '../../../helpers/Redis';
 import { status as userStatus, socialAccount } from '../../../constants';
-import { sendOTP } from '../../../helpers/Util';
+import { sendOTP } from '../../../helpers/SmsOTP';
 import UserProfile from '../../../models/userProfile';
 import Subscription from '../../../models/subscription';
 import IdentifyCard from '../../../models/identifyCard';
