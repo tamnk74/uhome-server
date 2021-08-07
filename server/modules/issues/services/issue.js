@@ -5,7 +5,7 @@ import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue } from '../../../helpers/Queue';
 import RequestSupporting from '../../../models/requestSupporting';
-import { issueStatus, command, commandMessage } from '../../../constants';
+import { issueStatus, command, commandMessage, paymentMethod } from '../../../constants';
 import UserProfile from '../../../models/userProfile';
 import ReceiveIsssue from '../../../models/receiveIssue';
 import sequelize from '../../../databases/database';
@@ -19,6 +19,10 @@ import Fee from '../../../helpers/Fee';
 
 export default class IssueService {
   static async create(user, issue) {
+    if (issue.paymentMethod === paymentMethod.MOMO) {
+      await IssueService.validateMoney(user.id, issue.categoryIds);
+    }
+
     issue = await Issue.addIssue(issue);
     notificationQueue.add('new_issue', { id: issue.id });
     return this.getDetail(user, issue.id);
@@ -258,5 +262,24 @@ export default class IssueService {
       actorId: user.id,
       message,
     });
+  }
+
+  static async validateMoney(id, categoriesId = []) {
+    const [feeConfiguration, feeCategory, userProfile] = await Promise.all([
+      FeeConfiguration.findOne({}),
+      FeeCategory.findOne({
+        where: {
+          categoryId: categoriesId,
+        },
+        order: [['max', 'DESC']],
+      }),
+      UserProfile.findOne({ where: { userId: id } }),
+    ]);
+
+    const fee = Fee.getFee(feeConfiguration, feeCategory, dayjs(), dayjs().add(1, 'hour'), 0);
+
+    if (fee.customerFee > userProfile.accountBalance) {
+      throw new Error('ISSUE-0411');
+    }
   }
 }
