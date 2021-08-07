@@ -8,5 +8,10 @@
     "status": 400,
     "title": "Failed to confirm momo payment",
     "detail": "Failed to confirm momo payment"
+  },
+  "PAY-0003": {
+    "status": 400,
+    "title": "This issue is already paid",
+    "detail": "This issue is already paid"
   }
 }
