@@ -4,5 +4,11 @@
     "error": "Not found",
     "title": "Issue not found",
     "detail": "Issue not found"
+  },
+  "ISSUE-0411": {
+    "status": 400,
+    "error": "Maximum request",
+    "title": "Maximum request",
+    "detail": "Maximum request"
   }
 }
