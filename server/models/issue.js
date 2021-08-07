@@ -5,7 +5,7 @@ import Category from './category';
 import CategoryIssue from './categoryIssue';
 import Attachment from './attachment';
 import sequelize from '../databases/database';
-import { issueStatus } from '../constants';
+import { issueStatus, paymentMethod } from '../constants';
 import RequestSupporting from './requestSupporting';
 import User from './user';
 
@@ -56,6 +56,10 @@ Issue.init(
     status: {
       type: Sequelize.ENUM(Object.values(issueStatus)),
       defaultValue: issueStatus.OPEN,
+    },
+    paymentMethod: {
+      type: Sequelize.ENUM(Object.values(paymentMethod)),
+      defaultValue: paymentMethod.CASH,
     },
     createdAt: {
       type: Sequelize.DATE,
