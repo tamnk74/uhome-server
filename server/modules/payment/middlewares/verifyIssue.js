@@ -24,13 +24,13 @@ export const verifyIssue = async (req, res, next) => {
       ],
       logging: true,
     });
-    console.log(issue.toJSON(), req.user);
+
     if (!issue || issue.createdBy !== req.user.id) {
       throw errorFactory.getError('ISSU-0001');
     }
 
     if (issue.payment.status === paymentStatus.PAID) {
-      throw errorFactory.getError('ISSU-0002');
+      throw errorFactory.getError('PAY-0003');
     }
     req.issue = issue;
     return next();
