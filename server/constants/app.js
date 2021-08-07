@@ -20,6 +20,7 @@ export const paymentType = Object.freeze({
 export const paymentMethod = Object.freeze({
   SYSTEM: 'system',
   MOMO: 'momo',
+  CASH: 'cash',
 });
 
 export const currencies = Object.freeze({
