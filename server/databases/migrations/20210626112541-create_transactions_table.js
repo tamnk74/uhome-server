@@ -7,16 +7,6 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      payment_id: {
-        type: Sequelize.DataTypes.UUID,
-        allowNull: false,
-        references: {
-          model: 'receive_issues',
-          key: 'id',
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'no action',
-      },
       user_id: {
         type: Sequelize.DataTypes.UUID,
         allowNull: false,

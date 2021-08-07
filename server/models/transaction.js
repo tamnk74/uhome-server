@@ -9,10 +9,6 @@ class Transaction extends BaseModel {}
 
 Transaction.init(
   {
-    paymentId: {
-      type: Sequelize.DataTypes.UUID,
-      allowNull: false,
-    },
     userId: {
       type: Sequelize.DataTypes.UUID,
       allowNull: false,

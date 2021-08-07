@@ -5,22 +5,23 @@ import { Momo, paymentLogger } from 'helpers';
 import Transaction from 'models/transaction';
 import UserProfile from 'models/userProfile';
 import sequelize from 'databases/database';
+import uuid from 'uuid';
+import { paymentStatus } from 'constants';
 
 export class PaymentService {
-  static async process(issue, data, { user }) {
-    console.log(issue);
+  static async process(user, data) {
     const paymentReq = {
       partnerCode: momoConfig.partnerCode,
-      partnerRefId: issue.id,
-      partnerTransId: issue.id,
-      amount: issue.payment.total,
+      partnerRefId: user.id,
+      partnerTransId: user.id,
+      amount: data.amount,
       description: 'Thanh toan dich vu uhome qua momo',
     };
     const hashData = await Momo.encryptRSA(paymentReq);
 
     const { data: payment } = await axios.post(momoConfig.requestPaymentUrl, {
       partnerCode: momoConfig.partnerCode,
-      partnerRefId: issue.id,
+      partnerRefId: user.id,
       customerNumber: data.phoneNumber,
       appData: data.token,
       hash: hashData,
@@ -39,10 +40,10 @@ export class PaymentService {
       });
       throw new Error('PAY-0001');
     }
-    const requestId = issue.id;
+    const requestId = user.id;
     const confirmRequest = {
       partnerCode: momoConfig.partnerCode,
-      partnerRefId: issue.id,
+      partnerRefId: user.id,
       requestType: 'capture',
       requestId,
       momoTransId: payment.transid,
@@ -66,55 +67,86 @@ export class PaymentService {
       throw new Error('PAY-0002');
     }
 
+    return sequelize
+      .transaction(async (t) => {
+        await Transaction.create(
+          {
+            userId: user.id,
+            type: paymentType.INBOUND,
+            method: paymentMethod.MOMO,
+            transid: confirmResult.data.momoTransId,
+            amount: confirmResult.data.amount,
+            fee: 0,
+            currency: currencies.VND,
+            extra: JSON.stringify({
+              ...confirmResult.data,
+            }),
+          },
+          { transaction: t }
+        );
+        await UserProfile.increment('accountBalance', {
+          by: confirmResult.data.amount,
+          where: { userId: user.id },
+          transaction: t,
+        });
+        paymentLogger.log({
+          level: 'infor',
+          timestamp: new Date(),
+          data: {
+            confirmRequest,
+            paymentReq,
+            confirmResult,
+          },
+        });
+        return confirmResult.data;
+      })
+      .catch((error) => {
+        // Todo handle refund
+        paymentLogger.log({
+          level: 'error',
+          timestamp: new Date(),
+          data: {
+            error,
+            confirmRequest,
+            paymentReq,
+            confirmResult,
+          },
+        });
+
+        return null;
+      });
+  }
+
+  static async payment({ user, issue }) {
     return sequelize.transaction(async (t) => {
-      await issue.payment.update({ status: 'PAID' }, { transaction: t });
-      await Transaction.create(
+      const transaction = await Transaction.create(
         {
-          paymentId: issue.payment.id,
-          userId: user,
+          userId: user.id,
           type: paymentType.OUTBOUND,
-          method: paymentMethod.MOMO,
-          transid: confirmResult.data.momoTransId,
-          amount: confirmResult.data.amount,
-          fee: 0,
-          currency: currencies.VND,
-          extra: JSON.stringify({
-            ...confirmResult.data,
-          }),
-        },
-        { transaction: t }
-      );
-      await Transaction.create(
-        {
-          paymentId: issue.payment.id,
-          userId: issue.supporting.userId,
-          type: paymentType.INBOUND,
           method: paymentMethod.SYSTEM,
-          transid: confirmResult.data.momoTransId,
-          amount: confirmResult.data.amount,
+          transid: uuid(),
+          amount: issue.payment.total,
           fee: 0,
           currency: currencies.VND,
-          extra: JSON.stringify({
-            ...confirmResult.data,
-          }),
+          extra: JSON.stringify({}),
         },
         { transaction: t }
       );
       await UserProfile.increment('accountBalance', {
-        by: confirmResult.data.amount,
-        where: { userId: issue.supporting.userId },
+        by: -issue.payment.total,
+        where: { userId: user.id },
         transaction: t,
       });
-      paymentLogger.log({
-        level: 'infor',
-        timestamp: new Date(),
-        data: {
-          confirmRequest,
-          paymentReq,
-          confirmResult,
+      await issue.payment.update(
+        {
+          status: paymentStatus.PAID,
         },
-      });
-      return confirmResult.data;
+        { transaction: t }
+      );
+
+      return {
+        transaction,
+      };
     });
   }
 
