@@ -282,4 +282,20 @@ export default class IssueService {
       throw new Error('ISSUE-0411');
     }
   }
+
+  static async update(issue, data) {
+    const { title, location, attachmentIds, lat, lon, paymentMethod } = data;
+
+    if (attachmentIds) {
+      await issue.addAttachments(data.attachmentIds);
+    }
+
+    return issue.update({
+      title,
+      location,
+      lat,
+      lon,
+      paymentMethod,
+    });
+  }
 }

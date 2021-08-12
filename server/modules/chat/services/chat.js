@@ -7,7 +7,13 @@ import ChatChannel from '../../../models/chatChannel';
 import User from '../../../models/user';
 import ChatUser from '../../../models/chatUser';
 import ReceiveIssue from '../../../models/receiveIssue';
-import { commandMessage, issueStatus, command, transactionType } from '../../../constants';
+import {
+  commandMessage,
+  issueStatus,
+  command,
+  transactionType,
+  paymentMethod,
+} from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
@@ -213,6 +219,14 @@ export default class ChatService {
     data.workerFee = +data.workerFee;
     data.customerFee = +data.customerFee;
     const { startTime, endTime, workerFee, customerFee } = data;
+    const { issue } = chatChannel;
+
+    const userProfile = await UserProfile.findOne({ where: { userId: user.id } });
+
+    if (issue.paymentMethod === paymentMethod.MOMO && userProfile.accountBalance < customerFee) {
+      throw new Error('ISSUE-0411');
+    }
+
     await Promise.all([
       ReceiveIssue.update(
         {
