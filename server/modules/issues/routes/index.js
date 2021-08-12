@@ -14,6 +14,7 @@ import {
   cancelIssueSchema,
   estimationSchema,
   materialCostSchema,
+  updateIssueSchema,
 } from '../schema';
 
 const router = Router();
@@ -77,6 +78,15 @@ router.post(
   validator(materialCostSchema),
   validIssueSupport,
   IssueController.noticeMaterialCost
+);
+
+router.patch(
+  '/issues/:issueId',
+  auth,
+  active,
+  verifyOwnerIssue,
+  validator(updateIssueSchema),
+  IssueController.update
 );
 
 export default router;
