@@ -44,7 +44,7 @@ router
   .route('/me/session-roles')
   .put(auth, active, validator(setRoleSchema), UserController.changeSessionRole);
 router.route('/refresh-token').post(validator(refreshTokenSchema), AuthController.refreshToken);
-router.route('/me').get(auth, AuthController.userInfo);
+router.route('/me').get(auth, active, AuthController.userInfo);
 router.route('/me').patch(auth, active, validator(updateUserSchema), AuthController.updateUser);
 router
   .route('/users/:userId/verify')
