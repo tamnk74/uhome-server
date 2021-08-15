@@ -7,7 +7,7 @@ global.__rootDir = Path.resolve(__dirname, '..');
 
 const Http = require('http');
 const { port, env } = require('./config');
-const app = require('./app.js');
+const app = require('./app');
 
 /**
  * Normalize a port into a number, string, or false.

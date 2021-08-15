@@ -14,6 +14,7 @@ import Subscription from '../../../models/subscription';
 import Fcm from '../../../helpers/Fcm';
 import { idCardStatus } from '../../../constants';
 import IdentifyCard from '../../../models/identifyCard';
+import { sendOTP } from '../../../helpers/SmsOTP';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -311,5 +312,17 @@ export default class Userervice {
     user.sessionRole = role;
 
     return user;
+  }
+
+  static async reSendOTP(id) {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      throw new Error('USER-0002');
+    }
+
+    const { phoneNumber } = user;
+
+    await sendOTP(id, phoneNumber);
   }
 }
