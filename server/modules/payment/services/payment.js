@@ -12,22 +12,22 @@ export class PaymentService {
   static async process(user, data) {
     const paymentReq = {
       partnerCode: momoConfig.partnerCode,
-      partnerRefId: user.id,
+      partnerRefId: `${user.id}-${Date.now()}`,
       partnerTransId: user.id,
-      amount: data.amount,
-      description: 'Thanh toan dich vu uhome qua momo',
+      amount: +data.amount,
     };
     const hashData = await Momo.encryptRSA(paymentReq);
+    console.log(JSON.stringify(paymentReq), hashData);
 
     const { data: payment } = await axios.post(momoConfig.requestPaymentUrl, {
-      partnerCode: momoConfig.partnerCode,
-      partnerRefId: user.id,
+      partnerCode: paymentReq.partnerCode,
+      partnerRefId: paymentReq.partnerRefId,
       customerNumber: data.phoneNumber,
       appData: data.token,
+      description: 'Nạp tiền vào ví Uhome',
       hash: hashData,
       version: 2.0,
       payType: 3,
-      description: 'Thanh toan dich vu uhome qua momo',
     });
     if (+payment.status !== 0) {
       paymentLogger.log({
@@ -40,12 +40,11 @@ export class PaymentService {
       });
       throw new Error('PAY-0001');
     }
-    const requestId = user.id;
     const confirmRequest = {
       partnerCode: momoConfig.partnerCode,
-      partnerRefId: user.id,
+      partnerRefId: paymentReq.partnerRefId,
       requestType: 'capture',
-      requestId,
+      requestId: paymentReq.partnerRefId,
       momoTransId: payment.transid,
     };
     const signature = Momo.createSignature(confirmRequest);
@@ -66,6 +65,15 @@ export class PaymentService {
       });
       throw new Error('PAY-0002');
     }
+
+    paymentLogger.log({
+      level: 'info',
+      timestamp: new Date(),
+      data: {
+        confirmRequest,
+        confirmResult,
+      },
+    });
 
     return sequelize
       .transaction(async (t) => {
@@ -89,15 +97,7 @@ export class PaymentService {
           where: { userId: user.id },
           transaction: t,
         });
-        paymentLogger.log({
-          level: 'infor',
-          timestamp: new Date(),
-          data: {
-            confirmRequest,
-            paymentReq,
-            confirmResult,
-          },
-        });
+
         return confirmResult.data;
       })
       .catch((error) => {
