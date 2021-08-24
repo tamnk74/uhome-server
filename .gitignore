@@ -125,3 +125,4 @@ dist
 *.DS_Store
 firebase-admin-config.json
 momo_public_key
+momo.pub
