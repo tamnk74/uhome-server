@@ -7,6 +7,7 @@ import UserProfile from 'models/userProfile';
 import sequelize from 'databases/database';
 import uuid from 'uuid';
 import { paymentStatus } from 'constants';
+import WithdrawRequestion from 'models/withdrawRequestion';
 
 export class PaymentService {
   static async process(user, data) {
@@ -169,5 +170,28 @@ export class PaymentService {
       ...momoResponse,
       signature,
     };
+  }
+
+  static async withdraw(user, data) {
+    const { amount, paymentMethod } = data;
+
+    const userProfile = await UserProfile.findOne({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    if (userProfile.accountBalance < amount) {
+      throw new Error('PAY-0411');
+    }
+    userProfile.accountBalance -= amount;
+
+    await userProfile.save();
+
+    return WithdrawRequestion.create({
+      amount,
+      paymentMethod,
+      userId: user.id,
+    });
   }
 }
