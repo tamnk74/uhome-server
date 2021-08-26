@@ -4,10 +4,12 @@ import { momoConfig } from 'config';
 import { Momo, paymentLogger } from 'helpers';
 import Transaction from 'models/transaction';
 import UserProfile from 'models/userProfile';
+import TransactionHistory from 'models/transactionHistory';
 import sequelize from 'databases/database';
-import uuid from 'uuid';
+import uuid, { v4 as uuidv4 } from 'uuid';
 import { paymentStatus } from 'constants';
 import WithdrawRequestion from 'models/withdrawRequestion';
+import { transactionType } from 'constants/issue';
 
 export class PaymentService {
   static async process(user, data) {
@@ -18,7 +20,6 @@ export class PaymentService {
       amount: +data.amount,
     };
     const hashData = await Momo.encryptRSA(paymentReq);
-    console.log(JSON.stringify(paymentReq), hashData);
 
     const { data: payment } = await axios.post(momoConfig.requestPaymentUrl, {
       partnerCode: paymentReq.partnerCode,
@@ -41,6 +42,78 @@ export class PaymentService {
       });
       throw new Error('PAY-0001');
     }
+
+    return sequelize
+      .transaction(async (t) => {
+        await Transaction.create(
+          {
+            userId: user.id,
+            type: paymentType.INBOUND,
+            method: paymentMethod.MOMO,
+            transid: payment.transid,
+            amount: payment.amount,
+            fee: 0,
+            currency: currencies.VND,
+            extra: JSON.stringify(payment),
+          },
+          { transaction: t }
+        );
+        await UserProfile.increment('accountBalance', {
+          by: payment.amount,
+          where: { userId: user.id },
+          transaction: t,
+        });
+        await TransactionHistory.create(
+          {
+            id: uuidv4(),
+            userId: user.id,
+            amount: payment.amount,
+            issueId: null,
+            type: transactionType.DEPOSIT,
+            currency: currencies.VND,
+            extra: JSON.stringify({
+              ...payment,
+              method: paymentMethod.MOMO,
+              currency: currencies.VND,
+              customerNumber: data.phoneNumber,
+              payAt: new Date(),
+            }),
+          },
+          {
+            transaction: t,
+          }
+        );
+        const confirmResult = await PaymentService.confirmPayin(paymentReq, payment, data);
+        paymentLogger.log({
+          level: 'info',
+          timestamp: new Date(),
+          data: {
+            paymentReq,
+            confirmResult,
+          },
+        });
+        const profile = await UserProfile.findOne({ where: { userId: user.id } });
+
+        return {
+          ...confirmResult.data,
+          account_balance: profile.accountBalance,
+        };
+      })
+      .catch(async (error) => {
+        paymentLogger.log({
+          level: 'error',
+          timestamp: new Date(),
+          data: {
+            error,
+            paymentReq,
+          },
+        });
+        await PaymentService.cancelPayin(paymentReq, payment, data);
+        throw error;
+      });
+  }
+
+  static async confirmPayin(paymentReq, payment, data) {
     const confirmRequest = {
       partnerCode: momoConfig.partnerCode,
       partnerRefId: paymentReq.partnerRefId,
@@ -67,54 +140,33 @@ export class PaymentService {
       throw new Error('PAY-0002');
     }
 
-    paymentLogger.log({
-      level: 'info',
-      timestamp: new Date(),
-      data: {
-        confirmRequest,
-        confirmResult,
-      },
-    });
+    return confirmResult;
+  }
 
-    return sequelize
-      .transaction(async (t) => {
-        await Transaction.create(
-          {
-            userId: user.id,
-            type: paymentType.INBOUND,
-            method: paymentMethod.MOMO,
-            transid: confirmResult.data.momoTransId,
-            amount: confirmResult.data.amount,
-            fee: 0,
-            currency: currencies.VND,
-            extra: JSON.stringify({
-              ...confirmResult.data,
-            }),
-          },
-          { transaction: t }
-        );
-        await UserProfile.increment('accountBalance', {
-          by: confirmResult.data.amount,
-          where: { userId: user.id },
-          transaction: t,
-        });
-
-        return confirmResult.data;
+  static async cancelPayin(paymentReq, payment, data) {
+    const confirmRequest = {
+      partnerCode: momoConfig.partnerCode,
+      partnerRefId: paymentReq.partnerRefId,
+      requestType: 'revertAuthorize',
+      requestId: paymentReq.partnerRefId,
+      momoTransId: payment.transid,
+    };
+    const signature = Momo.createSignature(confirmRequest);
+    await axios
+      .post(momoConfig.confirmPaymentUrl, {
+        ...confirmRequest,
+        signature,
+        customerNumber: data.phoneNumber,
       })
-      .catch((error) => {
-        // Todo handle refund
+      .catch((confirmError) => {
         paymentLogger.log({
           level: 'error',
           timestamp: new Date(),
           data: {
-            error,
-            confirmRequest,
+            confirmError,
             paymentReq,
-            confirmResult,
           },
         });
-
-        return null;
       });
   }
 
@@ -133,11 +185,13 @@ export class PaymentService {
         },
         { transaction: t }
       );
-      await UserProfile.increment('accountBalance', {
+      const result = await UserProfile.increment('accountBalance', {
         by: -issue.payment.total,
         where: { userId: user.id },
         transaction: t,
       });
+
+      console.log(result);
       await issue.payment.update(
         {
           status: paymentStatus.PAID,
