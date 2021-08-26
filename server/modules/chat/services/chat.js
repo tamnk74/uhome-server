@@ -1,5 +1,6 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
 import Sequelize, { Op } from 'sequelize';
+import { get } from 'lodash';
 
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
@@ -284,6 +285,28 @@ export default class ChatService {
       },
     });
 
+    if (issue.paymentMethod === paymentMethod.MOMO) {
+      const [customerProfile, receiveIssue] = await Promise.all([
+        UserProfile.findOne({
+          where: {
+            userId: user.id,
+          },
+        }),
+        ReceiveIssue.findOne({
+          where: {
+            issueId: issue.id,
+            userId: member.userId,
+          },
+        }),
+      ]);
+
+      const customerFee = get(receiveIssue, 'customerFee', 0);
+
+      if (customerProfile.accountBalance < customerFee + data.totalCost) {
+        throw new Error('ISSUE-0411');
+      }
+    }
+
     await Promise.all([
       member
         ? IssueMaterial.create({
@@ -451,7 +474,7 @@ export default class ChatService {
         ),
         UserProfile.update(
           {
-            accountBalance: Sequelize.literal(`account_balance + ${customerFee}`),
+            accountBalance: Sequelize.literal(`account_balance - ${customerFee}`),
           },
           {
             where: {
