@@ -36,3 +36,10 @@ export const idCardStatus = Object.freeze({
   VERIFIED: 2,
   FAIL_VERIFIED: 3,
 });
+
+export const withdrawStatus = Object.freeze({
+  OPEN: 'OPEN',
+  CANCELED: 'CANCELED',
+  DONE: 'DONE',
+  FAILED: 'FAILED',
+});

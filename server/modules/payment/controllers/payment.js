@@ -32,4 +32,14 @@ export default class PaymentController {
       return next(e);
     }
   }
+
+  static async withdraw(req, res, next) {
+    try {
+      await PaymentService.withdraw(req.user, req.body);
+
+      return res.status(204).send();
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
