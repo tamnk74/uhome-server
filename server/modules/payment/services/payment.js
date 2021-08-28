@@ -54,7 +54,7 @@ export class PaymentService {
             amount: payment.amount,
             fee: 0,
             currency: currencies.VND,
-            extra: JSON.stringify(payment),
+            extra: payment,
           },
           { transaction: t }
         );
@@ -71,13 +71,13 @@ export class PaymentService {
             issueId: null,
             type: transactionType.DEPOSIT,
             currency: currencies.VND,
-            extra: JSON.stringify({
+            extra: {
               ...payment,
               method: paymentMethod.MOMO,
               currency: currencies.VND,
               customerNumber: data.phoneNumber,
               payAt: new Date(),
-            }),
+            },
           },
           {
             transaction: t,
@@ -181,7 +181,7 @@ export class PaymentService {
           amount: issue.payment.total,
           fee: 0,
           currency: currencies.VND,
-          extra: JSON.stringify({}),
+          extra: {},
         },
         { transaction: t }
       );
