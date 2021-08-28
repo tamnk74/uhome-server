@@ -70,11 +70,10 @@ export class PaymentService {
             amount: payment.amount,
             issueId: null,
             type: transactionType.DEPOSIT,
+            method: paymentMethod.MOMO,
             currency: currencies.VND,
             extra: {
               ...payment,
-              method: paymentMethod.MOMO,
-              currency: currencies.VND,
               customerNumber: data.phoneNumber,
               payAt: new Date(),
             },
