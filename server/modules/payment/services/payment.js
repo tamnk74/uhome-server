@@ -8,7 +8,6 @@ import TransactionHistory from 'models/transactionHistory';
 import sequelize from 'databases/database';
 import uuid, { v4 as uuidv4 } from 'uuid';
 import { paymentStatus } from 'constants';
-import WithdrawRequestion from 'models/withdrawRequestion';
 import { transactionType } from 'constants/issue';
 
 export class PaymentService {
@@ -239,12 +238,20 @@ export class PaymentService {
     }
     userProfile.accountBalance -= amount;
 
-    await userProfile.save();
-
-    return WithdrawRequestion.create({
-      amount,
-      paymentMethod,
-      userId: user.id,
+    return sequelize.transaction(async (t) => {
+      await userProfile.save({ transaction: t });
+      return TransactionHistory.create(
+        {
+          id: uuidv4(),
+          amount,
+          method: paymentMethod,
+          userId: user.id,
+          type: transactionType.WITHDRAW,
+          status: paymentStatus.OPEN,
+          currency: currencies.VND,
+        },
+        { transaction: t }
+      );
     });
   }
 }
