@@ -10,6 +10,7 @@ export const httpError = Object.freeze({
 export const paymentStatus = Object.freeze({
   OPEN: 'OPEN',
   PAID: 'PAID',
+  FAIL: 'FAIL',
 });
 
 export const paymentType = Object.freeze({

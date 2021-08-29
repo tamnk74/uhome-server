@@ -5,7 +5,7 @@ import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue } from '../../../helpers/Queue';
 import RequestSupporting from '../../../models/requestSupporting';
-import { issueStatus, command, commandMessage, paymentMethod } from '../../../constants';
+import { issueStatus, command, commandMessage } from '../../../constants';
 import UserProfile from '../../../models/userProfile';
 import ReceiveIsssue from '../../../models/receiveIssue';
 import sequelize from '../../../databases/database';
@@ -18,12 +18,8 @@ import FeeCategory from '../../../models/feeCategory';
 import Fee from '../../../helpers/Fee';
 
 export default class IssueService {
-  static async create(user, issue) {
-    if (issue.paymentMethod === paymentMethod.MOMO) {
-      await IssueService.validateMoney(user.id, issue.categoryIds);
-    }
-
-    issue = await Issue.addIssue(issue);
+  static async create(user, data) {
+    const issue = await Issue.addIssue(data);
     notificationQueue.add('new_issue', { id: issue.id });
     return this.getDetail(user, issue.id);
   }

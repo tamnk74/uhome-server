@@ -33,7 +33,7 @@ module.exports = {
         type: Sequelize.DataTypes.ENUM('DEPOSIT', 'WITHDRAW', 'WAGE', 'PAY'),
       },
       method: {
-        type: Sequelize.ENUM('system', 'momo'),
+        type: Sequelize.ENUM('system', 'momo', 'cash'),
         allowNull: false,
         defaultValue: 'system',
       },

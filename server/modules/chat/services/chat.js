@@ -275,7 +275,9 @@ export default class ChatService {
   }
 
   static async approveMaterialCost({ chatChannel, user, data }) {
+    data.totalCost = +data.totalCost;
     const { issue } = chatChannel;
+
     const member = await ChatMember.findOne({
       where: {
         channelId: chatChannel.id,
