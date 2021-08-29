@@ -44,7 +44,7 @@ TransactionHistory.init(
     status: {
       type: Sequelize.ENUM(Object.values(paymentStatus)),
       allowNull: false,
-      defaultValue: 'SUCCESS',
+      defaultValue: paymentStatus.PAID,
     },
     failReason: {
       type: Sequelize.TEXT('medium'),
