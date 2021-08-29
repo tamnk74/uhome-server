@@ -5,6 +5,7 @@ import BaseModel from './model';
 import sequelize from '../databases/database';
 import User from './user';
 import Issue from './issue';
+import { paymentMethod, paymentStatus } from '../constants';
 
 class TransactionHistory extends BaseModel {}
 
@@ -26,7 +27,7 @@ TransactionHistory.init(
       type: Sequelize.ENUM('DEPOSIT', 'WITHDRAW', 'WAGE', 'PAY'),
     },
     method: {
-      type: Sequelize.ENUM('system', 'momo'),
+      type: Sequelize.ENUM(Object.values(paymentMethod)),
       allowNull: false,
       defaultValue: 'system',
     },
@@ -39,6 +40,15 @@ TransactionHistory.init(
       type: Sequelize.DataTypes.JSON,
       allowNull: false,
       defaultValue: {},
+    },
+    status: {
+      type: Sequelize.ENUM(Object.values(paymentStatus)),
+      allowNull: false,
+      defaultValue: 'SUCCESS',
+    },
+    failReason: {
+      type: Sequelize.TEXT('medium'),
+      allowNull: true,
     },
     createdAt: {
       defaultValue: Sequelize.NOW,
