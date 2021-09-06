@@ -15,6 +15,10 @@ TransactionHistory.init(
       type: Sequelize.UUID,
       allowNull: false,
     },
+    actorId: {
+      type: Sequelize.UUID,
+      allowNull: true,
+    },
     amount: {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: false,
@@ -76,6 +80,7 @@ TransactionHistory.beforeCreate((instance) => {
 TransactionHistory.baseAttibutes = ['id', 'amount', 'type', 'method', 'currency', 'extra'];
 TransactionHistory.belongsTo(User);
 TransactionHistory.belongsTo(Issue);
+TransactionHistory.belongsTo(User, { as: 'actor', foreignKey: 'actor_id' });
 
 TransactionHistory.tranformResponseData = (transactions = []) => {
   const result = transactions.map((item) => {
