@@ -2,7 +2,6 @@ import omit from 'lodash/omit';
 import Pagination from '../../../helpers/Pagination';
 import UserService from '../services/user';
 import { objectToSnake, distance } from '../../../helpers/Util';
-import { fileSystemConfig } from '../../../config';
 
 export default class UserController {
   static async getIssues(req, res, next) {
@@ -78,12 +77,6 @@ export default class UserController {
       if (!userData.profile) {
         userData.profile = user.profile.toJSON();
         userData.profile.identityCard = JSON.parse(userData.profile.identityCard);
-      }
-      if (userData.profile.identityCard.before) {
-        userData.profile.identityCard.before = `${fileSystemConfig.clout_front}/${userData.profile.identityCard.before}`;
-      }
-      if (userData.profile.identityCard.after) {
-        userData.profile.identityCard.after = `${fileSystemConfig.clout_front}/${userData.profile.identityCard.after}`;
       }
 
       return res.status(200).json(objectToSnake(userData));
