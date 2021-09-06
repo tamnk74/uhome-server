@@ -339,6 +339,12 @@ export default class Userervice {
         attributes: ['id', 'name'],
         required: true,
       },
+      {
+        model: User,
+        attributes: ['id', 'name'],
+        as: 'actor',
+        required: false,
+      },
     ];
 
     if (from) {
