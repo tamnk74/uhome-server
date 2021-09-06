@@ -445,6 +445,7 @@ export default class ChatService {
         issueId,
         type: transactionType.WAGE,
         extra,
+        actorId: user.id,
       },
       {
         id: uuidv4(),
@@ -453,6 +454,7 @@ export default class ChatService {
         issueId,
         type: transactionType.PAY,
         extra,
+        actorId: receiveIssue.userId,
       },
     ];
 
