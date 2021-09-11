@@ -76,7 +76,9 @@ workflows:
           requires:
             - build # Only deploy once build job has completed
           filters:
-            <<: *filters-develop
+            branches:
+              only:
+                - develop
   staging:
     jobs:
       - build:
