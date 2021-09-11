@@ -1,3 +1,4 @@
+import { isNil } from 'lodash';
 import errorFactory from '../../../errors/ErrorFactory';
 import User from '../../../models/user';
 import JWT from '../../../helpers/JWT';
@@ -27,7 +28,7 @@ export default class AuthService {
       JWT.generateToken(user.toPayload()),
       JWT.generateRefreshToken(user.id),
     ]);
-    await RedisService.saveAccessToken(user.id, accessToken);
+    await RedisService.saveAccessToken(user.id, accessToken, user.sessionRole);
     return {
       accessToken,
       refreshToken,
@@ -35,7 +36,7 @@ export default class AuthService {
     };
   }
 
-  static async getUserById(userId) {
+  static async getUserById(userId, sessionRole) {
     const user = await User.findByPk(userId, {
       attributes: User.getAttributes(),
       include: [
@@ -59,6 +60,10 @@ export default class AuthService {
         ? `${fileSystemConfig.clout_front}/${identityCard.after}`
         : null;
       user.profile.identityCard = identityCard;
+    }
+
+    if (!isNil(sessionRole)) {
+      user.sessionRole = sessionRole;
     }
 
     return user;
@@ -106,8 +111,9 @@ export default class AuthService {
     const [newAccessToken, newRefreshToken] = await Promise.all([
       JWT.generateToken(user.toPayload(jwtdata.payload.role)),
       JWT.generateRefreshToken(user.id),
+      RedisService.removeAccessToken(user.id, accessToken),
     ]);
-    await RedisService.saveAccessToken(user.id, newAccessToken);
+    await RedisService.saveAccessToken(user.id, newAccessToken, user.sessionRole);
     return {
       accessToken: newAccessToken,
       tokenType: 'Bearer',

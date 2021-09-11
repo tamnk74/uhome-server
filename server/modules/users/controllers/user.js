@@ -1,4 +1,5 @@
 import omit from 'lodash/omit';
+import { ExtractJwt } from 'passport-jwt';
 import Pagination from '../../../helpers/Pagination';
 import UserService from '../services/user';
 import { objectToSnake, distance } from '../../../helpers/Util';
@@ -146,9 +147,12 @@ export default class UserController {
 
   static async changeSessionRole(req, res, next) {
     try {
+      const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+
       const user = await UserService.changeSesionRole({
         user: req.user,
         role: req.body.role,
+        accessToken,
       });
 
       return res.status(200).json(objectToSnake(user));

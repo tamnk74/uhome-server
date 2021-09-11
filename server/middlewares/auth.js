@@ -1,20 +1,25 @@
 import passport from 'passport';
+import { ExtractJwt } from 'passport-jwt';
 import errorFactory from '../errors/ErrorFactory';
 import { acl } from '../constants';
-import User from '../models/user';
+import RedisService from '../helpers/Redis';
 
 export default (req, res, next) => {
   passport.authenticate('jwt', { session: false }, async (err, jwtPayload) => {
-    let user = jwtPayload;
+    const user = jwtPayload;
+    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
 
     if (!user) {
+      await RedisService.removeAccessToken(user.id, token);
+
       return next(errorFactory.getError('ERR-0401'));
     }
 
-    user = await User.findByPk(user.id);
-    const { sessionRole } = user;
+    const sessionRole = await RedisService.getRoleAccessToken(user.id, token);
 
     if (!sessionRole) {
+      await RedisService.removeAccessToken(user.id, token);
+
       return next(errorFactory.getError('ERR-0410'));
     }
 
@@ -24,7 +29,9 @@ export default (req, res, next) => {
       return next(errorFactory.getError('ERR-0403'));
     }
 
+    user.sessionRole = sessionRole;
     req.user = user;
+
     next();
   })(req, res);
 };
