@@ -1,5 +1,5 @@
 version: 2.1
-orbs: 
+orbs:
   slack: circleci/slack@4.4.4
 jobs:
   build:
@@ -10,25 +10,26 @@ jobs:
       - run:
           name: NPM install
           command: npm install
-      - run: 
+      - run:
           name: NPM build
           command: npm run build
   deploy-develop:
     machine:
       enabled: true
     steps:
-      - run: 
+      - run:
           name: Deployment server over SSH
           command: |
             ssh -oStrictHostKeyChecking=no -v $USER@$IP_DEV "
-              cd uhome-server
-              git reset --hard HEAD~1
+              cd ~/uhome-server
+              cp .env backup.env
+              git reset --hard HEAD
               git pull origin develop
-              ansible local -m copy -a 'src=secrects-dev.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
+              ansible local -m copy -a 'src=deploy/secrets-dev.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
               npm install
               npm run build
-              pm2 restart all
               npx sequelize db:migrate
+              pm2 restart all
               pm2 status"
       - slack/notify:
           event: fail
@@ -41,14 +42,14 @@ jobs:
     machine:
       enabled: true
     steps:
-      - run: 
+      - run:
           name: Deployment server over SSH
           command: |
             ssh -oStrictHostKeyChecking=no -v $USER@$IP_STG "
               cd uhome-server
               git fetch origin && git fetch origin --tags
               git reset --hard $CIRCLE_TAG
-              ansible local -m copy -a 'src=secrects-stg.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
+              ansible local -m copy -a 'src=deploy/secrets-stg.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
               npm install
               npm run build
               pm2 restart all
@@ -67,9 +68,9 @@ workflows:
   develop:
     jobs:
       - build:
-          filters: &filters-develop 
+          filters: &filters-develop
             branches:
-              only: 
+              only:
                 - develop
       - deploy-develop:
           requires:
@@ -88,4 +89,4 @@ workflows:
           requires:
             - build # Only deploy once build job has completed
           filters:
-            <<: *filters-staging 
+            <<: *filters-staging
