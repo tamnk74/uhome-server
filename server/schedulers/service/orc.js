@@ -69,12 +69,12 @@ export default class OrcService {
       return done();
     } catch (error) {
       sentryConfig.Sentry.captureException(error);
-      OrcService.handleError(userId, res);
+      OrcService.handleError(userId, res, error);
       done(error);
     }
   }
 
-  static async handleError(userId, res) {
+  static async handleError(userId, res, error) {
     const identifyCard = await IdentifyCard.findOne({
       where: {
         userId,
@@ -96,7 +96,7 @@ export default class OrcService {
         dob: get(identifyCard, 'dob', '123456789012'),
         address: get(identifyCard, 'address', '123456789012'),
         hometown: get(identifyCard, 'hometown', '123456789012'),
-        raw: res,
+        raw: res || error.message,
         createdAt: new Date(),
         updatedAt: new Date(),
       }),
