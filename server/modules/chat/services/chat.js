@@ -381,7 +381,9 @@ export default class ChatService {
             content: comment,
           })
         : null,
-      ChatService.finishIssue({ user, receiveIssue, rate }),
+      issue.paymentMethod === paymentMethod.SYSTEM
+        ? ChatService.finishIssue({ user, receiveIssue, rate })
+        : null,
     ]);
     await this.sendMesage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
   }
