@@ -381,7 +381,7 @@ export default class ChatService {
             content: comment,
           })
         : null,
-      issue.paymentMethod === paymentMethod.SYSTEM
+      issue.paymentMethod !== paymentMethod.CASH
         ? ChatService.finishIssue({ user, receiveIssue, rate })
         : null,
     ]);
