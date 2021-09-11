@@ -1,5 +1,6 @@
 import omit from 'lodash/omit';
 import { ExtractJwt } from 'passport-jwt';
+import { get } from 'lodash';
 import AuthService from '../services/auth';
 import { objectToSnake } from '../../../helpers/Util';
 
@@ -54,7 +55,8 @@ export default class AuthController {
 
   static async userInfo(req, res, next) {
     try {
-      const user = await AuthService.getUserById(req.user.id);
+      const sessionRole = get(req, 'user.sessionRole');
+      const user = await AuthService.getUserById(req.user.id, sessionRole);
       const userData = omit(user.toJSON(), [
         'verify_code',
         'password',

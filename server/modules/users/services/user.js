@@ -17,6 +17,7 @@ import { idCardStatus } from '../../../constants';
 import IdentifyCard from '../../../models/identifyCard';
 import TransactionHistory from '../../../models/transactionHistory';
 import { sendOTP } from '../../../helpers/SmsOTP';
+import RedisService from '../../../helpers/Redis';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -299,17 +300,20 @@ export default class Userervice {
     );
   }
 
-  static async changeSesionRole({ user, role }) {
-    await User.update(
-      {
-        sessionRole: role,
-      },
-      {
-        where: {
-          id: user.id,
+  static async changeSesionRole({ user, role, accessToken }) {
+    await Promise.all([
+      User.update(
+        {
+          sessionRole: role,
         },
-      }
-    );
+        {
+          where: {
+            id: user.id,
+          },
+        }
+      ),
+      RedisService.saveAccessToken(user.id, accessToken, role),
+    ]);
 
     user.sessionRole = role;
 
