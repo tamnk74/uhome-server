@@ -10,5 +10,11 @@
     "error": "Maximum request",
     "title": "Maximum request",
     "detail": "Maximum request"
+  },
+  "ISSUE-0412": {
+    "status": 400,
+    "error": "Issue do not have estimation",
+    "title": "Issue do not have estimation",
+    "detail": "Issue do not have estimation"
   }
 }

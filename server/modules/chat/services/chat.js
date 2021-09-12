@@ -140,6 +140,9 @@ export default class ChatService {
 
   static async requestCommand(type, chatChannel, user) {
     if (type === command.REQUEST_ACCEPTANCE) {
+      const { issue } = chatChannel;
+      await ReceiveIssue.findByIssueIdAndCheckHasEstimation(issue.id, issueStatus.IN_PROGRESS);
+
       await Promise.all([
         ReceiveIssue.update(
           {
@@ -353,11 +356,10 @@ export default class ChatService {
   static async setRating({ chatChannel, user, data }) {
     const { issue } = chatChannel;
     const { rate, comment = '', messageSid } = data;
-    const receiveIssue = await ReceiveIssue.findOne({
-      where: {
-        issueId: issue.id,
-      },
-    });
+    const receiveIssue = await ReceiveIssue.findByIssueIdAndCheckHasEstimation(
+      issue.id,
+      issueStatus.IN_PROGRESS
+    );
 
     await Promise.all([
       Issue.update(
