@@ -215,6 +215,7 @@ export default class ChatService {
       chatChannelId: chatChannel.id,
       actorId: user.id,
       message,
+      commandName,
     });
   }
 
