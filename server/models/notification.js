@@ -55,6 +55,11 @@ Notification.beforeCreate((notification) => {
 });
 
 // eslint-disable-next-line no-undef
-Notification.getTitle = (key, paramas = {}) => i18n.__(key, paramas);
+Notification.getTitle = (key, paramas = {}) => {
+  i18n.setLocale('vi');
+
+  // eslint-disable-next-line no-undef
+  return __(key, paramas);
+};
 
 module.exports = Notification;
