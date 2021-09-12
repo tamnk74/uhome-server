@@ -257,6 +257,7 @@ export default class IssueService {
       chatChannelId: chatChannel.id,
       actorId: user.id,
       message,
+      commandName: command,
     });
   }
 

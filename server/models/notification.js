@@ -53,4 +53,7 @@ Notification.beforeCreate((notification) => {
   notification.id = uuid.v4();
 });
 
+// eslint-disable-next-line no-undef
+Notification.getTitle = (key, paramas = {}) => __(key, paramas);
+
 module.exports = Notification;
