@@ -1,4 +1,4 @@
-import { find, get } from 'lodash';
+import { find, get, isEmpty } from 'lodash';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import OcrService from '../../helpers/Ocr';
@@ -36,36 +36,47 @@ export default class OrcService {
       const ocrRes = await OcrService.getIdentifyCard(frontSide, backSide);
       res = ocrRes.data;
       const { errorCode } = res;
-      const { data } = res;
-      let dateFormat = 'DD-MM-YYYY';
-      let cardFront = find(data, (o) => {
-        return o.type === '9_id_card_front';
-      });
 
-      if (!cardFront) {
-        cardFront = find(data, (o) => {
-          return o.type === '12_id_card_front';
+      if (errorCode === '0') {
+        const { data } = res;
+        let dateFormat = 'DD-MM-YYYY';
+        let cardFront = find(data, (o) => {
+          return o.type === '9_id_card_front';
         });
-        dateFormat = 'DD/MM/YYYY';
+
+        if (!cardFront) {
+          cardFront = find(data, (o) => {
+            return o.type === '12_id_card_front';
+          });
+          dateFormat = 'DD/MM/YYYY';
+        }
+
+        const informationFront = get(cardFront, 'info', {});
+
+        user.idCardStatus = isEmpty(informationFront)
+          ? idCardStatus.FAIL_VERIFIED
+          : idCardStatus.VERIFIED;
+
+        await Promise.all([
+          IdentifyCard.upsert({
+            userId,
+            idNum: get(informationFront, 'id', '123456789012'),
+            name: get(informationFront, 'name', '123456789012'),
+            dob: isEmpty(informationFront)
+              ? dayjs()
+              : dayjs(get(informationFront, 'dob'), dateFormat),
+            hometown: get(informationFront, 'hometown', '123456789012'),
+            address: get(informationFront, 'address', '123456789012'),
+            raw: res,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }),
+          user.save(),
+        ]);
+      } else {
+        OrcService.handleError(userId, res, {});
       }
 
-      const informationFront = cardFront.info;
-
-      user.idCardStatus = errorCode === '0' ? idCardStatus.VERIFIED : idCardStatus.FAIL_VERIFIED;
-      await Promise.all([
-        IdentifyCard.upsert({
-          userId,
-          idNum: informationFront.id,
-          name: informationFront.name,
-          dob: dayjs(informationFront.dob, dateFormat),
-          hometown: informationFront.hometown,
-          address: informationFront.address,
-          raw: res,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }),
-        user.save(),
-      ]);
       return done();
     } catch (error) {
       sentryConfig.Sentry.captureException(error);
@@ -93,7 +104,7 @@ export default class OrcService {
         userId,
         idNum: get(identifyCard, 'idNum', '123456789012'),
         name: get(identifyCard, 'name', '123456789012'),
-        dob: get(identifyCard, 'dob', '123456789012'),
+        dob: dayjs(),
         address: get(identifyCard, 'address', '123456789012'),
         hometown: get(identifyCard, 'hometown', '123456789012'),
         raw: res || error.message,
