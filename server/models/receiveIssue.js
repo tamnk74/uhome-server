@@ -1,5 +1,7 @@
 import Sequelize from 'sequelize';
 import uuid from 'uuid';
+import { isEmpty } from 'lodash';
+
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import { issueStatus } from '../constants';
@@ -115,4 +117,20 @@ ReceiveIssue.cancel = ({ receiveIssue, reason }) => {
     return receiveIssue;
   });
 };
+
+ReceiveIssue.findByIssueIdAndCheckHasEstimation = async (issueId, status) => {
+  const receiveIssue = await ReceiveIssue.findOne({
+    where: {
+      issueId,
+      status,
+    },
+  });
+
+  if (isEmpty(receiveIssue) || isEmpty(receiveIssue.startTime) || isEmpty(receiveIssue.endTime)) {
+    throw new Error('ISSUE-0412');
+  }
+
+  return receiveIssue;
+};
+
 module.exports = ReceiveIssue;
