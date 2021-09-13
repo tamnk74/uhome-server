@@ -1,8 +1,8 @@
 import Sequelize from 'sequelize';
 import uuid from 'uuid';
-import i18n from 'i18n';
 import BaseModel from './model';
 import sequelize from '../databases/database';
+import { i18n } from '../config/i18n';
 
 class Notification extends BaseModel {}
 
@@ -56,8 +56,6 @@ Notification.beforeCreate((notification) => {
 
 // eslint-disable-next-line no-undef
 Notification.getTitle = (key, paramas = {}) => {
-  i18n.setLocale('vi');
-
   return i18n.__(key, paramas);
 };
 
