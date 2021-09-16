@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 
@@ -13,6 +14,9 @@ Category.init(
     name: {
       type: Sequelize.STRING,
       allowNull: false,
+    },
+    code: {
+      type: Sequelize.STRING,
     },
     description: {
       type: Sequelize.STRING,
@@ -45,5 +49,9 @@ Category.init(
 );
 
 Category.baseAttibutes = ['id', 'name', 'description', 'thumbnail'];
+
+Category.beforeCreate((instance) => {
+  instance.id = uuid.v4();
+});
 
 module.exports = Category;
