@@ -5,7 +5,7 @@ const FeeCategory = require('../../models/feeCategory');
 const createData = async (data) => {
   const category = await Category.findOne({
     where: {
-      name: data.name,
+      code: data.code,
     },
   });
   if (category) {
@@ -33,29 +33,49 @@ module.exports = {
   up: () => {
     const categories = [
       {
-        name: 'Sửa chữa hệ thống điện',
+        code: 'DL',
         min: 550000,
         max: 600000,
       },
       {
-        name: 'Sửa chữa đồ điện tử',
+        code: 'DM',
         min: 400000,
         max: 450000,
       },
       {
-        name: 'Sửa chữa hệ thống nước',
+        code: 'DN',
         min: 500000,
         max: 550000,
       },
       {
-        name: 'Sửa chữa đồ gỗ, nội thất',
+        code: 'NT',
         min: 600000,
         max: 650000,
       },
       {
-        name: 'Sửa chữa nhà cửa',
+        code: 'XTVV',
+        min: 450000,
+        max: 500000,
+      },
+      {
+        code: 'TVN',
         min: 700000,
         max: 750000,
+      },
+      {
+        code: 'CK',
+        min: 650000,
+        max: 700000,
+      },
+      {
+        code: 'SN',
+        min: 550000,
+        max: 600000,
+      },
+      {
+        code: 'NK',
+        min: 750000,
+        max: 800000,
       },
     ];
     const promises = categories.map((item) => createData(item));

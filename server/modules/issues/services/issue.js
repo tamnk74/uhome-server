@@ -197,7 +197,6 @@ export default class IssueService {
       }),
     ]);
     data.fee = Fee.getFee(feeConfiguration, feeCategory, dayjs(startTime), dayjs(endTime), 0);
-
     await this.sendMesage(command.SUBMIT_ESTIMATION_TIME, user, issue, data);
   }
 
