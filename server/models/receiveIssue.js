@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import uuid from 'uuid';
-import { isEmpty } from 'lodash';
+import { isNil } from 'lodash';
 
 import BaseModel from './model';
 import sequelize from '../databases/database';
@@ -126,7 +126,7 @@ ReceiveIssue.findByIssueIdAndCheckHasEstimation = async (issueId, status) => {
     },
   });
 
-  if (isEmpty(receiveIssue) || isEmpty(receiveIssue.startTime) || isEmpty(receiveIssue.endTime)) {
+  if (isNil(receiveIssue) || isNil(receiveIssue.startTime) || isNil(receiveIssue.endTime)) {
     throw new Error('ISSUE-0412');
   }
 
