@@ -141,7 +141,10 @@ export default class ChatService {
   static async requestCommand(type, chatChannel, user) {
     if (type === command.REQUEST_ACCEPTANCE) {
       const { issue } = chatChannel;
-      await ReceiveIssue.findByIssueIdAndCheckHasEstimation(issue.id, issueStatus.IN_PROGRESS);
+      await ReceiveIssue.findByIssueIdAndCheckHasEstimation(issue.id, [
+        issueStatus.IN_PROGRESS,
+        issueStatus.WAITING_VERIFY,
+      ]);
 
       await Promise.all([
         ReceiveIssue.update(
