@@ -118,11 +118,11 @@ ReceiveIssue.cancel = ({ receiveIssue, reason }) => {
   });
 };
 
-ReceiveIssue.findByIssueIdAndCheckHasEstimation = async (issueId, status) => {
+ReceiveIssue.findByIssueIdAndCheckHasEstimation = async (issueId, statuses = []) => {
   const receiveIssue = await ReceiveIssue.findOne({
     where: {
       issueId,
-      status,
+      status: statuses,
     },
   });
 
