@@ -19,4 +19,18 @@ export default class EventController {
       return next(e);
     }
   }
+
+  static async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const data = req.body;
+      const { file } = req;
+
+      await EventService.update(id, data, file);
+
+      return res.status(204).send();
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

@@ -4,6 +4,7 @@ import BaseModel from './model';
 import sequelize from '../databases/database';
 import EventType from './eventType';
 import EventDetail from './eventDetail';
+import { fileSystemConfig } from '../config';
 
 class Event extends BaseModel {}
 
@@ -22,6 +23,10 @@ Event.init(
     },
     image: {
       type: Sequelize.STRING,
+      get() {
+        const storedValue = this.getDataValue('image');
+        return `${fileSystemConfig.clout_front}/${storedValue}`;
+      },
     },
     from: {
       type: Sequelize.DATE,
