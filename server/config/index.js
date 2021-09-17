@@ -12,6 +12,7 @@ export * from './twilio';
 export * from './sentry';
 export * from './ocr';
 export * from './momo.config';
+export * from './roles';
 
 export const env = process.env.NODE_ENV || 'development';
 export const port = process.env.PORT || 'http://localhost:3000';

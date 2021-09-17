@@ -15,6 +15,6 @@ const multipleUpload = multer({ storage }).array('files');
 
 router
   .route('/attachments')
-  .post(auth, active, multipleUpload, validAttachment, AttachmentController.store);
+  .post(auth(), active, multipleUpload, validAttachment, AttachmentController.store);
 
 export default router;

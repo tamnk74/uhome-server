@@ -1,37 +1,59 @@
 import passport from 'passport';
 import { ExtractJwt } from 'passport-jwt';
 import errorFactory from '../errors/ErrorFactory';
-import { acl } from '../constants';
 import RedisService from '../helpers/Redis';
+import { roleRights } from '../config';
+import { roles } from '../constants';
+import User from '../models/user';
 
-export default (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, async (err, jwtPayload) => {
-    const user = jwtPayload;
-    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
+  if (err || info || !user) {
+    return reject(errorFactory.getError('ERR-0401'));
+  }
+  const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
 
-    if (!user) {
-      await RedisService.removeAccessToken(user.id, token);
+  if (!user) {
+    await RedisService.removeAccessToken(user.id, token);
+    return reject(errorFactory.getError('ERR-0401'));
+  }
 
-      return next(errorFactory.getError('ERR-0401'));
+  const [storedUser, sessionRole] = await Promise.all([
+    User.findByPk(user.id),
+    RedisService.getRoleAccessToken(user.id, token),
+  ]);
+
+  if (storedUser.role === roles.USER && !sessionRole) {
+    await RedisService.removeAccessToken(user.id, token);
+    return reject(errorFactory.getError('ERR-0401'));
+  }
+
+  if (requiredRights.length) {
+    const userRights = roleRights.get(storedUser.role) || [];
+    const sessionRight = roleRights.get(sessionRole) || [];
+
+    const rolesPermision = userRights.concat(sessionRight);
+    const hasRequiredRights = requiredRights.every((requiredRight) =>
+      rolesPermision.includes(requiredRight)
+    );
+    if (!hasRequiredRights) {
+      return reject(errorFactory.getError('ERR-0403'));
     }
+  }
 
-    const sessionRole = await RedisService.getRoleAccessToken(user.id, token);
+  user.sessionRole = sessionRole;
+  user.role = storedUser.role;
+  req.user = user;
+  resolve();
+};
 
-    if (!sessionRole) {
-      await RedisService.removeAccessToken(user.id, token);
-
-      return next(errorFactory.getError('ERR-0401'));
-    }
-
-    const permissions = acl[req.route.path] && acl[req.route.path][req.method];
-
-    if (permissions && !permissions.includes(sessionRole)) {
-      return next(errorFactory.getError('ERR-0403'));
-    }
-
-    user.sessionRole = sessionRole;
-    req.user = user;
-
-    next();
-  })(req, res);
+export default (...requiredRights) => async (req, res, next) => {
+  return new Promise((resolve, reject) => {
+    passport.authenticate(
+      'jwt',
+      { session: false },
+      verifyCallback(req, resolve, reject, requiredRights)
+    )(req, res, next);
+  })
+    .then(() => next())
+    .catch((err) => next(err));
 };

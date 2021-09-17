@@ -11,6 +11,7 @@ export const userRoles = Object.freeze({
 export const roles = Object.freeze({
   USER: 'USER',
   ADMIN: 'ADMIN',
+  CONSULTING: 'CONSULTING',
 });
 
 export const socialAccount = Object.freeze({
