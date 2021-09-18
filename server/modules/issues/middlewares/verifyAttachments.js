@@ -11,7 +11,7 @@ export const verifyAttachments = async (req, res, next) => {
     });
 
     if (req.body.attachmentIds && attachments.length !== req.body.attachmentIds.length) {
-      throw errorFactory.getError('ATTA-0001');
+      return next(errorFactory.getError('ATTA-0001'));
     }
 
     req.attachments = attachments;

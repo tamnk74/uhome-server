@@ -8,11 +8,11 @@ export const isAllowCreateGroupChat = async (req, res, next) => {
     const issue = await Issue.findByPk(issueId);
 
     if (!issue) {
-      throw errorFactory.getError('ISSU-0001');
+      return next(errorFactory.getError('ISSU-0001'));
     }
 
     if (user.id === userId) {
-      throw errorFactory.getError('CHAT-0203');
+      return next(errorFactory.getError('CHAT-0203'));
     }
 
     return next();

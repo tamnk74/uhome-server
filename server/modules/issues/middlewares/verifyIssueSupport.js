@@ -18,15 +18,15 @@ export const verifyIssueSupport = async (req, res, next) => {
     });
 
     if (!receiveIssue) {
-      throw errorFactory.getError('ISSU-0001');
+      return next(errorFactory.getError('ISSU-0001'));
     }
     const { user } = req;
     if (user.sessionRole === userRoles.CUSTOMER && receiveIssue.issue.createdBy !== user.id) {
-      throw errorFactory.getError('ISSU-0001');
+      return next(errorFactory.getError('ISSU-0001'));
     }
 
     if (user.sessionRole === userRoles.WORKER && receiveIssue.userId !== user.id) {
-      throw errorFactory.getError('ISSU-0001');
+      return next(errorFactory.getError('ISSU-0001'));
     }
 
     req.receiveIssue = receiveIssue;

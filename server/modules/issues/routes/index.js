@@ -8,6 +8,7 @@ import {
   verifyIssueSupport,
   validIssueSupport,
   verifyOwnerIssue,
+  verifyCategory,
 } from '../middlewares';
 import {
   createIssueSchema,
@@ -35,6 +36,7 @@ router.post(
   auth,
   active,
   verifyIssue,
+  verifyCategory,
   IssueController.requestSupporting
 );
 

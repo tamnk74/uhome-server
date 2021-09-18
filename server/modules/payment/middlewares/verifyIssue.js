@@ -26,11 +26,11 @@ export const verifyIssue = async (req, res, next) => {
     });
 
     if (!issue || issue.createdBy !== req.user.id) {
-      throw errorFactory.getError('ISSU-0001');
+      return next(errorFactory.getError('ISSU-0001'));
     }
 
     if (issue.payment.status === paymentStatus.PAID) {
-      throw errorFactory.getError('PAY-0003');
+      return next(errorFactory.getError('PAY-0003'));
     }
     req.issue = issue;
     return next();
