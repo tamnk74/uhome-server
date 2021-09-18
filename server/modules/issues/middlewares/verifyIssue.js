@@ -10,7 +10,7 @@ export const verifyIssue = async (req, res, next) => {
     });
 
     if (!issue) {
-      throw errorFactory.getError('ISSU-0001');
+      return next(errorFactory.getError('ISSU-0001'));
     }
 
     req.issue = issue;

@@ -32,7 +32,7 @@ export const handleError = (err, req, res, next) => {
     message: error.message,
     errors: error.errors || [],
   };
-  console.error(err);
+
   if (error instanceof InternalServerError || status === httpStatus.INTERNAL_SERVER_ERROR) {
     sentryConfig.Sentry.captureException(err);
   } else {
