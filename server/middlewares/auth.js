@@ -20,7 +20,7 @@ export default (req, res, next) => {
     if (!sessionRole) {
       await RedisService.removeAccessToken(user.id, token);
 
-      return next(errorFactory.getError('ERR-0410'));
+      return next(errorFactory.getError('ERR-0401'));
     }
 
     const permissions = acl[req.route.path] && acl[req.route.path][req.method];
