@@ -17,7 +17,22 @@ export default class NotificationService {
   static async pushNewIssueNotification(job, done) {
     try {
       const { id } = job.data;
-      const tempSQL = sequelize.dialect.QueryGenerator.selectQuery('notifications', {
+      const filterIssueSql = sequelize.dialect.QueryGenerator.selectQuery('category_issues', {
+        attributes: ['category_id'],
+        where: {
+          issue_id: id,
+        },
+      }).slice(0, -1);
+      const filteredCategorySql = sequelize.dialect.QueryGenerator.selectQuery('user_category', {
+        attributes: ['user_id'],
+        where: {
+          category_id: {
+            [Sequelize.Op.in]: Sequelize.literal(`(${filterIssueSql})`),
+          },
+        },
+      }).slice(0, -1);
+
+      const filteredNotifySql = sequelize.dialect.QueryGenerator.selectQuery('notifications', {
         attributes: ['recipient_id'],
         where: {
           issue_id: id,
@@ -28,9 +43,18 @@ export default class NotificationService {
       const [subscriptions, issue] = await Promise.all([
         Subscription.findAll({
           where: {
-            userId: {
-              [Sequelize.Op.notIn]: Sequelize.literal(`(${tempSQL})`),
-            },
+            [Op.and]: [
+              {
+                userId: {
+                  [Sequelize.Op.notIn]: Sequelize.literal(`(${filteredNotifySql})`),
+                },
+              },
+              {
+                userId: {
+                  [Sequelize.Op.in]: Sequelize.literal(`(${filteredCategorySql})`),
+                },
+              },
+            ],
             role: userRoles.WORKER,
           },
           include: [
