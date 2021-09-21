@@ -1,6 +1,6 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
 import Sequelize, { Op } from 'sequelize';
-import { get } from 'lodash';
+import { get, isNil } from 'lodash';
 
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
@@ -500,5 +500,40 @@ export default class ChatService {
         }),
       ]);
     });
+  }
+
+  static async joinChat(user, { issueId }) {
+    const issue = await Issue.findByPk(issueId);
+    const customerId = get(issue, 'createdBy');
+    let chatChannel = await ChatChannel.findChannelGroup(issueId, [customerId, user.id]);
+    if (!chatChannel) {
+      const supporting = await ReceiveIssue.findOne({
+        where: {
+          issueId,
+          status: {
+            [Op.ne]: issueStatus.CANCELLED,
+          },
+        },
+      });
+
+      chatChannel = await ChatChannel.findChannelGroup(issueId, [customerId, supporting.userId]);
+    }
+
+    if (isNil(chatChannel)) {
+      throw new Error('CHAT-0404');
+    }
+
+    const [authorChat, worker] = await Promise.all([
+      this.addUserToChat(chatChannel, user),
+      User.findByPk(user.id, {
+        attributes: User.getAttributes(),
+      }),
+    ]);
+
+    authorChat.setDataValue('supporting', worker.toJSON());
+    const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
+    authorChat.setDataValue('token', twilioToken);
+
+    return authorChat;
   }
 }

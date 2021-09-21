@@ -22,18 +22,24 @@ const router = Router();
 
 router.post(
   '/issues',
-  auth,
+  auth('createIssue'),
   active,
   validator(createIssueSchema),
   verifyAttachments,
   IssueController.create
 );
-router.delete('/issues/:issueId', auth, active, verifyOwnerIssue, IssueController.remove);
-router.get('/issues/:issueId', auth, active, verifyIssue, IssueController.show);
-router.get('/issues', auth, active, IssueController.index);
+router.delete(
+  '/issues/:issueId',
+  auth('deleteIssue'),
+  active,
+  verifyOwnerIssue,
+  IssueController.remove
+);
+router.get('/issues/:issueId', auth('getIssue'), active, verifyIssue, IssueController.show);
+router.get('/issues', auth('getIssues'), active, IssueController.index);
 router.post(
   '/issues/:issueId/request-supportings',
-  auth,
+  auth('requestSupport'),
   active,
   verifyIssue,
   verifyCategory,
@@ -42,7 +48,7 @@ router.post(
 
 router.get(
   '/issues/:issueId/request-supportings',
-  auth,
+  auth('joinChat'),
   active,
   verifyIssue,
   IssueController.getRequestSupporting
@@ -50,7 +56,7 @@ router.get(
 router.patch(
   '/issues/:issueId/cancel',
   validator(cancelIssueSchema),
-  auth,
+  auth('cancelSupport'),
   active,
   verifyIssueSupport,
   IssueController.cancelSupporting
@@ -58,7 +64,7 @@ router.patch(
 
 router.delete(
   '/issues/:issueId/request-supportings',
-  auth,
+  auth('cancelSupport'),
   active,
   verifyIssue,
   IssueController.cancelRequestSupporting
@@ -66,7 +72,7 @@ router.delete(
 
 router.post(
   '/issues/:issueId/estimation',
-  auth,
+  auth('sendEstimationCost'),
   active,
   validator(estimationSchema),
   validIssueSupport,
@@ -75,7 +81,7 @@ router.post(
 
 router.post(
   '/issues/:issueId/material-cost',
-  auth,
+  auth('sendMaterialCost'),
   active,
   validator(materialCostSchema),
   validIssueSupport,
@@ -84,7 +90,7 @@ router.post(
 
 router.patch(
   '/issues/:issueId',
-  auth,
+  auth('updateIssue'),
   active,
   verifyOwnerIssue,
   validator(updateIssueSchema),
