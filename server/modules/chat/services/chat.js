@@ -360,10 +360,10 @@ export default class ChatService {
   static async setRating({ chatChannel, user, data }) {
     const { issue } = chatChannel;
     const { rate, comment = '', messageSid } = data;
-    const receiveIssue = await ReceiveIssue.findByIssueIdAndCheckHasEstimation(
-      issue.id,
-      issueStatus.IN_PROGRESS
-    );
+    const receiveIssue = await ReceiveIssue.findByIssueIdAndCheckHasEstimation(issue.id, [
+      issueStatus.IN_PROGRESS,
+      issueStatus.WAITING_VERIFY,
+    ]);
 
     await Promise.all([
       Issue.update(
