@@ -31,9 +31,8 @@ export default class Fee {
     return hours * (fee32 * factor + fee32);
   }
 
-  static getBasicFee(configuration, classFee, starTime, endtime) {
-    const workingTimes = Fee.getWokingTimes(starTime, endtime);
-
+  static getBasicFee(configuration, classFee, starTime, endTime) {
+    const workingTimes = Fee.getWorkingTimes(starTime, endTime);
     const totalWorkingTime = {};
 
     Object.keys(workingTime).forEach((key) => {
@@ -47,9 +46,9 @@ export default class Fee {
     return sum(fees);
   }
 
-  static getFee(configuration, classFee, starTime, endtime, distance = 0) {
-    const basicFee = Fee.getBasicFee(configuration, classFee, starTime, endtime);
-    const workerFee = Fee.getWokerFee(basicFee, configuration, distance);
+  static getFee(configuration, classFee, starTime, endTime, distance = 0) {
+    const basicFee = Fee.getBasicFee(configuration, classFee, starTime, endTime);
+    const workerFee = Fee.getWorkerFee(basicFee, configuration, distance);
     const customerFee = Fee.getCustomerFee(workerFee, configuration);
 
     return {
@@ -58,7 +57,7 @@ export default class Fee {
     };
   }
 
-  static getWokerFee(basicFee, configuration, distance = 0) {
+  static getWorkerFee(basicFee, configuration, distance = 0) {
     return (
       basicFee + basicFee * configuration.workerFee + basicFee * distance * configuration.distance
     );
@@ -68,7 +67,7 @@ export default class Fee {
     return workerFee * configuration.customerFee + workerFee;
   }
 
-  static getWokingTimes(startTime, endTime) {
+  static getWorkingTimes(startTime, endTime) {
     const workingTimes = Fee.generateMatrixWorkingTime(startTime, endTime);
     const workingRangeTimes = workingTimes.map((item) =>
       Fee.getWorkingTime(item.startTime, item.endTime)
@@ -77,12 +76,12 @@ export default class Fee {
     return workingRangeTimes;
   }
 
-  static getTotalTimeByWorkingType(type, starTime, endtime) {
+  static getTotalTimeByWorkingType(type, starTime, endTime) {
     const workingsTime = workingTime[type];
     let fromTime = starTime.get('hour');
     const fromMinute = starTime.get('minute');
-    let toTime = endtime.get('hour');
-    const toMinute = endtime.get('minute');
+    let toTime = endTime.get('hour');
+    const toMinute = endTime.get('minute');
 
     fromTime += fromMinute / 60;
     toTime += toMinute > 30 ? 1 : toMinute / 60;
@@ -114,10 +113,9 @@ export default class Fee {
 
       startTime = startTime.endOf('day');
 
-      if (endTime.diff(startTime, 'hour') > 0) {
+      if (endTime.diff(startTime, 'hour') >= 0) {
         workingDay.endTime = startTime;
       }
-
       workingTimes.push(workingDay);
       startTime = startTime.add(1, 'day').startOf('day');
     }
@@ -125,11 +123,11 @@ export default class Fee {
     return workingTimes;
   }
 
-  static getWorkingTime(starTime, endtime) {
+  static getWorkingTime(starTime, endTime) {
     const timeWorking = {};
 
     Object.keys(workingTime).forEach((key) => {
-      timeWorking[key] = Fee.getTotalTimeByWorkingType(key, starTime, endtime);
+      timeWorking[key] = Fee.getTotalTimeByWorkingType(key, starTime, endTime);
     });
 
     return timeWorking;
