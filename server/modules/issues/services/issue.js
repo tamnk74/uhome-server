@@ -187,12 +187,12 @@ export default class IssueService {
     data.isContinuing = false;
     data.totalTime = +data.totalTime;
     const { startTime, endTime } = data;
-    const catefory = first(issue.categories);
+    const category = first(issue.categories);
     const [feeConfiguration, feeCategory] = await Promise.all([
       FeeConfiguration.findOne({}),
       FeeCategory.findOne({
         where: {
-          categoryId: catefory.id,
+          categoryId: category.id,
         },
       }),
     ]);
