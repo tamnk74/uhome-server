@@ -28,3 +28,8 @@ export const currencies = Object.freeze({
   VND: 'VND',
   USD: 'USD',
 });
+
+export const appTypes = Object.freeze({
+  ANDROID: 'android',
+  IOS: 'ios',
+});
