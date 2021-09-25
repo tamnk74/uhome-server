@@ -16,5 +16,11 @@
     "error": "Issue do not have estimation",
     "title": "Issue do not have estimation",
     "detail": "Issue do not have estimation"
+  },
+  "EST-0404": {
+    "status": 404,
+    "error": "Estimation not found",
+    "title": "Estimation not found",
+    "detail": "Estimation not found"
   }
 }

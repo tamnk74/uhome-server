@@ -1,13 +1,14 @@
 import { Sequelize, Op } from 'sequelize';
 import dayjs from 'dayjs';
-import { first } from 'lodash';
+import { first, isNil } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
-import { notificationQueue } from '../../../helpers/Queue';
+import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';
 import RequestSupporting from '../../../models/requestSupporting';
 import { issueStatus, command, commandMessage } from '../../../constants';
 import UserProfile from '../../../models/userProfile';
-import ReceiveIsssue from '../../../models/receiveIssue';
+import ReceiveIssue from '../../../models/receiveIssue';
 import sequelize from '../../../databases/database';
 import ChatChannel from '../../../models/chatChannel';
 import ChatMember from '../../../models/chatMember';
@@ -16,6 +17,7 @@ import { objectToSnake } from '../../../helpers/Util';
 import FeeConfiguration from '../../../models/feeConfiguration';
 import FeeCategory from '../../../models/feeCategory';
 import Fee from '../../../helpers/Fee';
+import EstimationMessage from '../../../models/estimationMessage';
 
 export default class IssueService {
   static async create(user, data) {
@@ -77,7 +79,7 @@ export default class IssueService {
       optionsCount,
       RequestSupporting
     ).slice(0, -1);
-    const optionsIsrequested = {
+    const optionsIsRequested = {
       attributes: [[Sequelize.fn('COUNT', Sequelize.col('issue_id')), 'isRequested']],
       where: {
         issue_id: {
@@ -90,7 +92,7 @@ export default class IssueService {
     };
     const isRequestedSQL = sequelize.dialect.QueryGenerator.selectQuery(
       'request_supportings',
-      optionsIsrequested,
+      optionsIsRequested,
       RequestSupporting
     ).slice(0, -1);
 
@@ -158,7 +160,7 @@ export default class IssueService {
     });
   }
 
-  static async cacelRequestSupporting(user, issue) {
+  static async cancelRequestSupporting(user, issue) {
     await RequestSupporting.destroy({
       where: {
         userId: user.id,
@@ -167,8 +169,13 @@ export default class IssueService {
     });
   }
 
+  /**
+   * Cancel supporting
+   * @param {*} param
+   * @returns
+   */
   static async cancelSupporting({ user, receiveIssue, data }) {
-    const cancelSupporting = await ReceiveIsssue.cancel({
+    const cancelSupporting = await ReceiveIssue.cancel({
       reason: data.reason,
       receiveIssue,
       userId: user.id,
@@ -179,10 +186,15 @@ export default class IssueService {
       actorId: user.id,
       userId: issue.createdBy,
     });
-    await this.sendMesage(command.CANCELED, user, issue, data);
+    await this.sendMessage(command.CANCELED, user, issue, data);
     return cancelSupporting;
   }
 
+  /**
+   * Send estimation information
+   *
+   * @param {*} param
+   */
   static async estimate({ user, issue, data }) {
     data.isContinuing = false;
     data.totalTime = +data.totalTime;
@@ -197,16 +209,47 @@ export default class IssueService {
       }),
     ]);
     data.fee = Fee.getFee(feeConfiguration, feeCategory, dayjs(startTime), dayjs(endTime), 0);
-    await this.sendMesage(command.SUBMIT_ESTIMATION_TIME, user, issue, data);
+    const { message, channel } = await this.sendMessage(
+      command.SUBMIT_ESTIMATION_TIME,
+      user,
+      issue,
+      data
+    );
+
+    await IssueService.updateEstimationMessage(
+      command.SUBMIT_ESTIMATION_TIME,
+      channel,
+      message.sid
+    );
   }
 
+  /**
+   * Notice material cost
+   *
+   * @param {*} param
+   */
   static async noticeMaterialCost({ user, issue, data }) {
     data.isContinuing = false;
     data.totalCost = +data.totalCost;
-    await this.sendMesage(command.INFORM_MATERIAL_COST, user, issue, data);
+    const { message, channel } = await this.sendMessage(
+      command.INFORM_MATERIAL_COST,
+      user,
+      issue,
+      data
+    );
+
+    await IssueService.updateEstimationMessage(command.INFORM_MATERIAL_COST, channel, message.sid);
   }
 
-  static async sendMesage(command, user, issue, data = {}) {
+  /**
+   * Send Message
+   * @param {*} command
+   * @param {*} user
+   * @param {*} issue
+   * @param {*} data
+   * @returns
+   */
+  static async sendMessage(command, user, issue, data = {}) {
     const [chatMember, actor] = await Promise.all([
       ChatMember.findOne({
         where: {
@@ -240,6 +283,7 @@ export default class IssueService {
       data,
       actor: actor.toJSON(),
       isContinuing: data.isContinuing || false,
+      is_expired: false,
     };
     /* eslint-disable no-undef */
     const message = __(commandMessage[command]);
@@ -251,15 +295,26 @@ export default class IssueService {
       attributes: JSON.stringify(objectToSnake(messageAttributes)),
     };
 
-    await twilioClient.sendMessage(chatChannel.channelSid, messageData);
+    const messageTwilio = await twilioClient.sendMessage(chatChannel.channelSid, messageData);
+
     notificationQueue.add('chat_notification', {
       chatChannelId: chatChannel.id,
       actorId: user.id,
       message,
       commandName: command,
     });
+
+    return {
+      message: messageTwilio,
+      channel: chatChannel,
+    };
   }
 
+  /**
+   * Validate money before payment
+   * @param {*} id
+   * @param {*} categoriesId
+   */
   static async validateMoney(id, categoriesId = []) {
     const [feeConfiguration, feeCategory, userProfile] = await Promise.all([
       FeeConfiguration.findOne({}),
@@ -279,6 +334,12 @@ export default class IssueService {
     }
   }
 
+  /**
+   * Update an issue
+   * @param {*} issue
+   * @param {*} data
+   * @returns
+   */
   static async update(issue, data) {
     const { title, location, attachmentIds, lat, lon, paymentMethod } = data;
 
@@ -292,6 +353,34 @@ export default class IssueService {
       lat,
       lon,
       paymentMethod,
+    });
+  }
+
+  /**
+   * Update estimation message
+   */
+  static async updateEstimationMessage(type, chatChannel, newMessageSid) {
+    const oldMessage = await EstimationMessage.findOne({
+      where: {
+        type,
+        channelId: chatChannel.id,
+      },
+    });
+    if (!isNil(oldMessage)) {
+      chatMessageQueue.add('update_message', {
+        sid: oldMessage.messageSid,
+        attributes: {
+          is_expired: true,
+        },
+        channelSid: chatChannel.channelSid,
+      });
+    }
+
+    return EstimationMessage.upsert({
+      id: uuidv4(),
+      type,
+      channelId: chatChannel.id,
+      messageSid: newMessageSid,
     });
   }
 }
