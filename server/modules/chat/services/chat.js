@@ -24,6 +24,7 @@ import IssueMaterial from '../../../models/issueMaterial';
 import UserProfile from '../../../models/userProfile';
 import TransactionHistory from '../../../models/transactionHistory';
 import sequelize from '../../../databases/database';
+import EstimationMessage from '../../../models/estimationMessage';
 
 export default class ChatService {
   static async create(user, data) {
@@ -139,12 +140,19 @@ export default class ChatService {
   }
 
   static async requestCommand(type, chatChannel, user) {
+    const members = await ChatMember.findAll({
+      where: {
+        channelId: chatChannel.id,
+        userId: {
+          [Op.ne]: user.id,
+        },
+      },
+    });
+    const supporterIds = members.map((item) => item.userId);
+
     if (type === command.REQUEST_ACCEPTANCE) {
       const { issue } = chatChannel;
-      await ReceiveIssue.findByIssueIdAndCheckHasEstimation(issue.id, [
-        issueStatus.IN_PROGRESS,
-        issueStatus.WAITING_VERIFY,
-      ]);
+      await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(issue.id, supporterIds);
 
       await Promise.all([
         ReceiveIssue.update(
@@ -170,10 +178,10 @@ export default class ChatService {
       ]);
     }
 
-    await this.sendMesage(type, chatChannel, user);
+    await this.sendMessage(type, chatChannel, user);
   }
 
-  static async sendMesage(commandName, chatChannel, user, messageId = null, data = {}) {
+  static async sendMessage(commandName, chatChannel, user, messageId = null, data = {}) {
     const [chatMember, actor] = await Promise.all([
       ChatMember.findOne({
         where: {
@@ -196,6 +204,7 @@ export default class ChatService {
       data,
       actor: actor.toJSON(),
       isContinuing: data.isContinuing || false,
+      is_expired: false,
     };
 
     /* eslint-disable no-undef */
@@ -222,14 +231,30 @@ export default class ChatService {
     });
   }
 
+  /**
+   * Approve estimation
+   *
+   * @param {*} param
+   */
   static async approveEstimateTime({ chatChannel, user, data }) {
+    const { messageSid } = data;
+    await EstimationMessage.findByMessageSidOrFail(messageSid);
+    const [chatMembers, userProfile] = await Promise.all([
+      ChatMember.findAll({
+        where: {
+          channelId: chatChannel.id,
+        },
+      }),
+      UserProfile.findOne({ where: { userId: user.id } }),
+    ]);
+
+    const supporterIds = chatMembers.map((item) => item.userId);
+
     data.totalTime = +data.totalTime;
     data.workerFee = +data.workerFee;
     data.customerFee = +data.customerFee;
     const { startTime, endTime, workerFee, customerFee } = data;
     const { issue } = chatChannel;
-
-    const userProfile = await UserProfile.findOne({ where: { userId: user.id } });
 
     if (issue.paymentMethod === paymentMethod.MOMO && userProfile.accountBalance < customerFee) {
       throw new Error('ISSUE-0411');
@@ -248,6 +273,7 @@ export default class ChatService {
         {
           where: {
             issueId: chatChannel.issue.id,
+            userId: supporterIds,
           },
         }
       ),
@@ -272,7 +298,7 @@ export default class ChatService {
     };
     delete data.workerFee;
     delete data.customerFee;
-    await this.sendMesage(
+    await this.sendMessage(
       command.APPROVAL_ESTIMATION_TIME,
       chatChannel,
       user,
@@ -281,11 +307,17 @@ export default class ChatService {
     );
   }
 
+  /**
+   * Approve material cost
+   * @param {*} param
+   */
   static async approveMaterialCost({ chatChannel, user, data }) {
+    const { messageSid } = data;
+    await EstimationMessage.findByMessageSidOrFail(messageSid);
     data.totalCost = +data.totalCost;
     const { issue } = chatChannel;
 
-    const member = await ChatMember.findOne({
+    const members = await ChatMember.findAll({
       where: {
         channelId: chatChannel.id,
         userId: {
@@ -293,6 +325,9 @@ export default class ChatService {
         },
       },
     });
+
+    const supporterIds = members.map((item) => item.userId);
+    let supporterId = null;
 
     if (issue.paymentMethod === paymentMethod.MOMO) {
       const [customerProfile, receiveIssue] = await Promise.all([
@@ -304,28 +339,28 @@ export default class ChatService {
         ReceiveIssue.findOne({
           where: {
             issueId: issue.id,
-            userId: member.userId,
+            userId: supporterIds,
           },
         }),
       ]);
 
       const customerFee = get(receiveIssue, 'customerFee', 0);
-
+      supporterId = get(receiveIssue, 'userId');
       if (customerProfile.accountBalance < customerFee + data.totalCost) {
         throw new Error('ISSUE-0411');
       }
     }
 
     await Promise.all([
-      member
+      supporterId
         ? IssueMaterial.create({
-            userId: member.userId,
+            userId: supporterId,
             issueId: issue.id,
             cost: data.totalCost,
             material: data.materials,
           })
         : null,
-      this.sendMesage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data),
+      this.sendMessage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data),
     ]);
   }
 
@@ -348,7 +383,7 @@ export default class ChatService {
       content,
       attachments,
     };
-    await this.sendMesage(
+    await this.sendMessage(
       command.UPDATED_PROGRESS,
       chatChannel,
       user,
@@ -360,10 +395,21 @@ export default class ChatService {
   static async setRating({ chatChannel, user, data }) {
     const { issue } = chatChannel;
     const { rate, comment = '', messageSid } = data;
-    const receiveIssue = await ReceiveIssue.findByIssueIdAndCheckHasEstimation(issue.id, [
-      issueStatus.IN_PROGRESS,
-      issueStatus.WAITING_VERIFY,
-    ]);
+
+    const members = await ChatMember.findAll({
+      where: {
+        channelId: chatChannel.id,
+        userId: {
+          [Op.ne]: user.id,
+        },
+      },
+    });
+    const supporterIds = members.map((item) => item.userId);
+
+    const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
+      issue.id,
+      supporterIds
+    );
 
     await Promise.all([
       Issue.update(
@@ -391,7 +437,7 @@ export default class ChatService {
         ? ChatService.finishIssue({ user, receiveIssue, rate })
         : null,
     ]);
-    await this.sendMesage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
+    await this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
   }
 
   static async continueChatting({ chatChannel, user, data }) {
@@ -400,7 +446,7 @@ export default class ChatService {
     const attributes = JSON.parse(message.attributes);
     data = attributes.data || {};
     data.isContinuing = true;
-    await this.sendMesage(
+    await this.sendMessage(
       attributes.command_name || command.CONTINUE_CHATTING,
       chatChannel,
       user,
@@ -428,7 +474,7 @@ export default class ChatService {
       content,
       attachments,
     };
-    await this.sendMesage(
+    await this.sendMessage(
       command.ADDED_MORE_INFORMATION,
       chatChannel,
       user,

@@ -12,7 +12,6 @@ import { env } from './config';
 import { handleError } from './errors';
 import { trimObject } from './helpers/Util';
 import './config/passport';
-import './schedulers';
 
 // Set up the express app
 const app = Express();
