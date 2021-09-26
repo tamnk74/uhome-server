@@ -1,6 +1,9 @@
+import dayjs from 'dayjs';
 import { sum, get, sumBy } from 'lodash';
+import isBetween from 'dayjs/plugin/isBetween';
 import { workingTime } from '../constants';
 
+dayjs.extend(isBetween);
 export default class Fee {
   static getBasicTimeFee(configuration, classFee, workingType, hours) {
     const factor = get(configuration, workingType, 0);
@@ -52,8 +55,8 @@ export default class Fee {
     const customerFee = Fee.getCustomerFee(workerFee, configuration);
 
     return {
-      workerFee: Math.round(workerFee),
-      customerFee: Math.round(customerFee),
+      workerFee: Math.ceil(workerFee / 1000) * 1000,
+      customerFee: Math.ceil(customerFee / 1000) * 1000,
     };
   }
 
@@ -77,29 +80,32 @@ export default class Fee {
   }
 
   static getTotalTimeByWorkingType(type, starTime, endTime) {
+    let tmpStartTime = starTime.clone();
+    let tmpToTime = endTime.clone();
     const workingsTime = workingTime[type];
-    let fromTime = starTime.get('hour');
-    const fromMinute = starTime.get('minute');
-    let toTime = endTime.get('hour');
-    const toMinute = endTime.get('minute');
-
-    fromTime += fromMinute / 60;
-    toTime += toMinute > 30 ? 1 : toMinute / 60;
 
     const ranges = workingsTime.map((workHour) => {
-      if (workHour.from <= fromTime && fromTime < workHour.to) {
-        return workHour.to <= toTime ? workHour.to - fromTime : toTime - fromTime;
-      }
+      tmpStartTime = tmpStartTime.set('hour', workHour.from).startOf('hour');
+      tmpToTime = tmpToTime.set('hour', workHour.to).startOf('hour');
+      if (
+        starTime.isBetween(tmpStartTime, tmpToTime, 'minute') ||
+        endTime.isBetween(tmpStartTime, tmpToTime, 'minute')
+      ) {
+        if (endTime.isBefore(tmpToTime, 'minute')) {
+          tmpToTime = endTime;
+        }
 
-      if (toTime > workHour.from && fromTime < workHour.to) {
-        const beginTime = workHour.from > fromTime ? workHour.from : fromTime;
-        return workHour.to <= toTime ? workHour.to - beginTime : toTime - beginTime;
+        if (starTime.isAfter(tmpStartTime, 'minute')) {
+          tmpStartTime = starTime;
+        }
+
+        return tmpToTime.diff(tmpStartTime, 'hour', true);
       }
 
       return 0;
     });
 
-    return sum(ranges);
+    return Math.ceil(sum(ranges));
   }
 
   static generateMatrixWorkingTime(startTime, endTime) {
