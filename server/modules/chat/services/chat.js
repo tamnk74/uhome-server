@@ -143,9 +143,6 @@ export default class ChatService {
     const members = await ChatMember.findAll({
       where: {
         channelId: chatChannel.id,
-        userId: {
-          [Op.ne]: user.id,
-        },
       },
     });
     const supporterIds = members.map((item) => item.userId);
