@@ -168,4 +168,25 @@ Issue.buildRelation = (categoryIds = [], duplicating = true) => {
     },
   ];
 };
+
+Issue.getIssueOption = (userId) => {
+  const filteredCategorySql = sequelize.dialect.QueryGenerator.selectQuery('user_category', {
+    attributes: ['category_id'],
+    where: {
+      user_id: userId,
+    },
+  }).slice(0, -1);
+
+  const filterIssueSql = sequelize.dialect.QueryGenerator.selectQuery('category_issues', {
+    attributes: ['issue_id'],
+    where: {
+      category_id: {
+        [Sequelize.Op.in]: Sequelize.literal(`(${filteredCategorySql})`),
+      },
+    },
+  }).slice(0, -1);
+
+  return filterIssueSql;
+};
+
 module.exports = Issue;
