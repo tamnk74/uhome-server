@@ -65,6 +65,9 @@ export default class IssueService {
     options.where.createdBy = {
       [Op.ne]: user.id,
     };
+    options.where.id = {
+      [Op.in]: Sequelize.literal(`(${Issue.getIssueOption(user.id)})`),
+    };
 
     const optionsCount = {
       attributes: [[Sequelize.fn('COUNT', Sequelize.col('issue_id')), 'totalRequestSupporting']],
