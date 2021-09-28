@@ -484,12 +484,13 @@ export default class ChatService {
       endTime,
       totalTime: time,
     };
+    const sumCost = await IssueMaterial.sumCost(issueId, receiveIssue.userId);
 
     const transactionHistories = [
       {
         id: uuidv4(),
         userId: receiveIssue.userId,
-        amount: workerFee,
+        amount: customerFee + sumCost,
         issueId,
         type: transactionType.WAGE,
         extra,
@@ -498,7 +499,7 @@ export default class ChatService {
       {
         id: uuidv4(),
         userId: user.id,
-        amount: customerFee,
+        amount: workerFee + sumCost,
         issueId,
         type: transactionType.PAY,
         extra,
@@ -510,7 +511,7 @@ export default class ChatService {
       return Promise.all([
         UserProfile.update(
           {
-            accountBalance: Sequelize.literal(`account_balance + ${workerFee}`),
+            accountBalance: Sequelize.literal(`account_balance + ${customerFee + sumCost}`),
             totalIssueCompleted: Sequelize.literal(`total_issue_completed + 1`),
             totalRating: Sequelize.literal(`total_rating + ${rate}`),
             reliability: Sequelize.literal(
@@ -526,7 +527,7 @@ export default class ChatService {
         ),
         UserProfile.update(
           {
-            accountBalance: Sequelize.literal(`account_balance - ${customerFee}`),
+            accountBalance: Sequelize.literal(`account_balance - ${workerFee + sumCost}`),
           },
           {
             where: {
