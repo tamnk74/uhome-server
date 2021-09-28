@@ -201,7 +201,8 @@ export default class IssueService {
   static async estimate({ user, issue, data }) {
     data.isContinuing = false;
     data.totalTime = +data.totalTime;
-    const { startTime, endTime } = data;
+    const { startTime, totalTime } = data;
+    const endTime = dayjs(startTime).add(totalTime, 'hour');
     const category = first(issue.categories);
     const [feeConfiguration, feeCategory] = await Promise.all([
       FeeConfiguration.findOne({}),
@@ -211,8 +212,8 @@ export default class IssueService {
         },
       }),
     ]);
-    data.fee = Fee.getFee(feeConfiguration, feeCategory, dayjs(startTime), dayjs(endTime), 0);
-
+    data.fee = Fee.getFee(feeConfiguration, feeCategory, dayjs(startTime), endTime, 0);
+    data.endTime = endTime.toISOString();
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
       user,
