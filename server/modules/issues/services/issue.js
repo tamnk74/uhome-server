@@ -202,7 +202,7 @@ export default class IssueService {
     data.isContinuing = false;
     data.totalTime = +data.totalTime;
     const { startTime, totalTime } = data;
-    const endTime = dayjs(startTime).add(totalTime, 'hour');
+    const endTime = dayjs(startTime).add(totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
     const category = first(issue.categories);
     const [feeConfiguration, feeCategory] = await Promise.all([
       FeeConfiguration.findOne({}),
@@ -212,8 +212,14 @@ export default class IssueService {
         },
       }),
     ]);
-    data.fee = Fee.getFee(feeConfiguration, feeCategory, dayjs(startTime), endTime, 0);
-    data.endTime = endTime.toISOString();
+    data.fee = Fee.getFee(
+      feeConfiguration,
+      feeCategory,
+      dayjs(startTime).tz('Asia/Ho_Chi_Minh'),
+      endTime,
+      0
+    );
+
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
       user,
