@@ -1,9 +1,14 @@
 import dayjs from 'dayjs';
 import { sum, get, sumBy } from 'lodash';
 import isBetween from 'dayjs/plugin/isBetween';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import { workingTime } from '../constants';
 
 dayjs.extend(isBetween);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 export default class Fee {
   static getBasicTimeFee(configuration, classFee, workingType, hours) {
     const factor = get(configuration, workingType, 0);
