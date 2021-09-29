@@ -105,7 +105,7 @@ export default class Fee {
       return 0;
     });
 
-    return Math.ceil(sum(ranges));
+    return Math.ceil(sum(ranges).toFixed(1));
   }
 
   static generateMatrixWorkingTime(startTime, endTime) {
