@@ -18,7 +18,7 @@ export const workingTime = Object.freeze({
   nightTime: [
     {
       from: 18,
-      to: 22,
+      to: 23,
     },
   ],
   urgentTime: [
@@ -27,7 +27,7 @@ export const workingTime = Object.freeze({
       to: 8,
     },
     {
-      from: 22,
+      from: 23,
       to: 24,
     },
   ],
