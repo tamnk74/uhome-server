@@ -111,7 +111,7 @@ export default class Fee {
   static generateMatrixWorkingTime(startTime, endTime) {
     const workingTimes = [];
 
-    while (endTime.diff(startTime, 'hour') >= 0) {
+    while (endTime.diff(startTime, 'hour', true) >= 0) {
       const workingDay = {
         startTime: startTime.clone(),
         endTime,
@@ -119,7 +119,7 @@ export default class Fee {
 
       startTime = startTime.endOf('day');
 
-      if (endTime.diff(startTime, 'hour') >= 0) {
+      if (endTime.diff(startTime, 'hour', true) >= 0) {
         workingDay.endTime = startTime;
       }
       workingTimes.push(workingDay);
