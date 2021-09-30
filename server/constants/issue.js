@@ -11,7 +11,7 @@ export const issueStatus = Object.freeze({
 export const workingTime = Object.freeze({
   normalTime: [
     {
-      from: 8,
+      from: 4,
       to: 18,
     },
   ],
@@ -24,7 +24,7 @@ export const workingTime = Object.freeze({
   urgentTime: [
     {
       from: 0,
-      to: 8,
+      to: 4,
     },
     {
       from: 23,
