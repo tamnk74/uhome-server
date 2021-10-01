@@ -2,6 +2,12 @@
   "settings": {
     "import/resolver": {
       "node": {
+        "paths": ["server"],
+        "alias": {
+          "map": [
+            ["@/", "./server/"]
+          ]
+        },
         "extensions": [".js", ".jsx", ".ts", ".tsx"]
       }
     }

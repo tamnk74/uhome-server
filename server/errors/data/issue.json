@@ -4,5 +4,23 @@
     "error": "Not found",
     "title": "Issue not found",
     "detail": "Issue not found"
+  },
+  "ISSUE-0411": {
+    "status": 400,
+    "error": "Maximum request",
+    "title": "Maximum request",
+    "detail": "Maximum request"
+  },
+  "ISSUE-0412": {
+    "status": 400,
+    "error": "Issue do not have estimation",
+    "title": "Issue do not have estimation",
+    "detail": "Issue do not have estimation"
+  },
+  "EST-0404": {
+    "status": 404,
+    "error": "Estimation not found",
+    "title": "Estimation not found",
+    "detail": "Estimation not found"
   }
 }

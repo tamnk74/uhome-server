@@ -16,18 +16,24 @@ const router = Router();
 
 router.post(
   '/chat/chat-groups',
-  auth,
+  auth('joinChat'),
   active,
   validator(createChatSchema),
   isAllowCreateGroupChat,
   ChatController.create
 );
 
-router.get('/chat/:channelId/token', auth, active, verifyChannel, ChatController.getToken);
+router.get(
+  '/chat/:channelId/token',
+  auth('joinChat'),
+  active,
+  verifyChannel,
+  ChatController.getToken
+);
 
 router.get(
   '/chat/:channelId/commands/:type',
-  auth,
+  auth('actionOnChat'),
   active,
   verifyRequestType,
   verifyChannel,
@@ -36,7 +42,7 @@ router.get(
 
 router.post(
   '/chat/:channelId/approval-time',
-  auth,
+  auth('approveEstimationCost'),
   active,
   validator(approveEstimateTimeSchema),
   verifyChannel,
@@ -45,7 +51,7 @@ router.post(
 
 router.post(
   '/chat/:channelId/approval-material-cost',
-  auth,
+  auth('approveMaterialCost'),
   active,
   validator(approveMaterialCostSchema),
   verifyChannel,
@@ -54,7 +60,7 @@ router.post(
 
 router.post(
   '/chat/:channelId/tracking',
-  auth,
+  auth('actionOnChat'),
   active,
   validator(trackingSchema),
   verifyChannel,
@@ -64,7 +70,7 @@ router.post(
 router.post(
   '/chat/:channelId/rating',
   validator(evaluateIssueSchema),
-  auth,
+  auth('acceptance'),
   active,
   verifyChannel,
   ChatController.setRating
@@ -73,7 +79,7 @@ router.post(
 router.post(
   '/chat/:channelId/continue',
   validator(continueChattingchema),
-  auth,
+  auth('actionOnChat'),
   active,
   verifyChannel,
   ChatController.continueChatting
@@ -82,7 +88,7 @@ router.post(
 router.post(
   '/chat/:channelId/informations',
   validator(trackingSchema),
-  auth,
+  auth('actionOnChat'),
   active,
   verifyChannel,
   ChatController.addMoreInformation

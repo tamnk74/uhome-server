@@ -46,4 +46,19 @@ IssueMaterial.beforeCreate((instant) => {
   instant.id = uuid.v4();
 });
 
+IssueMaterial.sumCost = async (issueId, userId) => {
+  const materials = await IssueMaterial.findAll({
+    where: {
+      userId,
+      issueId,
+    },
+  });
+
+  const totalCost = materials.reduce((total, material) => {
+    return total + material.cost;
+  }, 0);
+
+  return Math.ceil(totalCost);
+};
+
 module.exports = IssueMaterial;

@@ -10,9 +10,26 @@ export const httpError = Object.freeze({
 export const paymentStatus = Object.freeze({
   OPEN: 'OPEN',
   PAID: 'PAID',
+  FAIL: 'FAIL',
+});
+
+export const paymentType = Object.freeze({
+  INBOUND: 'INBOUND',
+  OUTBOUND: 'OUTBOUND',
+});
+
+export const paymentMethod = Object.freeze({
+  SYSTEM: 'system',
+  MOMO: 'momo',
+  CASH: 'cash',
 });
 
 export const currencies = Object.freeze({
   VND: 'VND',
   USD: 'USD',
+});
+
+export const appTypes = Object.freeze({
+  ANDROID: 'android',
+  IOS: 'ios',
 });

@@ -1,4 +1,4 @@
-import omit from 'lodash/omit';
+import { omit, get } from 'lodash';
 import IssueService from '../services/issue';
 import { objectToCamel, objectToSnake } from '../../../helpers/Util';
 import Pagination from '../../../helpers/Pagination';
@@ -97,7 +97,7 @@ export default class AuthController {
 
   static async cancelRequestSupporting(req, res, next) {
     try {
-      await IssueService.cacelRequestSupporting(req.user, req.issue);
+      await IssueService.cancelRequestSupporting(req.user, req.issue);
 
       return res.status(204).json({});
     } catch (e) {
@@ -139,6 +139,19 @@ export default class AuthController {
         data: req.body,
       });
       return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async update(req, res, next) {
+    try {
+      const issue = get(req, 'issue');
+      const data = get(req, 'body');
+
+      await IssueService.update(issue, data);
+
+      return res.status(204).send();
     } catch (e) {
       return next(e);
     }

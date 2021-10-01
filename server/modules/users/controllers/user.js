@@ -1,8 +1,8 @@
 import omit from 'lodash/omit';
+import { ExtractJwt } from 'passport-jwt';
 import Pagination from '../../../helpers/Pagination';
 import UserService from '../services/user';
 import { objectToSnake, distance } from '../../../helpers/Util';
-import { fileSystemConfig } from '../../../config';
 
 export default class UserController {
   static async getIssues(req, res, next) {
@@ -79,12 +79,6 @@ export default class UserController {
         userData.profile = user.profile.toJSON();
         userData.profile.identityCard = JSON.parse(userData.profile.identityCard);
       }
-      if (userData.profile.identityCard.before) {
-        userData.profile.identityCard.before = `${fileSystemConfig.clout_front}/${userData.profile.identityCard.before}`;
-      }
-      if (userData.profile.identityCard.after) {
-        userData.profile.identityCard.after = `${fileSystemConfig.clout_front}/${userData.profile.identityCard.after}`;
-      }
 
       return res.status(200).json(objectToSnake(userData));
     } catch (e) {
@@ -153,12 +147,37 @@ export default class UserController {
 
   static async changeSessionRole(req, res, next) {
     try {
+      const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+
       const user = await UserService.changeSesionRole({
         user: req.user,
         role: req.body.role,
+        accessToken,
       });
 
       return res.status(200).json(objectToSnake(user));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async getTransactionHistories(req, res, next) {
+    try {
+      const pagination = new Pagination(req);
+      const histories = await UserService.getTransactionHistories({
+        user: req.user,
+        query: {
+          ...req.query,
+          limit: pagination.limit,
+          offset: pagination.skip,
+        },
+      });
+
+      pagination.setTotal(histories.count);
+      return res.status(200).json({
+        meta: pagination.getMeta(),
+        data: histories.rows.map((history) => objectToSnake(history)),
+      });
     } catch (e) {
       return next(e);
     }

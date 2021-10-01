@@ -1,5 +1,7 @@
 import Sequelize from 'sequelize';
 import uuid from 'uuid';
+import { isNil } from 'lodash';
+
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import { issueStatus } from '../constants';
@@ -28,12 +30,21 @@ ReceiveIssue.init(
       type: Sequelize.FLOAT,
       allowNull: true,
     },
-    cost: {
-      type: Sequelize.INTEGER,
+    workerFee: {
+      type: Sequelize.DECIMAL(10, 2),
+    },
+    customerFee: {
+      type: Sequelize.DECIMAL(10, 2),
     },
     rating: {
       type: Sequelize.DECIMAL(2),
       defaultValue: 0,
+    },
+    startTime: {
+      type: Sequelize.DATE,
+    },
+    endTime: {
+      type: Sequelize.DATE,
     },
     reason: {
       type: Sequelize.STRING(2048),
@@ -106,4 +117,20 @@ ReceiveIssue.cancel = ({ receiveIssue, reason }) => {
     return receiveIssue;
   });
 };
+
+ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation = async (issueId, supporterIds = []) => {
+  const receiveIssue = await ReceiveIssue.findOne({
+    where: {
+      issueId,
+      userId: supporterIds,
+    },
+  });
+
+  if (isNil(receiveIssue) || isNil(receiveIssue.startTime) || isNil(receiveIssue.endTime)) {
+    throw new Error('ISSUE-0412');
+  }
+
+  return receiveIssue;
+};
+
 module.exports = ReceiveIssue;

@@ -1,0 +1,94 @@
+version: 2.1
+orbs:
+  slack: circleci/slack@4.4.4
+jobs:
+  build:
+    docker:
+      - image: cimg/node:15.1
+    steps:
+      - checkout
+      - run:
+          name: NPM install
+          command: npm install
+      - run:
+          name: NPM build
+          command: npm run build
+  deploy-develop:
+    machine:
+      enabled: true
+    steps:
+      - run:
+          name: Deployment server over SSH
+          command: |
+            ssh -oStrictHostKeyChecking=no -v $USER@$IP_DEV "
+              cd ~/uhome-server
+              cp .env backup.env
+              git reset --hard HEAD
+              git pull origin develop
+              ansible local -m copy -a 'src=deploy/secrets-dev.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
+              npm install
+              npm run build
+              npx sequelize db:migrate
+              pm2 restart all
+              pm2 status"
+      - slack/notify:
+          event: fail
+          mentions: '@channel'
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+  deploy-staging:
+    machine:
+      enabled: true
+    steps:
+      - run:
+          name: Deployment server over SSH
+          command: |
+            ssh -oStrictHostKeyChecking=no -v $USER@$IP_STG "
+              cd uhome-server
+              git fetch origin && git fetch origin --tags
+              git reset --hard $CIRCLE_TAG
+              ansible local -m copy -a 'src=deploy/secrets-stg.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
+              npm install
+              npm run build
+              pm2 restart all
+              npx sequelize db:migrate
+              pm2 status"
+      - slack/notify:
+          event: fail
+          mentions: '@channel'
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+
+workflows:
+  version: 2
+  develop:
+    jobs:
+      - build:
+          filters: &filters-develop
+            branches:
+              only:
+                - develop
+      - deploy-develop:
+          requires:
+            - build # Only deploy once build job has completed
+          filters:
+            branches:
+              only:
+                - develop
+  staging:
+    jobs:
+      - build:
+          filters: &filters-staging
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/ # Only deploy with tags
+            branches:
+              ignore: /.*/
+      - deploy-staging:
+          requires:
+            - build # Only deploy once build job has completed
+          filters:
+            <<: *filters-staging

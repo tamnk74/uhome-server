@@ -2,6 +2,7 @@ import Sequelize from 'sequelize';
 import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
+import { i18n } from '../config/i18n';
 
 class Notification extends BaseModel {}
 
@@ -52,5 +53,10 @@ Notification.init(
 Notification.beforeCreate((notification) => {
   notification.id = uuid.v4();
 });
+
+// eslint-disable-next-line no-undef
+Notification.getTitle = (key, paramas = {}) => {
+  return i18n.__(key, paramas);
+};
 
 module.exports = Notification;

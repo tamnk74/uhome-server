@@ -1,10 +1,18 @@
 import { objectToCamel, objectToSnake } from '../../../helpers/Util';
 import ChatService from '../services/chat';
+import { roles } from '../../../constants';
 
 export default class ChatController {
   static async create(req, res, next) {
     try {
-      const issue = await ChatService.create(req.user, objectToCamel(req.body));
+      const { user } = req;
+      const { role } = user;
+      if (role === roles.USER) {
+        const issue = await ChatService.create(user, objectToCamel(req.body));
+        return res.status(201).json(objectToSnake(issue.toJSON()));
+      }
+
+      const issue = await ChatService.joinChat(user, objectToCamel(req.body));
       return res.status(201).json(objectToSnake(issue.toJSON()));
     } catch (e) {
       return next(e);

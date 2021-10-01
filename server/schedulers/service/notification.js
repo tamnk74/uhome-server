@@ -4,19 +4,35 @@ import Notificaion from '../../models/notification';
 import Fcm from '../../helpers/Fcm';
 import Subscription from '../../models/subscription';
 import User from '../../models/user';
-import { notificationType, userRoles } from '../../constants';
+import { notificationType, userRoles, notificationMessage } from '../../constants';
 import Issue from '../../models/issue';
 import sequelize from '../../databases/database';
 import RequestSupporting from '../../models/requestSupporting';
 import { objectToSnake } from '../../helpers/Util';
 import ChatChannel from '../../models/chatChannel';
 import ChatMember from '../../models/chatMember';
+import { sentryConfig } from '../../config';
 
 export default class NotificationService {
   static async pushNewIssueNotification(job, done) {
     try {
       const { id } = job.data;
-      const tempSQL = sequelize.dialect.QueryGenerator.selectQuery('notifications', {
+      const filterIssueSql = sequelize.dialect.QueryGenerator.selectQuery('category_issues', {
+        attributes: ['category_id'],
+        where: {
+          issue_id: id,
+        },
+      }).slice(0, -1);
+      const filteredCategorySql = sequelize.dialect.QueryGenerator.selectQuery('user_category', {
+        attributes: ['user_id'],
+        where: {
+          category_id: {
+            [Sequelize.Op.in]: Sequelize.literal(`(${filterIssueSql})`),
+          },
+        },
+      }).slice(0, -1);
+
+      const filteredNotifySql = sequelize.dialect.QueryGenerator.selectQuery('notifications', {
         attributes: ['recipient_id'],
         where: {
           issue_id: id,
@@ -27,9 +43,18 @@ export default class NotificationService {
       const [subscriptions, issue] = await Promise.all([
         Subscription.findAll({
           where: {
-            userId: {
-              [Sequelize.Op.notIn]: Sequelize.literal(`(${tempSQL})`),
-            },
+            [Op.and]: [
+              {
+                userId: {
+                  [Sequelize.Op.notIn]: Sequelize.literal(`(${filteredNotifySql})`),
+                },
+              },
+              {
+                userId: {
+                  [Sequelize.Op.in]: Sequelize.literal(`(${filteredCategorySql})`),
+                },
+              },
+            ],
             role: userRoles.WORKER,
           },
           include: [
@@ -55,8 +80,8 @@ export default class NotificationService {
       const tokens = [];
       const actor = issue.creator;
       const notification = {
-        title: `${issue.title}`,
-        body: `${issue.title}`,
+        title: Notificaion.getTitle('notfication.new_issue', { title: issue.title }),
+        body: Notificaion.getTitle('notfication.new_issue', { title: issue.title }),
       };
       const data = {
         type: notificationType.newIssue,
@@ -83,6 +108,7 @@ export default class NotificationService {
       ]);
       done();
     } catch (error) {
+      sentryConfig.Sentry.captureException(error);
       done(error);
     }
   }
@@ -113,8 +139,8 @@ export default class NotificationService {
       const actor = supporting.user;
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: `${issue.title}`,
-        body: `${issue.title}`,
+        title: Notificaion.getTitle('notfication.request_support', { title: issue.title }),
+        body: Notificaion.getTitle('notfication.request_support', { title: issue.title }),
       };
       const data = {
         type: notificationType.requestSupporting,
@@ -135,6 +161,7 @@ export default class NotificationService {
       ]);
       done();
     } catch (error) {
+      sentryConfig.Sentry.captureException(error);
       done(error);
     }
   }
@@ -152,8 +179,8 @@ export default class NotificationService {
       ]);
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: `${issue.title}`,
-        body: `${issue.title}`,
+        title: Notificaion.getTitle('notfication.cancel', { title: issue.title }),
+        body: Notificaion.getTitle('notfication.cancel', { title: issue.title }),
       };
       const data = {
         type: notificationType.cancelRequestSupport,
@@ -175,6 +202,7 @@ export default class NotificationService {
       ]);
       done();
     } catch (error) {
+      sentryConfig.Sentry.captureException(error);
       done(error);
     }
   }
@@ -192,8 +220,8 @@ export default class NotificationService {
       ]);
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: `${issue.title}`,
-        body: `${issue.title}`,
+        title: Notificaion.getTitle('notfication.cancel', { title: issue.title }),
+        body: Notificaion.getTitle('notfication.cancel', { title: issue.title }),
       };
       const data = {
         type: notificationType.cancelSupport,
@@ -215,13 +243,14 @@ export default class NotificationService {
       ]);
       done();
     } catch (error) {
+      sentryConfig.Sentry.captureException(error);
       done(error);
     }
   }
 
   static async pushChatNotification(job, done) {
     try {
-      const { chatChannelId, actorId, message = '' } = job.data;
+      const { chatChannelId, actorId, commandName, message = '' } = job.data;
       const [chatChannel, chatMembers, actor] = await Promise.all([
         ChatChannel.findByPk(chatChannelId, {
           include: [
@@ -256,7 +285,7 @@ export default class NotificationService {
       });
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: `${issue.title}`,
+        title: Notificaion.getTitle(notificationMessage[commandName], { title: issue.title }),
         body: message,
       };
 
@@ -269,6 +298,7 @@ export default class NotificationService {
       await Promise.all([tokens.length ? Fcm.sendNotification(tokens, data, notification) : null]);
       return done();
     } catch (error) {
+      sentryConfig.Sentry.captureException(error);
       done(error);
     }
   }

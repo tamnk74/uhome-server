@@ -82,7 +82,7 @@ User.init(
       defaultValue: 'default.png',
       get() {
         const avatar = this.getDataValue('avatar');
-        if (!avatar.startsWith('http')) {
+        if (avatar && !avatar.startsWith('http')) {
           return `${fileSystemConfig.clout_front}/${avatar}`;
         }
         return avatar;

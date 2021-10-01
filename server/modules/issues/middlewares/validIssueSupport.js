@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import Issue from '../../../models/issue';
 import errorFactory from '../../../errors/ErrorFactory';
 import { issueStatus } from '../../../constants';
+import Category from '../../../models/category';
 
 export const validIssueSupport = async (req, res, next) => {
   try {
@@ -12,10 +13,16 @@ export const validIssueSupport = async (req, res, next) => {
           [Op.in]: [issueStatus.IN_PROGRESS, issueStatus.CHATTING, issueStatus.WAITING_VERIFY],
         },
       },
+      include: [
+        {
+          model: Category,
+          as: 'categories',
+        },
+      ],
     });
 
     if (!issue) {
-      throw errorFactory.getError('ISSU-0001');
+      return next(errorFactory.getError('ISSU-0001'));
     }
 
     req.issue = issue;

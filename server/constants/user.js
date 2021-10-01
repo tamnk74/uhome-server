@@ -11,6 +11,7 @@ export const userRoles = Object.freeze({
 export const roles = Object.freeze({
   USER: 'USER',
   ADMIN: 'ADMIN',
+  CONSULTING: 'CONSULTING',
 });
 
 export const socialAccount = Object.freeze({
@@ -35,4 +36,11 @@ export const idCardStatus = Object.freeze({
   WAITING_VERIFY_CARD: 1,
   VERIFIED: 2,
   FAIL_VERIFIED: 3,
+});
+
+export const withdrawStatus = Object.freeze({
+  OPEN: 'OPEN',
+  CANCELED: 'CANCELED',
+  DONE: 'DONE',
+  FAILED: 'FAILED',
 });

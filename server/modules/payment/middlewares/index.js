@@ -1,1 +1,1 @@
-export * from './verifyReceiveIssue';
+export * from './verifyIssue';

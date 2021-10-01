@@ -43,3 +43,21 @@ export const commandRequests = [
   command.CONTINUE_CHATTING,
   command.REQUEST_ADD_MORE_INFORMATION,
 ];
+
+export const notificationMessage = Object.freeze({
+  REQUEST_UPDATE_PROGRESS: 'notfication.update_progress',
+  REQUEST_CANCEL: 'notfication.cancel',
+  REQUEST_SEND_MEDIA: 'notfication.send_media',
+  REQUEST_ESTIMATION_TIME: 'notfication.estimate_time',
+  SUBMIT_ESTIMATION_TIME: 'notfication.submit_estimate_time',
+  APPROVAL_ESTIMATION_TIME: 'notfication.approval_estimate_time',
+  INFORM_MATERIAL_COST: 'notfication.inform_material_cost',
+  APPROVAL_MATERIAL_COST: 'notfication.approval_material_cost',
+  REQUEST_ACCEPTANCE: 'notfication.request_acceptance',
+  CONTINUE_CHATTING: 'notfication.continue_chatting',
+  UPDATED_PROGRESS: 'notfication.updated_progress',
+  ACCEPTANCE: 'notfication.acceptance',
+  REQUEST_ADD_MORE_INFORMATION: 'notfication.request_add_more_information',
+  ADDED_MORE_INFORMATION: 'notfication.added_more_information',
+  CANCELED: 'notfication.canceled',
+});

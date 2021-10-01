@@ -6,23 +6,13 @@ import CORS from 'cors';
 import BodyParser from 'body-parser';
 import Compress from 'compression';
 import Path from 'path';
-import i18n from 'i18n';
+import { i18n } from './config/i18n';
 import { ApiRouter } from './routes';
 import { env } from './config';
 import { handleError } from './errors';
 import { trimObject } from './helpers/Util';
 import './config/passport';
-import './schedulers';
 
-i18n.configure({
-  locales: ['vi'],
-  directory: `${__dirname}/locales`,
-  defaultLocale: 'vi',
-  cookie: 'i18n',
-  extension: '.json',
-  objectNotation: true,
-  register: global,
-});
 // Set up the express app
 const app = Express();
 

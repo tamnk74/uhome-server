@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { Op } from 'sequelize';
 import { fileSystemConfig } from '../../../config';
 import Issue from '../../../models/issue';
 import Category from '../../../models/category';
@@ -14,7 +15,9 @@ import Subscription from '../../../models/subscription';
 import Fcm from '../../../helpers/Fcm';
 import { idCardStatus } from '../../../constants';
 import IdentifyCard from '../../../models/identifyCard';
+import TransactionHistory from '../../../models/transactionHistory';
 import { sendOTP } from '../../../helpers/SmsOTP';
+import RedisService from '../../../helpers/Redis';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -48,7 +51,7 @@ export default class Userervice {
           model: ReceiveIssue,
           required: false,
           as: 'supporting',
-          attributes: ['id', 'userId', 'issueId', 'time', 'cost'],
+          attributes: ['id', 'userId', 'issueId', 'time', 'workerFee', 'customerFee'],
           include: [
             {
               model: User,
@@ -297,21 +300,79 @@ export default class Userervice {
     );
   }
 
-  static async changeSesionRole({ user, role }) {
-    await User.update(
-      {
-        sessionRole: role,
-      },
-      {
-        where: {
-          id: user.id,
+  static async changeSesionRole({ user, role, accessToken }) {
+    await Promise.all([
+      User.update(
+        {
+          sessionRole: role,
         },
-      }
-    );
+        {
+          where: {
+            id: user.id,
+          },
+        }
+      ),
+      RedisService.saveAccessToken(user.id, accessToken, role),
+    ]);
 
     user.sessionRole = role;
 
     return user;
+  }
+
+  static async getTransactionHistories({ user, query }) {
+    const { limit, offset, from, to } = query;
+    const options = TransactionHistory.buildOptionQuery(query);
+    options.where.userId = user.id;
+    options.include = [
+      {
+        model: Issue,
+        attributes: ['id', 'location', 'title'],
+        required: false,
+        include: [
+          {
+            model: Category,
+            required: false,
+            attributes: ['id', 'name'],
+            as: 'categories',
+          },
+        ],
+      },
+      {
+        model: User,
+        attributes: ['id', 'name'],
+        required: true,
+      },
+      {
+        model: User,
+        attributes: ['id', 'name'],
+        as: 'actor',
+        required: false,
+      },
+    ];
+
+    if (from) {
+      options.where.createdAt = {
+        [Op.gte]: from,
+      };
+    }
+
+    if (to) {
+      options.where.createdAt = {
+        [Op.lte]: to,
+      };
+    }
+
+    const result = await TransactionHistory.findAndCountAll({
+      ...options,
+      limit,
+      offset,
+    });
+
+    const rows = TransactionHistory.tranformResponseData(result.rows);
+    result.rows = rows;
+
+    return result;
   }
 
   static async reSendOTP(id) {
