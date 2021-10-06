@@ -1,6 +1,6 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
 import Sequelize, { Op } from 'sequelize';
-import { get, isNil } from 'lodash';
+import { get, isNil, pick } from 'lodash';
 
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
@@ -35,7 +35,15 @@ export default class ChatService {
       User.findByPk(userId, {
         attributes: User.getAttributes(),
       }),
-      Issue.findByPk(issueId),
+      Issue.findByPk(issueId, {
+        include: [
+          {
+            model: User,
+            require: true,
+            as: 'creator',
+          },
+        ],
+      }),
     ]);
 
     if (!chatChannel) {
@@ -60,11 +68,17 @@ export default class ChatService {
       ]);
     }
     const authorChat = await this.addUserToChat(chatChannel, user);
+
     await Promise.all([
       this.addUserToChat(chatChannel, worker),
       this.addToReviceIssue(issueId, issue.createdBy === user.id ? worker.id : user.id),
     ]);
-    authorChat.setDataValue('supporting', worker.toJSON());
+
+    const host = get(issue, 'creator');
+    const allowAttributes = ['id', 'avatar', 'name', 'status'];
+    authorChat.setDataValue('worker', pick(worker.toJSON(), allowAttributes));
+    authorChat.setDataValue('host', pick(host.toJSON(), allowAttributes));
+    authorChat.setDataValue('supporting', null);
     const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
     authorChat.setDataValue('token', twilioToken);
 
@@ -544,34 +558,53 @@ export default class ChatService {
   }
 
   static async joinChat(user, { issueId }) {
-    const issue = await Issue.findByPk(issueId);
-    const customerId = get(issue, 'createdBy');
-    let chatChannel = await ChatChannel.findChannelGroup(issueId, [customerId, user.id]);
-    if (!chatChannel) {
-      const supporting = await ReceiveIssue.findOne({
+    const [issue, receiveIssue] = await Promise.all([
+      Issue.findByPk(issueId, {
+        include: [
+          {
+            model: User,
+            require: true,
+            as: 'creator',
+          },
+        ],
+      }),
+      ReceiveIssue.findOne({
         where: {
           issueId,
           status: {
             [Op.ne]: issueStatus.CANCELLED,
           },
         },
-      });
+      }),
+    ]);
+    const customerId = get(issue, 'createdBy');
+    const host = get(issue, 'creator');
 
-      chatChannel = await ChatChannel.findChannelGroup(issueId, [customerId, supporting.userId]);
+    let chatChannel = await ChatChannel.findChannelGroup(issueId, [customerId, user.id]);
+
+    if (!chatChannel) {
+      chatChannel = await ChatChannel.findChannelGroup(issueId, [customerId, receiveIssue.userId]);
     }
 
     if (isNil(chatChannel)) {
       throw new Error('CHAT-0404');
     }
 
-    const [authorChat, worker] = await Promise.all([
+    const [authorChat, supporting, worker] = await Promise.all([
       this.addUserToChat(chatChannel, user),
       User.findByPk(user.id, {
         attributes: User.getAttributes(),
       }),
+      User.findByPk(receiveIssue.userId, {
+        attributes: User.getAttributes(),
+      }),
     ]);
 
-    authorChat.setDataValue('supporting', worker.toJSON());
+    const allowAttributes = ['id', 'avatar', 'name', 'status'];
+    authorChat.setDataValue('supporting', pick(supporting.toJSON(), allowAttributes));
+    authorChat.setDataValue('worker', pick(worker.toJSON(), allowAttributes));
+    authorChat.setDataValue('host', pick(host.toJSON(), allowAttributes));
+
     const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
     authorChat.setDataValue('token', twilioToken);
 
