@@ -60,4 +60,5 @@ export const notificationMessage = Object.freeze({
   REQUEST_ADD_MORE_INFORMATION: 'notfication.request_add_more_information',
   ADDED_MORE_INFORMATION: 'notfication.added_more_information',
   CANCELED: 'notfication.canceled',
+  NEW_MESSAGE: 'notfication.new_message',
 });

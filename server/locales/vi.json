@@ -39,6 +39,7 @@
 		"added_more_information": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
 		"canceled": "Công việc {{title}} đã bị huỷ. Hãy kiểm tra.",
     "new_issue": "Công việc {{title}} cần hỗ trợ.",
-    "cancel": "Công việc {{title}} đã cập nhật. Hãy kiểm tra."
+    "cancel": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
+	"new_message": "Công việc {{title}} đã cập nhật. Hãy kiểm tra."
   }
 }
