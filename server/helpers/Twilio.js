@@ -74,6 +74,15 @@ export default class Twilio {
   async fetchMessage(id, channelId) {
     return this.client.chat.services(twilioConfig.chatId).channels(channelId).messages(id).fetch();
   }
+
+  async setWebhook({ postWebhookUrl, preWebhookUrl, webhookMethod = 'POST' }) {
+    return this.client.chat.services(twilioConfig.chatId).update({
+      postWebhookUrl,
+      preWebhookUrl,
+      webhookMethod,
+      webhookFilters: ['onMessageSent'],
+    });
+  }
 }
 
 export const twilioClient = new Twilio();

@@ -295,6 +295,7 @@ export default class NotificationService {
         issue: JSON.stringify(objectToSnake(issue.fmtRes())),
         channel: JSON.stringify(objectToSnake(chatChannel.toJSON())),
       };
+
       await Promise.all([tokens.length ? Fcm.sendNotification(tokens, data, notification) : null]);
       return done();
     } catch (error) {
