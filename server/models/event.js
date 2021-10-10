@@ -1,21 +1,26 @@
-import Sequelize from 'sequelize';
+import Sequelize, { Op } from 'sequelize';
 import uuid from 'uuid';
 import BaseModel from './model';
+import Category from './category';
+import EventCategory from './eventCategory';
 import sequelize from '../databases/database';
-import EventType from './eventType';
-import EventDetail from './eventDetail';
 import { fileSystemConfig } from '../config';
+import { saleEventTypes, eventStatuses } from '../constants';
 
 class Event extends BaseModel {}
 
 Event.init(
   {
-    title: {
+    type: {
+      type: Sequelize.ENUM(...Object.values(saleEventTypes)),
+      allowNull: false,
+    },
+    code: {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    eventTypeId: {
-      type: Sequelize.UUID,
+    title: {
+      type: Sequelize.STRING,
       allowNull: false,
     },
     description: {
@@ -35,6 +40,21 @@ Event.init(
     to: {
       type: Sequelize.DATE,
       defautValue: Sequelize.NOW,
+    },
+    value: {
+      type: Sequelize.DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 1000000000,
+    },
+    maxValue: {
+      type: Sequelize.DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 1000000000,
+    },
+    minValue: {
+      type: Sequelize.DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
     },
     status: {
       type: Sequelize.TINYINT,
@@ -64,23 +84,51 @@ Event.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
 
-Event.belongsTo(EventType);
-Event.hasOne(EventDetail);
+Event.belongsToMany(Category, { as: 'categories', through: EventCategory });
 
-Event.baseAttibutes = ['id', 'title', 'description', 'image', 'status', 'from', 'to'];
+Event.baseAttibutes = [
+  'id',
+  'type',
+  'title',
+  'description',
+  'image',
+  'minValue',
+  'maxValue',
+  'status',
+  'from',
+  'to',
+];
 Event.buildRelation = () => {
   return [
     {
-      model: EventType,
-      required: true,
-      attributes: EventType.baseAttibutes,
-    },
-    {
-      model: EventDetail,
-      required: true,
-      attributes: EventDetail.baseAttibutes,
+      model: Category,
+      as: 'categories',
     },
   ];
+};
+
+Event.whereCondition = (user) => {
+  console.log(user);
+  const filteredEventSql = sequelize.dialect.QueryGenerator.selectQuery('event_scope', {
+    attributes: ['event_id'],
+    where: {
+      scope: {
+        [Op.or]: [user.sessionRole, 'public'],
+      },
+    },
+  }).slice(0, -1);
+  return {
+    from: {
+      [Op.lte]: new Date(),
+    },
+    to: {
+      [Op.gte]: new Date(),
+    },
+    id: {
+      [Op.in]: Sequelize.literal(`(${filteredEventSql})`),
+    },
+    status: eventStatuses.ACTIVE,
+  };
 };
 
 module.exports = Event;

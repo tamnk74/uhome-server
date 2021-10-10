@@ -33,3 +33,14 @@ export const appTypes = Object.freeze({
   ANDROID: 'android',
   IOS: 'ios',
 });
+
+export const saleEventTypes = Object.freeze({
+  DISCOUNT: 'discount',
+  BONUS: 'bonus',
+  VOUCHER: 'voucher',
+});
+
+export const eventStatuses = Object.freeze({
+  DEACTIVE: 0,
+  ACTIVE: 1,
+});

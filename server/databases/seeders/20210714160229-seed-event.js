@@ -1,22 +1,19 @@
 const { v4: uuidv4 } = require('uuid');
 const dayjs = require('dayjs');
 const Event = require('../../models/event');
-const EventType = require('../../models/eventType');
-const EventDetail = require('../../models/eventDetail');
 const EventPublicRole = require('../../models/eventPublicRole');
 const EventLocation = require('../../models/eventLocation');
 
+for
+
 const createData = async (data) => {
-  const eventType = await EventType.findOne({
-    where: {
-      name: data.type,
-    },
-  });
   const event = await Event.create({
     title: data.title,
+    description: data.description,
     from: data.from,
     to: data.to,
-    eventTypeId: eventType.id,
+    to: data.to,
+    type: data.type,
   });
   const roles = data.roles || [];
   const eventRoles = roles.map((role) => {
@@ -29,10 +26,6 @@ const createData = async (data) => {
     };
   });
   await Promise.all([
-    EventDetail.create({
-      eventId: event.id,
-      value: data.value,
-    }),
     EventLocation.create({
       eventId: event.id,
       zipCode: data.zipCode,
@@ -45,31 +38,51 @@ module.exports = {
   up: () => {
     const events = [
       {
+        code: 'TANG-100k-KHI-HOAN-THANH',
         title: 'Tặng ngay 100.000 khi hoàn thành 1 công việc',
         from: dayjs(),
         to: dayjs().add(1, 'year'),
         type: 'Donate',
         value: 100000,
         roles: ['WORKER'],
-        zipCode: '550000',
       },
       {
+        code: 'TANG-100k-KHI-HOAN-THANH',
+        title: 'Tặng ngay 100.000 khi hoàn thành 1 công việc',
+        from: dayjs(),
+        to: dayjs().add(1, 'year'),
+        type: 'Donate',
+        value: 100000,
+        roles: ['WORKER'],
+      },
+      {
+        code: 'GIAM-10-3-YEU-CAU',
         title: 'Giảm 10% khi tạo 3 yêu cầu đầu tiên',
         from: dayjs(),
         to: dayjs().add(1, 'year'),
         type: 'Discount',
         value: 10,
         roles: ['CUSTOMER'],
-        zipCode: '550000',
       },
       {
+        code: 'LIEN-KET-MOMO',
         title: 'Liên kết momo nhận Voucher',
         from: dayjs(),
         to: dayjs().add(1, 'year'),
         type: 'Gift',
         value: 10,
+        maxValue: 50000,
         roles: ['CUSTOMER', 'WORKER'],
-        zipCode: '550000',
+      },
+      {
+        code: 'MUA-HE-SIEU-NONG',
+        title: 'Mùa hè siêu nóng - hot giảm 50% phí sửa chữa máy lạnh - giảm đến 50K.',
+        from: dayjs(),
+        to: dayjs().add(3, 'month'),
+        type: 'discount',
+        value: 50,
+        maxValue: 50000,
+        roles: ['CUSTOMER'],
       },
     ];
 

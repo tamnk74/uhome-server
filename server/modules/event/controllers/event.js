@@ -20,6 +20,20 @@ export default class EventController {
     }
   }
 
+  static async myEvents(req, res, next) {
+    try {
+      const events = await EventService.getMyEvents(req.user);
+      return res.status(200).json(
+        events.rows.map((event) => {
+          const item = event.toJSON();
+          return objectToSnake(item);
+        })
+      );
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async update(req, res, next) {
     try {
       const { id } = req.params;

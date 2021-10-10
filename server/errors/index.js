@@ -11,7 +11,7 @@ import errorFactory from './ErrorFactory';
 
 export const handleError = (err, req, res, next) => {
   let error = null;
-  console.log(error);
+  console.error(err);
   switch (err.constructor) {
     case BadRequestError:
     case ValidationError:
@@ -34,10 +34,13 @@ export const handleError = (err, req, res, next) => {
     errors: error.errors || [],
   };
 
-  if (error instanceof InternalServerError || status === httpStatus.INTERNAL_SERVER_ERROR) {
+  if (
+    process.env.ENV !== 'local' &&
+    (error instanceof InternalServerError || status === httpStatus.INTERNAL_SERVER_ERROR)
+  ) {
     sentryConfig.Sentry.captureException(err);
   } else {
-    console.info(err);
+    console.error(err);
   }
 
   return res.status(status).send(response);
