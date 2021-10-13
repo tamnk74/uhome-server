@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import { objectToCamel, objectToSnake } from '../../../helpers/Util';
 import ChatService from '../services/chat';
 import { roles } from '../../../constants';
@@ -110,6 +111,20 @@ export default class ChatController {
         data: req.body,
       });
       return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async postWebhook(req, res, next) {
+    try {
+      const { body: data } = req;
+      const channelSid = get(data, 'ChannelSid');
+      const clientIdentity = get(data, 'ClientIdentity');
+      const message = get(data, 'Body');
+      await ChatService.handleWebhook({ channelSid, clientIdentity, message });
+
+      return res.status(200).json({});
     } catch (e) {
       return next(e);
     }

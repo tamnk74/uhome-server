@@ -577,4 +577,27 @@ export default class ChatService {
 
     return authorChat;
   }
+
+  static async handleWebhook({ channelSid, clientIdentity, message }) {
+    const [chatChannel, chatMember] = await Promise.all([
+      ChatChannel.findOne({
+        where: {
+          channelSid,
+        },
+      }),
+      ChatMember.findOne({
+        where: {
+          channelSid,
+          identity: clientIdentity,
+        },
+      }),
+    ]);
+
+    notificationQueue.add('chat_notification', {
+      chatChannelId: chatChannel.id,
+      actorId: get(chatMember, 'userId'),
+      message,
+      commandName: 'NEW_MESSAGE',
+    });
+  }
 }

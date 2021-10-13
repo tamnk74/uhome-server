@@ -94,4 +94,6 @@ router.post(
   ChatController.addMoreInformation
 );
 
+router.post('/chat/post-webhooks', ChatController.postWebhook);
+
 export default router;
