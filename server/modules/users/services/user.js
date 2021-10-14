@@ -18,6 +18,7 @@ import IdentifyCard from '../../../models/identifyCard';
 import TransactionHistory from '../../../models/transactionHistory';
 import { sendOTP } from '../../../helpers/SmsOTP';
 import RedisService from '../../../helpers/Redis';
+import AuthService from './auth';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -315,9 +316,7 @@ export default class Userervice {
       RedisService.saveAccessToken(user.id, accessToken, role),
     ]);
 
-    user.sessionRole = role;
-
-    return user;
+    return AuthService.getUserById(user.id, role);
   }
 
   static async getTransactionHistories({ user, query }) {
