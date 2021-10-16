@@ -14,6 +14,7 @@ export const command = Object.freeze({
   REQUEST_ADD_MORE_INFORMATION: 'REQUEST_ADD_MORE_INFORMATION',
   ADDED_MORE_INFORMATION: 'ADDED_MORE_INFORMATION',
   CANCELED: 'CANCELED',
+  ADDED_PROMOTION: 'ADDED_PROMOTION',
 });
 
 export const commandMessage = Object.freeze({
@@ -32,6 +33,7 @@ export const commandMessage = Object.freeze({
   REQUEST_ADD_MORE_INFORMATION: 'chat.request_add_more_information',
   ADDED_MORE_INFORMATION: 'chat.added_more_information',
   CANCELED: 'chat.canceled',
+  ADDED_PROMOTION: 'chat.added_promotion',
 });
 
 export const commandRequests = [

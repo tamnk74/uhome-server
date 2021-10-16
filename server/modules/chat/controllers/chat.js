@@ -129,4 +129,16 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async addPromotion(req, res, next) {
+    try {
+      const { files, user, chatChannel } = req;
+
+      await ChatService.addPromotion({ user, files, chatChannel });
+
+      return res.status(200).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

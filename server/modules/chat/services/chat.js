@@ -25,8 +25,29 @@ import UserProfile from '../../../models/userProfile';
 import TransactionHistory from '../../../models/transactionHistory';
 import sequelize from '../../../databases/database';
 import EstimationMessage from '../../../models/estimationMessage';
+import Uploader from '../../../helpers/Uploader';
+import { fileSystemConfig } from '../../../config';
+
+const uploadPromotion = async (file) => {
+  const id = uuidv4();
+  const fileName = `${id}-${file.originalname}`;
+  // eslint-disable-next-line no-use-before-define
+  const path = `${ChatService.filePath}/${fileName}`;
+
+  await Uploader.upload(file, {
+    path,
+    'x-amz-meta-mimeType': file.mimetype,
+    'x-amz-meta-size': file.size.toString(),
+  });
+
+  return { path: `${fileSystemConfig.clout_front}/${path}` };
+};
 
 export default class ChatService {
+  static get filePath() {
+    return 'promotions';
+  }
+
   static async create(user, data) {
     const { userId, issueId } = data;
     /* eslint-disable prefer-const */
@@ -219,7 +240,7 @@ export default class ChatService {
     };
 
     /* eslint-disable no-undef */
-    const message = __(commandMessage[commandName]);
+    const message = __(get(commandMessage, commandName));
     const messageData = {
       from: chatMember.identity,
       channelSid: chatChannel.channelSid,
@@ -632,5 +653,16 @@ export default class ChatService {
       message,
       commandName: 'NEW_MESSAGE',
     });
+  }
+
+  static async addPromotion({ user, files = [], chatChannel }) {
+    const promises = files.map((file) => uploadPromotion(file));
+
+    const promotions = await Promise.all(promises);
+    const messageAttributes = {
+      promotions,
+    };
+
+    await this.sendMessage(command.ADDED_PROMOTION, chatChannel, user, null, messageAttributes);
   }
 }
