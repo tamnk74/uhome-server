@@ -16,6 +16,7 @@ import {
   estimationSchema,
   materialCostSchema,
   updateIssueSchema,
+  requestSupportSchema,
 } from '../schema';
 
 const router = Router();
@@ -41,6 +42,7 @@ router.post(
   '/issues/:issueId/request-supportings',
   auth('requestSupport'),
   active,
+  validator(requestSupportSchema),
   verifyIssue,
   verifyCategory,
   IssueController.requestSupporting

@@ -58,7 +58,9 @@ export default class AuthController {
 
   static async requestSupporting(req, res, next) {
     try {
-      await IssueService.requestSupporting(req.user, req.issue);
+      const payload = get(req, 'body', {});
+
+      await IssueService.requestSupporting(req.user, req.issue, payload);
       return res.status(204).json({});
     } catch (e) {
       return next(e);

@@ -21,6 +21,10 @@ RequestSupporting.init(
       type: Sequelize.DataTypes.UUID,
       allowNull: false,
     },
+    message: {
+      type: Sequelize.DataTypes.STRING,
+      allowNull: false,
+    },
     createdAt: {
       type: Sequelize.DATE,
       defautValue: Sequelize.NOW,

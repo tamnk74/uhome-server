@@ -1,6 +1,6 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
 import Sequelize, { Op } from 'sequelize';
-import { get, isNil, pick } from 'lodash';
+import { get, isNil, pick, isEmpty } from 'lodash';
 
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
@@ -27,6 +27,7 @@ import sequelize from '../../../databases/database';
 import EstimationMessage from '../../../models/estimationMessage';
 import Uploader from '../../../helpers/Uploader';
 import { fileSystemConfig } from '../../../config';
+import RequestSupporting from '../../../models/requestSupporting';
 
 const uploadPromotion = async (file) => {
   const id = uuidv4();
@@ -66,7 +67,7 @@ export default class ChatService {
         ],
       }),
     ]);
-
+    let isNewGroup = false;
     if (!chatChannel) {
       const channel = await twilioClient.createChannel();
       [chatChannel] = await Promise.all([
@@ -87,10 +88,10 @@ export default class ChatService {
           }
         ),
       ]);
+      isNewGroup = true;
     }
     const authorChat = await this.addUserToChat(chatChannel, user);
-
-    await Promise.all([
+    const [workerChat] = await Promise.all([
       this.addUserToChat(chatChannel, worker),
       this.addToReviceIssue(issueId, issue.createdBy === user.id ? worker.id : user.id),
     ]);
@@ -102,6 +103,10 @@ export default class ChatService {
     authorChat.setDataValue('supporting', null);
     const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
     authorChat.setDataValue('token', twilioToken);
+
+    if (isNewGroup) {
+      await this.sendWelcomeMessage(chatChannel, workerChat);
+    }
 
     return authorChat;
   }
@@ -664,5 +669,31 @@ export default class ChatService {
     };
 
     await this.sendMessage(command.ADDED_PROMOTION, chatChannel, user, null, messageAttributes);
+  }
+
+  /**
+   * Send welcome Message
+   *
+   * @param {ChatChannel} chatChannel
+   * @param {Member} worker
+   */
+  static async sendWelcomeMessage(chatChannel, worker) {
+    const requestSupporting = await RequestSupporting.findOne({
+      where: {
+        userId: worker.userId,
+        issueId: chatChannel.issueId,
+      },
+    });
+    const message = get(requestSupporting, 'message');
+
+    if (!isEmpty(message)) {
+      const messageData = {
+        from: worker.identity,
+        channelSid: chatChannel.channelSid,
+        body: message,
+      };
+
+      await twilioClient.sendMessage(chatChannel.channelSid, messageData);
+    }
   }
 }
