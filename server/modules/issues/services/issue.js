@@ -120,7 +120,7 @@ export default class IssueService {
     });
   }
 
-  static async requestSupporting(user, issue) {
+  static async requestSupporting(user, issue, { message }) {
     if (issue.status !== issueStatus.OPEN) {
       throw new Error('ISSUE-0002');
     }
@@ -130,7 +130,12 @@ export default class IssueService {
         userId: user.id,
         issueId: issue.id,
       },
+      defaults: {
+        id: uuidv4(),
+        message,
+      },
     });
+
     notificationQueue.add('request_supporting', {
       requestId: requestSupporting[0].id,
       userId: issue.createdBy,

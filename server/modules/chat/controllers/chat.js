@@ -16,6 +16,7 @@ export default class ChatController {
       const issue = await ChatService.joinChat(user, objectToCamel(req.body));
       return res.status(201).json(objectToSnake(issue.toJSON()));
     } catch (e) {
+      console.log(e);
       return next(e);
     }
   }
