@@ -290,7 +290,8 @@ export default class ChatService {
     data.totalTime = +data.totalTime;
     data.workerFee = +data.workerFee;
     data.customerFee = +data.customerFee;
-    const { startTime, endTime, workerFee, customerFee } = data;
+    data.numOfWorker = +data.numOfWorker;
+    const { startTime, endTime, workerFee, customerFee, numOfWorker } = data;
     const { issue } = chatChannel;
 
     if (issue.paymentMethod === paymentMethod.MOMO && userProfile.accountBalance < customerFee) {
@@ -306,6 +307,7 @@ export default class ChatService {
           workerFee,
           customerFee,
           status: issueStatus.IN_PROGRESS,
+          numOfWorker,
         },
         {
           where: {

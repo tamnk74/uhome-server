@@ -30,6 +30,10 @@ ReceiveIssue.init(
       type: Sequelize.FLOAT,
       allowNull: true,
     },
+    numOfWorker: {
+      type: Sequelize.INTEGER,
+      defaultValue: 1,
+    },
     workerFee: {
       type: Sequelize.DECIMAL(10, 2),
     },
