@@ -206,6 +206,7 @@ export default class IssueService {
   static async estimate({ user, issue, data }) {
     data.isContinuing = false;
     data.totalTime = +data.totalTime;
+    data.numOfWorker = +data.numOfWorker;
     const { startTime, totalTime } = data;
     const endTime = dayjs(startTime).add(totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
     const category = first(issue.categories);
