@@ -9,6 +9,7 @@ import {
   validIssueSupport,
   verifyOwnerIssue,
   verifyCategory,
+  verifySaleEvent,
 } from '../middlewares';
 import {
   createIssueSchema,
@@ -27,6 +28,7 @@ router.post(
   active,
   validator(createIssueSchema),
   verifyAttachments,
+  verifySaleEvent,
   IssueController.create
 );
 router.delete(

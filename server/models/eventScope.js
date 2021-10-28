@@ -32,7 +32,7 @@ EventScope.init(
     sequelize,
     underscored: true,
     modelName: 'EventScope',
-    table: 'event_scope',
+    table: 'event_scopes',
   }
 );
 

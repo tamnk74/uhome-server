@@ -44,3 +44,8 @@ export const eventStatuses = Object.freeze({
   DEACTIVE: 0,
   ACTIVE: 1,
 });
+
+export const calculateType = Object.freeze({
+  FIXED: 'fixed',
+  PERCENT: 'percent',
+});

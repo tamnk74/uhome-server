@@ -5,7 +5,7 @@ import Category from './category';
 import EventCategory from './eventCategory';
 import sequelize from '../databases/database';
 import { fileSystemConfig } from '../config';
-import { saleEventTypes, eventStatuses } from '../constants';
+import { saleEventTypes, eventStatuses, calculateType } from '../constants';
 
 class Event extends BaseModel {}
 
@@ -41,15 +41,20 @@ Event.init(
       type: Sequelize.DATE,
       defautValue: Sequelize.NOW,
     },
+    valueType: {
+      type: Sequelize.ENUM(...Object.values(calculateType)),
+      allowNull: false,
+      defaultValue: calculateType.FIXED,
+    },
     value: {
       type: Sequelize.DataTypes.DECIMAL(12, 2),
       allowNull: false,
-      defaultValue: 1000000000,
+      defaultValue: 0,
     },
     maxValue: {
       type: Sequelize.DataTypes.DECIMAL(12, 2),
       allowNull: false,
-      defaultValue: 1000000000,
+      defaultValue: 0,
     },
     minValue: {
       type: Sequelize.DataTypes.DECIMAL(12, 2),
@@ -85,6 +90,31 @@ Event.beforeCreate((instance) => {
 });
 
 Event.belongsToMany(Category, { as: 'categories', through: EventCategory });
+EventCategory.belongsTo(Event);
+
+Event.prototype.isExpired = function isExpired() {
+  const now = new Date();
+  return (
+    this.dataValues.status !== eventStatuses.ACTIVE ||
+    this.dataValues.from > now ||
+    this.dataValues.to < now
+  );
+};
+
+Event.prototype.getDiscountValue = function getDiscountValue(total) {
+  if (this.dataValues.valueType === calculateType.FIXED) {
+    return this.value;
+  }
+
+  if (this.dataValues.valueType === calculateType.PERCENT) {
+    const value = (total * this.dataValues.value) / 100;
+    if (value > this.dataValues.maxValue) return this.dataValues.maxValue;
+    if (value < this.dataValues.minValue) return this.dataValues.minValue;
+    return value;
+  }
+
+  return 0;
+};
 
 Event.baseAttibutes = [
   'id',
@@ -92,6 +122,8 @@ Event.baseAttibutes = [
   'title',
   'description',
   'image',
+  'value',
+  'valueType',
   'minValue',
   'maxValue',
   'status',
@@ -109,7 +141,7 @@ Event.buildRelation = () => {
 
 Event.whereCondition = (user) => {
   console.log(user);
-  const filteredEventSql = sequelize.dialect.QueryGenerator.selectQuery('event_scope', {
+  const filteredEventSql = sequelize.dialect.QueryGenerator.selectQuery('event_scopes', {
     attributes: ['event_id'],
     where: {
       scope: {

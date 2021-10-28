@@ -7,10 +7,10 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         defaultValue: Sequelize.UUID,
       },
-      issue_id: {
+      event_id: {
         type: Sequelize.DataTypes.UUID,
         references: {
-          model: 'issues',
+          model: 'events',
           key: 'id',
         },
         allowNull: false,

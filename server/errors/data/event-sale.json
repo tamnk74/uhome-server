@@ -1,0 +1,20 @@
+{
+  "EVSL-0001": {
+    "status": 404,
+    "error": "Sale event not found",
+    "title": "Sale event not found",
+    "detail": "Sale event not found"
+  },
+  "EVSL-0002": {
+    "status": 400,
+    "error": "Invalid sale event",
+    "title": "Sale event is invalid",
+    "detail": "Sale event is invalid"
+  },
+  "EVSL-0003": {
+    "status": 400,
+    "error": "Invalid sale event",
+    "title": "This sale event is not suitable for your issue",
+    "detail": "This sale event is not suitable for your issue"
+  }
+}

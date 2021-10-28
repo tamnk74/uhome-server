@@ -7,6 +7,7 @@ import { twilioClient } from '../../../helpers/Twilio';
 import ChatChannel from '../../../models/chatChannel';
 import User from '../../../models/user';
 import ChatUser from '../../../models/chatUser';
+import UserEvent from '../../../models/userEvent';
 import ReceiveIssue from '../../../models/receiveIssue';
 import {
   commandMessage,
@@ -14,10 +15,12 @@ import {
   command,
   transactionType,
   paymentMethod,
+  eventStatuses,
 } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
+import Event from '../../../models/event';
 import Attachment from '../../../models/attachment';
 import ReceiveIssueComment from '../../../models/receiveIssueComment';
 import IssueMaterial from '../../../models/issueMaterial';
@@ -293,8 +296,13 @@ export default class ChatService {
     data.numOfWorker = +data.numOfWorker;
     const { startTime, endTime, workerFee, customerFee, numOfWorker } = data;
     const { issue } = chatChannel;
+    const event = await Event.findByPk(issue.eventId);
+    const discount = event.getDiscountValue(customerFee);
 
-    if (issue.paymentMethod === paymentMethod.MOMO && userProfile.accountBalance < customerFee) {
+    if (
+      issue.paymentMethod === paymentMethod.MOMO &&
+      userProfile.accountBalance < customerFee - discount
+    ) {
       throw new Error('ISSUE-0411');
     }
 
@@ -306,6 +314,7 @@ export default class ChatService {
           endTime,
           workerFee,
           customerFee,
+          discount,
           status: issueStatus.IN_PROGRESS,
           numOfWorker,
         },
@@ -384,8 +393,10 @@ export default class ChatService {
       ]);
 
       const customerFee = get(receiveIssue, 'customerFee', 0);
+      const discount = get(receiveIssue, 'discount', 0);
+      const totalCost = customerFee + data.totalCost - discount;
       supporterId = get(receiveIssue, 'userId');
-      if (customerProfile.accountBalance < customerFee + data.totalCost) {
+      if (customerProfile.accountBalance < totalCost) {
         throw new Error('ISSUE-0411');
       }
     }
@@ -473,6 +484,54 @@ export default class ChatService {
         ? ChatService.finishIssue({ user, receiveIssue, rate })
         : null,
     ]);
+
+    if (rate === 5) {
+      const events = await Event.findAll({
+        where: {
+          code: ['FIRST-5-STAR', 'NEXT-5-5-STAR'],
+          status: eventStatuses.ACTIVE,
+        },
+      });
+      const userEvents = await UserEvent.findAll({
+        where: {
+          eventId: events.map((event) => event.id),
+        },
+      });
+      const first5StarEvent = events.find((event) => event.code === 'FIRST-5-STAR');
+      const next5StarEvent = events.find((event) => event.code === 'NEXT-5-5-STAR');
+      if (first5StarEvent && userEvents.length === 0) {
+        await UserProfile.update(
+          {
+            accountBalance: Sequelize.literal(`account_balance + ${first5StarEvent.value}`),
+          },
+          {
+            where: {
+              userId: receiveIssue.userId,
+            },
+          }
+        );
+        await UserEvent.create({
+          userId: receiveIssue.userId,
+          eventId: first5StarEvent.id,
+        });
+      }
+      if (next5StarEvent && userEvents.length < 5) {
+        await UserProfile.update(
+          {
+            accountBalance: Sequelize.literal(`account_balance + ${next5StarEvent.value}`),
+          },
+          {
+            where: {
+              userId: receiveIssue.userId,
+            },
+          }
+        );
+        await UserEvent.create({
+          userId: receiveIssue.userId,
+          eventId: next5StarEvent.id,
+        });
+      }
+    }
     await this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
   }
 
@@ -520,7 +579,7 @@ export default class ChatService {
   }
 
   static async finishIssue({ user, receiveIssue, rate }) {
-    const { workerFee, customerFee, issueId, startTime, endTime, time } = receiveIssue;
+    const { workerFee, customerFee, discount, issueId, startTime, endTime, time } = receiveIssue;
     const extra = {
       startTime,
       endTime,
@@ -553,7 +612,9 @@ export default class ChatService {
       return Promise.all([
         UserProfile.update(
           {
-            accountBalance: Sequelize.literal(`account_balance + ${customerFee + sumCost}`),
+            accountBalance: Sequelize.literal(
+              `account_balance + ${customerFee - discount + sumCost}`
+            ),
             totalIssueCompleted: Sequelize.literal(`total_issue_completed + 1`),
             totalRating: Sequelize.literal(`total_rating + ${rate}`),
             reliability: Sequelize.literal(
