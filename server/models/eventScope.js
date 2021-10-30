@@ -2,23 +2,19 @@ import Sequelize from 'sequelize';
 import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
+import Event from './event';
 
-class EventDetail extends BaseModel {}
+class EventScope extends BaseModel {}
 
-EventDetail.init(
+EventScope.init(
   {
     eventId: {
       type: Sequelize.UUID,
       allowNull: false,
     },
-    value: {
-      type: Sequelize.DECIMAL(10, 2),
-    },
-    maxValue: {
-      type: Sequelize.DECIMAL(10, 2),
-    },
-    gift: {
-      type: Sequelize.STRING(255),
+    scope: {
+      type: Sequelize.STRING, // role, userId, public
+      allowNull: false,
     },
     createdAt: {
       defaultValue: Sequelize.NOW,
@@ -35,15 +31,15 @@ EventDetail.init(
   {
     sequelize,
     underscored: true,
-    modelName: 'EventDetail',
-    table: 'event_details',
+    modelName: 'EventScope',
+    table: 'event_scopes',
   }
 );
 
-EventDetail.beforeCreate((instance) => {
+EventScope.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
 
-EventDetail.baseAttibutes = ['id', 'value', 'maxValue', 'gift'];
+EventScope.belongsTo(Event);
 
-module.exports = EventDetail;
+module.exports = EventScope;

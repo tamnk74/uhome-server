@@ -14,6 +14,7 @@ const storage = multer.memoryStorage({
 const upload = multer({ storage }).single('file');
 
 router.get('/', auth(), EventController.index);
+router.get('/me', auth(), EventController.myEvents);
 router.patch('/:id', auth(), upload, EventController.update);
 
 export default router;

@@ -5,6 +5,7 @@ import common from './common.json';
 import joi from './joi.json';
 import chat from './chat.json';
 import payment from './payment.json';
+import saleEvent from './event-sale.json';
 
 export default {
   ...joi,
@@ -14,4 +15,5 @@ export default {
   ...attachment,
   ...chat,
   ...payment,
+  ...saleEvent,
 };

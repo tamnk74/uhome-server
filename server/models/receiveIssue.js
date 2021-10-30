@@ -40,6 +40,9 @@ ReceiveIssue.init(
     customerFee: {
       type: Sequelize.DECIMAL(10, 2),
     },
+    discount: {
+      type: Sequelize.DECIMAL(10, 2),
+    },
     rating: {
       type: Sequelize.DECIMAL(2),
       defaultValue: 0,

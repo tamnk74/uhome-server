@@ -29,6 +29,14 @@ export class EventService {
     });
   }
 
+  static async getMyEvents(user) {
+    return Event.findAndCountAll({
+      include: Event.buildRelation(),
+      attributes: Event.baseAttibutes,
+      where: Event.whereCondition(user),
+    });
+  }
+
   static async update(id, data, file) {
     if (file) {
       const fileName = `${id}-${file.originalname}`;

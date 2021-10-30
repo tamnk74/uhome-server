@@ -53,3 +53,5 @@ Api server built by nodejs
 > npx sequelize-cli db:seed:all
 
 > npx sequelize-cli db:seed:undo --seed name-of-seed-as-in-data
+
+> npx sequelize-cli db:seed --seed name-of-seed-as-in-data
