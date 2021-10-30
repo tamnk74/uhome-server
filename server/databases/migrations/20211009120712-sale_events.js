@@ -4,7 +4,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await Promise.all([
       queryInterface.bulkDelete('event_locations', null, {}),
-      queryInterface.bulkDelete('event_scopes', null, {}),
+      queryInterface.bulkDelete('event_public_roles', null, {}),
       queryInterface.bulkDelete('event_details', null, {}),
     ]);
 
