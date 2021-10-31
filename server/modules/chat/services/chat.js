@@ -516,7 +516,7 @@ export default class ChatService {
           eventId: first5StarEvent.id,
         });
       }
-      if (next5StarEvent && userEvents.length < 5) {
+      if (next5StarEvent && userEvents.length > 0 && userEvents.length < 5) {
         await UserProfile.update(
           {
             accountBalance: Sequelize.literal(`account_balance + ${next5StarEvent.value}`),
