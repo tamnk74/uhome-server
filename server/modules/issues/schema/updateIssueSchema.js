@@ -7,5 +7,5 @@ export const updateIssueSchema = Joi.object().keys({
   attachment_ids: Joi.array().items(Joi.string()),
   lat: Joi.number(),
   lon: Joi.number(),
-  payment_method: Joi.string().valid(Object.values(paymentMethod)),
+  payment_method: Joi.string().valid(...Object.values(paymentMethod)),
 });

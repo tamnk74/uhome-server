@@ -1,7 +1,7 @@
 module.exports = {
   up: (queryInterface, Sequelize) =>
     queryInterface.addColumn('receive_issues', 'num_of_worker', {
-      type: Sequelize.DataTypes.STRING,
+      type: Sequelize.DataTypes.INTEGER,
       after: 'time',
       defaultValue: 1,
     }),

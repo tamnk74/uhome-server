@@ -1,12 +1,13 @@
 import Sequelize from 'sequelize';
 import uuid from 'uuid';
-import { isNil } from 'lodash';
+import { isEmpty, isNil, get } from 'lodash';
 
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import { issueStatus } from '../constants';
 import User from './user';
 import Issue from './issue';
+import IssueEstimation from './issueEstimation';
 
 class ReceiveIssue extends BaseModel {
   static get mapFilterFields() {
@@ -89,6 +90,7 @@ User.hasMany(ReceiveIssue);
 
 ReceiveIssue.belongsTo(Issue);
 Issue.hasOne(ReceiveIssue, { as: 'supporting', foreignKey: 'issueId' });
+ReceiveIssue.hasMany(IssueEstimation);
 
 ReceiveIssue.cancel = ({ receiveIssue, reason }) => {
   return sequelize.transaction(async (t) => {
@@ -131,9 +133,16 @@ ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation = async (issueId, supp
       issueId,
       userId: supporterIds,
     },
+    include: [
+      {
+        model: IssueEstimation,
+      },
+    ],
   });
 
-  if (isNil(receiveIssue) || isNil(receiveIssue.startTime) || isNil(receiveIssue.endTime)) {
+  const estimations = get(receiveIssue, 'issue_estimations', []);
+
+  if (isNil(receiveIssue) || isEmpty(estimations)) {
     throw new Error('ISSUE-0412');
   }
 

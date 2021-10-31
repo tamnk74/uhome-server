@@ -39,3 +39,13 @@ export const transactionType = Object.freeze({
   WAGE: 'WAGE',
   PAY: 'PAY',
 });
+
+export const issueType = Object.freeze({
+  HOTFIX: 'HOTFIX',
+  NORMAL: 'NORMAL',
+});
+
+export const unitTime = Object.freeze({
+  DAY: 'DAY',
+  HOUR: 'HOUR',
+});

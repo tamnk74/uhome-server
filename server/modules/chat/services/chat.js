@@ -31,6 +31,7 @@ import EstimationMessage from '../../../models/estimationMessage';
 import Uploader from '../../../helpers/Uploader';
 import { fileSystemConfig } from '../../../config';
 import RequestSupporting from '../../../models/requestSupporting';
+import IssueEstimation from '../../../models/issueEstimation';
 
 const uploadPromotion = async (file) => {
   const id = uuidv4();
@@ -294,7 +295,7 @@ export default class ChatService {
     data.workerFee = +data.workerFee;
     data.customerFee = +data.customerFee;
     data.numOfWorker = +data.numOfWorker;
-    const { startTime, endTime, workerFee, customerFee, numOfWorker } = data;
+    const { workerFee, customerFee, numOfWorker, totalTime, unitTime, type, workingTimes } = data;
     const { issue } = chatChannel;
     const event = await Event.findByPk(issue.eventId);
     const discount = event.getDiscountValue(customerFee);
@@ -306,25 +307,15 @@ export default class ChatService {
       throw new Error('ISSUE-0411');
     }
 
+    const receiveIssue = await ReceiveIssue.findOne({
+      where: {
+        issueId: chatChannel.issue.id,
+        userId: supporterIds,
+      },
+    });
+
     await Promise.all([
-      ReceiveIssue.update(
-        {
-          time: data.totalTime,
-          startTime,
-          endTime,
-          workerFee,
-          customerFee,
-          discount,
-          status: issueStatus.IN_PROGRESS,
-          numOfWorker,
-        },
-        {
-          where: {
-            issueId: chatChannel.issue.id,
-            userId: supporterIds,
-          },
-        }
-      ),
+      receiveIssue.update({ status: issueStatus.IN_PROGRESS }),
       chatChannel.issue.update({
         status: issueStatus.IN_PROGRESS,
       }),
@@ -338,6 +329,16 @@ export default class ChatService {
           },
         }
       ),
+      IssueEstimation.create({
+        receiveIssueId: receiveIssue.id,
+        totalTime,
+        unitTime,
+        numOfWorker,
+        workerFee,
+        customerFee,
+        type,
+        workingTimes,
+      }),
     ]);
 
     data.fee = {
@@ -579,7 +580,21 @@ export default class ChatService {
   }
 
   static async finishIssue({ user, receiveIssue, rate }) {
-    const { workerFee, customerFee, discount, issueId, startTime, endTime, time } = receiveIssue;
+    const {
+      issueId,
+      startTime,
+      endTime,
+      time,
+      issue_estimations: issueEstimations = [],
+    } = receiveIssue;
+    let customerFee = 0;
+    let workerFee = 0;
+
+    await issueEstimations.forEach((item) => {
+      customerFee += item.customerFee;
+      workerFee += item.workerFee;
+    });
+
     const extra = {
       startTime,
       endTime,

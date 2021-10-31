@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import { dbConfig as config, debug } from '../config';
+import { dbConfig as config } from '../config';
 
 const DAO = new Sequelize(config.database, config.username, config.password, {
   host: config.host,
@@ -18,7 +18,7 @@ const DAO = new Sequelize(config.database, config.username, config.password, {
     min: 0,
     idle: 10000,
   },
-  logging: debug,
+  logging: console.log,
 });
 
 module.exports = DAO;

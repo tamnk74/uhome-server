@@ -16,8 +16,10 @@ import { twilioClient } from '../../../helpers/Twilio';
 import { objectToSnake } from '../../../helpers/Util';
 import FeeConfiguration from '../../../models/feeConfiguration';
 import FeeCategory from '../../../models/feeCategory';
-import Fee from '../../../helpers/Fee';
+import Fee from '../../../helpers/fee/NormalFee';
 import EstimationMessage from '../../../models/estimationMessage';
+import FeeFactory from '../../../helpers/fee/FeeFactory';
+import TeamFeeConfiguration from '../../../models/teamFeeConfiguration';
 
 export default class IssueService {
   static async create(user, data) {
@@ -207,31 +209,46 @@ export default class IssueService {
     data.isContinuing = false;
     data.totalTime = +data.totalTime;
     data.numOfWorker = +data.numOfWorker;
-    const { startTime, totalTime } = data;
-    const endTime = dayjs(startTime).add(totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
+    const { type, totalTime, workingTimes, numOfWorker } = data;
     const category = first(issue.categories);
-    const [feeConfiguration, feeCategory] = await Promise.all([
+    const [feeConfiguration, feeCategory, teamConfiguration] = await Promise.all([
       FeeConfiguration.findOne({}),
       FeeCategory.findOne({
         where: {
           categoryId: category.id,
         },
       }),
+      TeamFeeConfiguration.findOne({
+        where: {
+          categoryId: category.id,
+          minWorker: {
+            [Op.gte]: numOfWorker,
+          },
+        },
+        order: [['minWorker', 'ASC']],
+      }),
     ]);
-    data.fee = Fee.getFee(
-      feeConfiguration,
-      feeCategory,
-      dayjs(startTime).tz('Asia/Ho_Chi_Minh'),
-      endTime,
-      0
-    );
 
+    data.fee = FeeFactory.getFee(
+      type,
+      {
+        teamConfiguration,
+        classFee: feeCategory,
+        configuration: feeConfiguration,
+      },
+      {
+        workingTimes,
+        totalTime,
+        numOfWorker,
+      }
+    );
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
       user,
       issue,
       data
     );
+    console.log(message);
 
     await IssueService.updateEstimationMessage(
       command.SUBMIT_ESTIMATION_TIME,
