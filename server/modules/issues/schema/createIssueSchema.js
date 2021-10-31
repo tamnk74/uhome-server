@@ -9,5 +9,7 @@ export const createIssueSchema = Joi.object().keys({
   event_id: Joi.string(),
   lat: Joi.number(),
   lon: Joi.number(),
-  payment_method: Joi.string().valid(Object.values(paymentMethod)).required(),
+  payment_method: Joi.string()
+    .valid(...Object.values(paymentMethod))
+    .required(),
 });

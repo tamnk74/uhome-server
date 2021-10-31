@@ -1,16 +1,23 @@
 import dayjs from 'dayjs';
-import { sum, get, sumBy } from 'lodash';
+import { sum, get, sumBy, first, isEmpty } from 'lodash';
 import isBetween from 'dayjs/plugin/isBetween';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import { workingTime } from '../constants';
+import { workingTime } from '../../constants';
 
 dayjs.extend(isBetween);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default class Fee {
-  static getBasicTimeFee(configuration, classFee, workingType, hours) {
+export default class HotfixFee {
+  constructor(workingTimes = [], totalTime = 0, numOfWorker = 1) {
+    this.workingTimes = workingTimes;
+    this.totalTime = totalTime;
+    this.numOfWorker = numOfWorker;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getBasicTimeFee(configuration, classFee, workingType, hours) {
     const factor = get(configuration, workingType, 0);
     const fee1 = classFee.min / 8;
 
@@ -39,8 +46,8 @@ export default class Fee {
     return hours * (fee32 * factor + fee32);
   }
 
-  static getBasicFee(configuration, classFee, starTime, endTime) {
-    const workingTimes = Fee.getWorkingTimes(starTime, endTime);
+  getBasicFee(configuration, classFee, starTime, endTime) {
+    const workingTimes = this.getWorkingTimes(starTime, endTime);
     const totalWorkingTime = {};
 
     Object.keys(workingTime).forEach((key) => {
@@ -48,16 +55,26 @@ export default class Fee {
     });
 
     const fees = Object.keys(totalWorkingTime).map((key) => {
-      return Fee.getBasicTimeFee(configuration, classFee, key, totalWorkingTime[key]);
+      return this.getBasicTimeFee(configuration, classFee, key, totalWorkingTime[key]);
     });
 
     return sum(fees);
   }
 
-  static getFee(configuration, classFee, starTime, endTime, distance = 0) {
-    const basicFee = Fee.getBasicFee(configuration, classFee, starTime, endTime);
-    const workerFee = Fee.getWorkerFee(basicFee, configuration, distance);
-    const customerFee = Fee.getCustomerFee(workerFee, configuration);
+  getFee(configuration, classFee, teamConfiguration) {
+    const workingTime = first(this.workingTimes);
+    if (isEmpty(workingTime)) {
+      return {
+        workerFee: 0,
+        customerFee: 0,
+      };
+    }
+
+    const startTime = dayjs(workingTime.startTime).tz('Asia/Ho_Chi_Minh');
+    const endTime = dayjs(startTime).add(this.totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
+    const basicFee = this.getBasicFee(configuration, classFee, startTime, endTime);
+    const workerFee = this.getWorkerFee(basicFee, configuration, teamConfiguration, 0);
+    const customerFee = this.getCustomerFee(workerFee, configuration);
 
     return {
       workerFee: Math.ceil(workerFee / 1000) * 1000,
@@ -65,26 +82,32 @@ export default class Fee {
     };
   }
 
-  static getWorkerFee(basicFee, configuration, distance = 0) {
+  // eslint-disable-next-line class-methods-use-this
+  getWorkerFee(basicFee, configuration, teamConfiguration, distance = 0) {
     return (
-      basicFee + basicFee * configuration.workerFee + basicFee * distance * configuration.distance
+      basicFee +
+      basicFee * configuration.workerFee +
+      basicFee * distance * configuration.distance +
+      basicFee * this.numOfWorker * get(teamConfiguration, 'fee', 0)
     );
   }
 
-  static getCustomerFee(workerFee, configuration) {
+  // eslint-disable-next-line class-methods-use-this
+  getCustomerFee(workerFee, configuration) {
     return workerFee * configuration.customerFee + workerFee;
   }
 
-  static getWorkingTimes(startTime, endTime) {
-    const workingTimes = Fee.generateMatrixWorkingTime(startTime, endTime);
+  getWorkingTimes(startTime, endTime) {
+    const workingTimes = this.generateMatrixWorkingTime(startTime, endTime);
     const workingRangeTimes = workingTimes.map((item) =>
-      Fee.getWorkingTime(item.startTime, item.endTime)
+      this.getWorkingTime(item.startTime, item.endTime)
     );
 
     return workingRangeTimes;
   }
 
-  static getTotalTimeByWorkingType(type, starTime, endTime) {
+  // eslint-disable-next-line class-methods-use-this
+  getTotalTimeByWorkingType(type, starTime, endTime) {
     let tmpStartTime = starTime.clone();
     let tmpToTime = endTime.clone();
     const workingsTime = workingTime[type];
@@ -113,7 +136,8 @@ export default class Fee {
     return Math.ceil(sum(ranges).toFixed(1));
   }
 
-  static generateMatrixWorkingTime(startTime, endTime) {
+  // eslint-disable-next-line class-methods-use-this
+  generateMatrixWorkingTime(startTime, endTime) {
     const workingTimes = [];
 
     while (endTime.diff(startTime, 'hour', true) >= 0) {
@@ -134,11 +158,11 @@ export default class Fee {
     return workingTimes;
   }
 
-  static getWorkingTime(starTime, endTime) {
+  getWorkingTime(starTime, endTime) {
     const timeWorking = {};
 
     Object.keys(workingTime).forEach((key) => {
-      timeWorking[key] = Fee.getTotalTimeByWorkingType(key, starTime, endTime);
+      timeWorking[key] = this.getTotalTimeByWorkingType(key, starTime, endTime);
     });
 
     return timeWorking;

@@ -3,25 +3,20 @@ import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 
-class FeeCategory extends BaseModel {}
+class TeamFeeConfiguration extends BaseModel {}
 
-FeeCategory.init(
+TeamFeeConfiguration.init(
   {
     categoryId: {
       type: Sequelize.UUID,
       allowNull: false,
     },
-    min: {
+    minWorker: {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: false,
       defaultValue: 0,
     },
-    max: {
-      type: Sequelize.DECIMAL(10, 2),
-      allowNull: false,
-      defaultValue: 0,
-    },
-    normalCost: {
+    fee: {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: false,
       defaultValue: 0,
@@ -41,14 +36,13 @@ FeeCategory.init(
   {
     sequelize,
     underscored: true,
-    modelName: 'FeeCategory',
-    table: 'fee_categories',
+    modelName: 'TeamFeeConfiguration',
+    table: 'team_fee_configurations',
   }
 );
 
-FeeCategory.beforeCreate((instance) => {
+TeamFeeConfiguration.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
-FeeCategory.baseAttibutes = ['id', 'min', 'max'];
 
-module.exports = FeeCategory;
+module.exports = TeamFeeConfiguration;
