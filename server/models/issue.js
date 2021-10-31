@@ -4,7 +4,6 @@ import BaseModel from './model';
 import Category from './category';
 import CategoryIssue from './categoryIssue';
 import Attachment from './attachment';
-import Event from './event';
 import sequelize from '../databases/database';
 import { issueStatus, paymentMethod } from '../constants';
 import RequestSupporting from './requestSupporting';
@@ -95,7 +94,6 @@ RequestSupporting.belongsTo(User);
 
 Issue.hasMany(RequestSupporting, { as: 'requestSupportings' });
 Issue.belongsToMany(User, { as: 'requestUsers', through: RequestSupporting });
-Issue.belongsTo(Event);
 
 Issue.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 User.hasMany(RequestSupporting, { as: 'requestSupportings' });
