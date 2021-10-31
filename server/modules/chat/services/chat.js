@@ -16,6 +16,7 @@ import {
   transactionType,
   paymentMethod,
   eventStatuses,
+  unitTime,
 } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
@@ -295,7 +296,15 @@ export default class ChatService {
     data.workerFee = +data.workerFee;
     data.customerFee = +data.customerFee;
     data.numOfWorker = +data.numOfWorker;
-    const { workerFee, customerFee, numOfWorker, totalTime, unitTime, type, workingTimes } = data;
+    const {
+      workerFee,
+      customerFee,
+      numOfWorker,
+      totalTime,
+      unitTime: unit,
+      type,
+      workingTimes,
+    } = data;
     const { issue } = chatChannel;
     const event = await Event.findByPk(issue.eventId);
     const discount = event.getDiscountValue(customerFee);
@@ -332,7 +341,7 @@ export default class ChatService {
       IssueEstimation.create({
         receiveIssueId: receiveIssue.id,
         totalTime,
-        unitTime,
+        unitTime: unit,
         numOfWorker,
         workerFee,
         customerFee,
@@ -481,9 +490,7 @@ export default class ChatService {
             content: comment,
           })
         : null,
-      issue.paymentMethod !== paymentMethod.CASH
-        ? ChatService.finishIssue({ user, receiveIssue, rate })
-        : null,
+      ChatService.finishIssue({ user, receiveIssue, rate, method: issue.paymentMethod }),
     ]);
 
     if (rate === 5) {
@@ -579,26 +586,26 @@ export default class ChatService {
     );
   }
 
-  static async finishIssue({ user, receiveIssue, rate }) {
-    const {
-      issueId,
-      startTime,
-      endTime,
-      time,
-      issue_estimations: issueEstimations = [],
-    } = receiveIssue;
+  static async finishIssue({ user, receiveIssue, rate, method }) {
+    const { issueId, issue_estimations: issueEstimations = [] } = receiveIssue;
     let customerFee = 0;
     let workerFee = 0;
+    const workingTimes = [];
+    let totalTime = 0;
+    let unit = unitTime.HOUR;
 
     await issueEstimations.forEach((item) => {
       customerFee += item.customerFee;
       workerFee += item.workerFee;
+      workingTimes.push(...item.workingTimes);
+      totalTime += item.totalTime;
+      unit = item.unitTime;
     });
 
     const extra = {
-      startTime,
-      endTime,
-      totalTime: time,
+      workingTimes,
+      totalTime,
+      unitTime: unit,
     };
     const sumCost = await IssueMaterial.sumCost(issueId, receiveIssue.userId);
 
@@ -609,10 +616,17 @@ export default class ChatService {
         amount: customerFee + sumCost,
         issueId,
         type: transactionType.WAGE,
-        extra,
+        extra: {
+          ...extra,
+          systemFee: customerFee - workerFee,
+        },
         actorId: user.id,
+        method,
       },
-      {
+    ];
+
+    if (method === paymentMethod.MOMO) {
+      transactionHistories.push({
         id: uuidv4(),
         userId: user.id,
         amount: workerFee + sumCost,
@@ -620,16 +634,18 @@ export default class ChatService {
         type: transactionType.PAY,
         extra,
         actorId: receiveIssue.userId,
-      },
-    ];
+        method,
+      });
+    }
 
     return sequelize.transaction(async (t) => {
       return Promise.all([
         UserProfile.update(
           {
-            accountBalance: Sequelize.literal(
-              `account_balance + ${customerFee - discount + sumCost}`
-            ),
+            accountBalance:
+              method === paymentMethod.MOMO
+                ? Sequelize.literal(`account_balance + ${workerFee - discount + sumCost}`)
+                : Sequelize.literal(`account_balance - ${customerFee - workerFee}`),
             totalIssueCompleted: Sequelize.literal(`total_issue_completed + 1`),
             totalRating: Sequelize.literal(`total_rating + ${rate}`),
             reliability: Sequelize.literal(
@@ -643,17 +659,19 @@ export default class ChatService {
             transaction: t,
           }
         ),
-        UserProfile.update(
-          {
-            accountBalance: Sequelize.literal(`account_balance - ${workerFee + sumCost}`),
-          },
-          {
-            where: {
-              userId: user.id,
-            },
-            transaction: t,
-          }
-        ),
+        method === paymentMethod.MOMO
+          ? UserProfile.update(
+              {
+                accountBalance: Sequelize.literal(`account_balance - ${customerFee + sumCost}`),
+              },
+              {
+                where: {
+                  userId: user.id,
+                },
+                transaction: t,
+              }
+            )
+          : null,
         TransactionHistory.bulkCreate(transactionHistories, {
           transaction: t,
         }),
