@@ -15,6 +15,10 @@ UserEvent.init(
       type: Sequelize.UUID,
       allowNull: false,
     },
+    status: {
+      type: Sequelize.DataTypes.TINYINT,
+      defautValue: 0,
+    },
     createdAt: {
       defaultValue: Sequelize.NOW,
       type: Sequelize.DATE,

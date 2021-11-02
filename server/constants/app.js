@@ -41,7 +41,7 @@ export const saleEventTypes = Object.freeze({
 });
 
 export const eventStatuses = Object.freeze({
-  DEACTIVE: 0,
+  INACTIVE: 0,
   ACTIVE: 1,
 });
 

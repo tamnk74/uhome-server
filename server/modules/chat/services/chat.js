@@ -493,6 +493,28 @@ export default class ChatService {
       ChatService.finishIssue({ user, receiveIssue, rate, method: issue.paymentMethod }),
     ]);
 
+    const event = issue.eventId
+      ? await Event.findOne({
+          where: {
+            id: issue.eventId,
+          },
+        })
+      : null;
+
+    if (event && event.type === saleEventTypes.VOUCHER) {
+      await UserEvent.update(
+        {
+          status: eventStatuses.ACTIVE,
+        },
+        {
+          where: {
+            userId: user.id,
+            eventId: event.id,
+          },
+        }
+      );
+    }
+
     if (rate === 5) {
       const events = await Event.findAll({
         where: {
@@ -502,6 +524,7 @@ export default class ChatService {
       });
       const userEvents = await UserEvent.findAll({
         where: {
+          userId: receiveIssue.userId,
           eventId: events.map((event) => event.id),
         },
       });
