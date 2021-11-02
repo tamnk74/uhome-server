@@ -4,11 +4,12 @@ import { momoConfig } from 'config';
 import { Momo, paymentLogger } from 'helpers';
 import Transaction from 'models/transaction';
 import UserProfile from 'models/userProfile';
+import UserEvent from 'models/userEvent';
+import Event from 'models/event';
 import TransactionHistory from 'models/transactionHistory';
 import sequelize from 'databases/database';
 import uuid, { v4 as uuidv4 } from 'uuid';
-import { paymentStatus } from 'constants';
-import { transactionType } from 'constants/issue';
+import { paymentStatus, eventStatuses, transactionType } from '../../../constants';
 
 export class PaymentService {
   static async process(user, data) {
@@ -91,6 +92,30 @@ export class PaymentService {
           },
         });
         const profile = await UserProfile.findOne({ where: { userId: user.id } });
+        const event = await Event.findOne({
+          where: {
+            code: 'LIEN-KET-MOMO',
+            status: eventStatuses.ACTIVE,
+          },
+          transaction: t,
+        });
+        if (event) {
+          await UserEvent.findOrCreate({
+            where: {
+              userId: user.id,
+              eventId: event.id,
+            },
+            defaults: {
+              id: uuidv4(),
+              userId: user.id,
+              eventId: event.id,
+              status: eventStatuses.INACTIVE,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            transaction: t,
+          });
+        }
 
         return {
           ...confirmResult.data,
