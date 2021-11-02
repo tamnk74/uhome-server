@@ -307,7 +307,7 @@ export default class ChatService {
     } = data;
     const { issue } = chatChannel;
     const event = await Event.findByPk(issue.eventId);
-    const discount = event.getDiscountValue(customerFee);
+    const discount = event ? event.getDiscountValue(customerFee) : 0;
 
     if (
       issue.paymentMethod === paymentMethod.MOMO &&
