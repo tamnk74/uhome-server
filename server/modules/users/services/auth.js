@@ -193,6 +193,7 @@ export default class AuthService {
             socialId: fbUser.id,
             type: socialAccount.FACEBOOK,
           },
+          sessionRole: 'CUSTOMER',
         },
         {
           include: [User.includeFacebookAccount(fbUser.id)],
@@ -204,7 +205,7 @@ export default class AuthService {
       JWT.generateToken(user.toPayload()),
       JWT.generateRefreshToken(user.id),
     ]);
-    await RedisService.saveAccessToken(user.id, accessToken);
+    await RedisService.saveAccessToken(user.id, accessToken, user.sessionRole);
 
     return {
       accessToken,
@@ -232,6 +233,7 @@ export default class AuthService {
             socialId: zaloUser.id,
             type: socialAccount.ZALO,
           },
+          sessionRole: 'CUSTOMER',
         },
         {
           include: [User.includeZaloAccount(zaloUser.id)],
@@ -243,7 +245,7 @@ export default class AuthService {
       JWT.generateToken(user.toPayload()),
       JWT.generateRefreshToken(user.id),
     ]);
-    await RedisService.saveAccessToken(user.id, accessToken);
+    await RedisService.saveAccessToken(user.id, accessToken, user.sessionRole);
 
     return {
       accessToken,
