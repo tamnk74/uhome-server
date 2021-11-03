@@ -23,15 +23,15 @@ RequestSupporting.init(
     },
     message: {
       type: Sequelize.DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     createdAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     deletedAt: {
       type: Sequelize.DATE,
