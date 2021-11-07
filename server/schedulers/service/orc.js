@@ -39,7 +39,6 @@ export default class OrcService {
 
       if (errorCode === '0') {
         const { data } = res;
-        let dateFormat = 'DD-MM-YYYY';
         let cardFront = find(data, (o) => {
           return o.type === '9_id_card_front';
         });
@@ -48,7 +47,6 @@ export default class OrcService {
           cardFront = find(data, (o) => {
             return o.type === '12_id_card_front';
           });
-          dateFormat = 'DD/MM/YYYY';
         }
 
         const informationFront = get(cardFront, 'info', {});
@@ -62,9 +60,7 @@ export default class OrcService {
             userId,
             idNum: get(informationFront, 'id', '123456789012'),
             name: get(informationFront, 'name', '123456789012'),
-            dob: isEmpty(informationFront)
-              ? dayjs()
-              : dayjs(get(informationFront, 'dob'), dateFormat),
+            dob: get(informationFront, 'dob'),
             hometown: get(informationFront, 'hometown', '123456789012'),
             address: get(informationFront, 'address', '123456789012'),
             raw: res,
