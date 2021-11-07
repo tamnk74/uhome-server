@@ -141,16 +141,23 @@ export default class ChatService {
       friendlyName: chatUser.friendlyName,
     });
 
-    return ChatMember.addMember({
-      identity: chatUser.identity,
-      channelSid: chatChannel.channelSid,
-      friendlyName: user.name,
-      serviceSid: chatChannel.serviceSid,
-      roleSid: chatUser.roleSid,
-      userId: user.id,
-      channelId: chatChannel.id,
-      memberSid: twilioMember.sid,
-    });
+    const [chatMember] = await Promise.all([
+      ChatMember.addMember({
+        identity: chatUser.identity,
+        channelSid: chatChannel.channelSid,
+        friendlyName: user.name,
+        serviceSid: chatChannel.serviceSid,
+        roleSid: chatUser.roleSid,
+        userId: user.id,
+        channelId: chatChannel.id,
+        memberSid: twilioMember.sid,
+      }),
+      chatUser.update({
+        totalChannel: chatUser.totalChannel + 1,
+      }),
+    ]);
+
+    return chatMember;
   }
 
   static async getToken(chatChannel, user) {

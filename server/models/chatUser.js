@@ -2,6 +2,7 @@ import Sequelize from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
+import { twilioConfig } from '../config';
 
 class ChatUser extends BaseModel {
   static get searchFields() {
@@ -29,13 +30,17 @@ ChatUser.init(
       type: Sequelize.STRING,
       allowNull: false,
     },
+    totalChannel: {
+      type: Sequelize.INTEGER,
+      defaultValue: 1,
+    },
     createdAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     deletedAt: {
       type: Sequelize.DATE,
@@ -58,10 +63,10 @@ ChatUser.beforeCreate((user) => {
 
 ChatUser.findUserFree = async (channelId) => {
   const chatUsers = await sequelize.query(
-    'SELECT chat_users.* FROM chat_users where chat_users.deleted_at IS NULL ' +
+    'SELECT chat_users.* FROM chat_users where chat_users.deleted_at IS NULL and total_channel < :totalChannel' +
       ' and identity not in (select identity from chat_members where channel_id = :channelId) ORDER BY RAND() limit 1',
     {
-      replacements: { channelId },
+      replacements: { channelId, totalChannel: twilioConfig.maximumJoiningChannel },
       type: Sequelize.QueryTypes.SELECT,
     }
   );
