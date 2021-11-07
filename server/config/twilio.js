@@ -9,4 +9,5 @@ export const twilioConfig = {
   messagingId: process.env.TWILIO_MESSAGING_SERVICE_SID || '',
   preWebhookUrl: process.env.TWILIO_PRE_WEBHOOK_URL || '',
   postWebhookUrl: process.env.TWILIO_POST_WEBHOOK_URL || '',
+  maximumJoiningChannel: parseInt(process.env.TWILIO_MAXIMUM_JOINING_CHANNEL, 10) || 10,
 };
