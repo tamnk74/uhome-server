@@ -154,7 +154,12 @@ export default class ChatService {
         channelId: chatChannel.id,
         memberSid: twilioMember.sid,
       }),
-      chatUser.save(),
+      ChatUser.update(
+        {
+          totalChannel: chatUser.totalChannel + 1,
+        },
+        { where: { id: chatUser.id } }
+      ),
     ]);
 
     return chatMember;
