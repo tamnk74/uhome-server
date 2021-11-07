@@ -141,6 +141,8 @@ export default class ChatService {
       friendlyName: chatUser.friendlyName,
     });
 
+    chatUser.totalChannel += 1;
+
     const [chatMember] = await Promise.all([
       ChatMember.addMember({
         identity: chatUser.identity,
@@ -152,9 +154,7 @@ export default class ChatService {
         channelId: chatChannel.id,
         memberSid: twilioMember.sid,
       }),
-      chatUser.update({
-        totalChannel: chatUser.totalChannel + 1,
-      }),
+      chatUser.save(),
     ]);
 
     return chatMember;
