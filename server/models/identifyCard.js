@@ -27,8 +27,8 @@ IdentifyCard.init(
       allowNull: false,
     },
     dob: {
-      type: Sequelize.DataTypes.DATE,
-      allowNull: false,
+      type: Sequelize.DataTypes.STRING,
+      allowNull: true,
     },
     hometown: {
       type: Sequelize.DataTypes.STRING,
