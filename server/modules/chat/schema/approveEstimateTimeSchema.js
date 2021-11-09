@@ -16,6 +16,7 @@ export const approveEstimateTimeSchema = Joi.object().keys({
     }),
   worker_fee: Joi.number().integer().required(),
   customer_fee: Joi.number().integer().required(),
+  discount: Joi.number().integer(),
   message_sid: Joi.string().required(),
   num_of_worker: Joi.number().integer().min(1).default(1),
   working_times: Joi.array().items(workerTimeItem).required(),

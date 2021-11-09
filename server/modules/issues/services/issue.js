@@ -12,6 +12,7 @@ import ReceiveIssue from '../../../models/receiveIssue';
 import sequelize from '../../../databases/database';
 import ChatChannel from '../../../models/chatChannel';
 import ChatMember from '../../../models/chatMember';
+import Event from '../../../models/event';
 import { twilioClient } from '../../../helpers/Twilio';
 import { objectToSnake } from '../../../helpers/Util';
 import FeeConfiguration from '../../../models/feeConfiguration';
@@ -211,7 +212,7 @@ export default class IssueService {
     data.numOfWorker = +data.numOfWorker;
     const { type, totalTime, workingTimes, numOfWorker } = data;
     const category = first(issue.categories);
-    const [feeConfiguration, feeCategory, teamConfiguration] = await Promise.all([
+    const [feeConfiguration, feeCategory, teamConfiguration, saleEvent] = await Promise.all([
       FeeConfiguration.findOne({}),
       FeeCategory.findOne({
         where: {
@@ -227,6 +228,7 @@ export default class IssueService {
         },
         order: [['minWorker', 'ASC']],
       }),
+      Event.findByPk(issue.eventId),
     ]);
 
     data.fee = FeeFactory.getFee(
@@ -242,13 +244,13 @@ export default class IssueService {
         numOfWorker,
       }
     );
+    data.discount = saleEvent ? saleEvent.getDiscountValue(data.fee) : 0;
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
       user,
       issue,
       data
     );
-    console.log(message);
 
     await IssueService.updateEstimationMessage(
       command.SUBMIT_ESTIMATION_TIME,
