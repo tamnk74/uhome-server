@@ -308,6 +308,7 @@ export default class ChatService {
     data.workerFee = +data.workerFee;
     data.customerFee = +data.customerFee;
     data.numOfWorker = +data.numOfWorker;
+    data.discount = +data.discount;
     const {
       workerFee,
       customerFee,
@@ -315,11 +316,10 @@ export default class ChatService {
       totalTime,
       unitTime: unit,
       type,
+      discount,
       workingTimes,
     } = data;
     const { issue } = chatChannel;
-    const event = await Event.findByPk(issue.eventId);
-    const discount = event ? event.getDiscountValue(customerFee) : 0;
 
     if (
       issue.paymentMethod === paymentMethod.MOMO &&
@@ -357,6 +357,7 @@ export default class ChatService {
         numOfWorker,
         workerFee,
         customerFee,
+        discount,
         type,
         workingTimes,
       }),
@@ -365,6 +366,7 @@ export default class ChatService {
     data.fee = {
       workerFee,
       customerFee,
+      discount,
     };
     delete data.workerFee;
     delete data.customerFee;
@@ -625,6 +627,7 @@ export default class ChatService {
     const { issueId, issue_estimations: issueEstimations = [] } = receiveIssue;
     let customerFee = 0;
     let workerFee = 0;
+    let discount = 0;
     const workingTimes = [];
     let totalTime = 0;
     let unit = unitTime.HOUR;
@@ -632,6 +635,7 @@ export default class ChatService {
     await issueEstimations.forEach((item) => {
       customerFee += item.customerFee;
       workerFee += item.workerFee;
+      discount += item.discount || 0;
       workingTimes.push(...item.workingTimes);
       totalTime += item.totalTime;
       unit = item.unitTime;
@@ -644,11 +648,15 @@ export default class ChatService {
     };
     const sumCost = await IssueMaterial.sumCost(issueId, receiveIssue.userId);
 
+    const total = customerFee + sumCost - discount;
+
     const transactionHistories = [
       {
         id: uuidv4(),
         userId: receiveIssue.userId,
         amount: customerFee + sumCost,
+        discount,
+        total,
         issueId,
         type: transactionType.WAGE,
         extra: {
@@ -679,7 +687,7 @@ export default class ChatService {
           {
             accountBalance:
               method === paymentMethod.MOMO
-                ? Sequelize.literal(`account_balance + ${workerFee - discount + sumCost}`)
+                ? Sequelize.literal(`account_balance + ${workerFee + sumCost}`)
                 : Sequelize.literal(`account_balance - ${customerFee - workerFee}`),
             totalIssueCompleted: Sequelize.literal(`total_issue_completed + 1`),
             totalRating: Sequelize.literal(`total_rating + ${rate}`),
@@ -697,7 +705,7 @@ export default class ChatService {
         method === paymentMethod.MOMO
           ? UserProfile.update(
               {
-                accountBalance: Sequelize.literal(`account_balance - ${customerFee + sumCost}`),
+                accountBalance: Sequelize.literal(`account_balance - ${total}`),
               },
               {
                 where: {

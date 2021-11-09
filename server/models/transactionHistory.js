@@ -23,6 +23,14 @@ TransactionHistory.init(
       type: Sequelize.DECIMAL(10, 2),
       allowNull: false,
     },
+    discount: {
+      type: Sequelize.DECIMAL(10, 2),
+      allowNull: false,
+    },
+    total: {
+      type: Sequelize.DECIMAL(10, 2),
+      allowNull: false,
+    },
     issueId: {
       type: Sequelize.UUID,
       allowNull: true,
