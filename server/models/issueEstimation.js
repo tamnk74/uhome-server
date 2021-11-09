@@ -34,6 +34,10 @@ IssueEstimation.init(
     workerFee: {
       type: Sequelize.DECIMAL(10, 2),
     },
+    discount: {
+      type: Sequelize.DECIMAL(10, 2),
+      allowNull: false,
+    },
     customerFee: {
       type: Sequelize.DECIMAL(10, 2),
     },
