@@ -29,11 +29,11 @@ export class EventService {
     });
   }
 
-  static async getMyEvents(user) {
+  static async getMyEvents(user, params) {
     return Event.findAndCountAll({
       include: Event.buildRelation(),
       attributes: Event.baseAttibutes,
-      where: Event.whereCondition(user),
+      where: Event.whereCondition(user, params),
     });
   }
 

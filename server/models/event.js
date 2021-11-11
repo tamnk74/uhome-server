@@ -139,8 +139,8 @@ Event.buildRelation = () => {
   ];
 };
 
-Event.whereCondition = (user) => {
-  console.log(user);
+Event.whereCondition = (user, params) => {
+  const types = params.type ? params.type.split(',') : [];
   const filteredEventSql = sequelize.dialect.QueryGenerator.selectQuery('event_scopes', {
     attributes: ['event_id'],
     where: {
@@ -160,6 +160,7 @@ Event.whereCondition = (user) => {
       [Op.in]: Sequelize.literal(`(${filteredEventSql})`),
     },
     status: eventStatuses.ACTIVE,
+    ...(types.length ? { type: types } : null),
   };
 };
 
