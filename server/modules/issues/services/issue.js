@@ -244,7 +244,7 @@ export default class IssueService {
         numOfWorker,
       }
     );
-    data.discount = saleEvent ? saleEvent.getDiscountValue(data.fee) : 0;
+    data.discount = saleEvent ? saleEvent.getDiscountValue(data.fee.customerFee || 0) : 0;
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
       user,

@@ -35,7 +35,11 @@ export const verifySaleEvent = async (req, res, next) => {
       }
 
       const categoryIds = await saleEvent.categories.map((category) => category.id);
-      if (!req.body.categoryIds.some((categoryId) => categoryIds.includes(categoryId))) {
+
+      if (
+        categoryIds.length &&
+        !req.body.categoryIds.some((categoryId) => categoryIds.includes(categoryId))
+      ) {
         throw errorFactory.getError('EVSL-0003');
       }
 
