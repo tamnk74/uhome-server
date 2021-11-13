@@ -119,6 +119,7 @@ Event.prototype.getDiscountValue = function getDiscountValue(total) {
 Event.baseAttibutes = [
   'id',
   'type',
+  'code',
   'title',
   'description',
   'image',
