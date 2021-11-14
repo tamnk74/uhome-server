@@ -33,7 +33,7 @@ router.post(
 );
 router.delete(
   '/issues/:issueId',
-  auth('deleteIssue'),
+  auth('deleteIssue'),
   active,
   verifyOwnerIssue,
   IssueController.remove
