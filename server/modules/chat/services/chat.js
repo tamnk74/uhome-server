@@ -110,7 +110,7 @@ export default class ChatService {
     authorChat.setDataValue('token', twilioToken);
 
     if (isNewGroup) {
-      await this.sendWelcomeMessage(chatChannel, workerChat);
+      await this.sendWelcomeMessage(chatChannel, workerChat, worker);
     }
 
     return authorChat;
@@ -814,22 +814,29 @@ export default class ChatService {
    * Send welcome Message
    *
    * @param {ChatChannel} chatChannel
-   * @param {Member} worker
+   * @param {Member} memberChat
+   * @param {User} worker
    */
-  static async sendWelcomeMessage(chatChannel, worker) {
+  static async sendWelcomeMessage(chatChannel, memberChat, worker) {
     const requestSupporting = await RequestSupporting.findOne({
       where: {
-        userId: worker.userId,
+        userId: memberChat.userId,
         issueId: chatChannel.issueId,
       },
     });
     const message = get(requestSupporting, 'message');
 
     if (!isEmpty(message)) {
+      const messageAttributes = {
+        type: 'message',
+        actor: worker.toJSON(),
+      };
+
       const messageData = {
-        from: worker.identity,
+        from: memberChat.identity,
         channelSid: chatChannel.channelSid,
         body: message,
+        attributes: JSON.stringify(objectToSnake(messageAttributes)),
       };
 
       await twilioClient.sendMessage(chatChannel.channelSid, messageData);
