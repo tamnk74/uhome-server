@@ -559,6 +559,18 @@ export default class ChatService {
           userId: receiveIssue.userId,
           eventId: first5StarEvent.id,
         });
+        await TransactionHistory.create({
+          id: uuidv4(),
+          userId: receiveIssue.userId,
+          amount: first5StarEvent.value,
+          issueId: issue.id,
+          type: transactionType.BONUS,
+          extra: {
+            eventId: first5StarEvent.id,
+          },
+          actorId: user.id,
+          method: paymentMethod.CASH,
+        });
       }
       if (next5StarEvent && userEvents.length > 0 && userEvents.length < 5) {
         await UserProfile.update(
@@ -574,6 +586,18 @@ export default class ChatService {
         await UserEvent.create({
           userId: receiveIssue.userId,
           eventId: next5StarEvent.id,
+        });
+        await TransactionHistory.create({
+          id: uuidv4(),
+          userId: receiveIssue.userId,
+          amount: next5StarEvent.value,
+          issueId: issue.id,
+          type: transactionType.BONUS,
+          extra: {
+            eventId: next5StarEvent.id,
+          },
+          actorId: user.id,
+          method: paymentMethod.CASH,
         });
       }
     }

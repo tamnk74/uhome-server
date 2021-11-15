@@ -38,6 +38,7 @@ export const transactionType = Object.freeze({
   WITHDRAW: 'WITHDRAW',
   WAGE: 'WAGE',
   PAY: 'PAY',
+  BONUS: 'BONUS',
 });
 
 export const issueType = Object.freeze({
