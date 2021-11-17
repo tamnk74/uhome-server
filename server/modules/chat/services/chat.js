@@ -563,11 +563,13 @@ export default class ChatService {
         await TransactionHistory.create({
           id: uuidv4(),
           userId: receiveIssue.userId,
-          amount: first5StarEvent.value,
+          amount: first5StarEvent.value || 0,
+          discount: 0,
           issueId: issue.id,
           type: transactionType.BONUS,
+          currency: currencies.VND,
           extra: {
-            eventId: first5StarEvent.id,
+            event: first5StarEvent.toJSON(),
           },
           actorId: user.id,
           method: paymentMethod.CASH,
@@ -591,11 +593,13 @@ export default class ChatService {
         await TransactionHistory.create({
           id: uuidv4(),
           userId: receiveIssue.userId,
-          amount: next5StarEvent.value,
+          amount: next5StarEvent.value || 0,
+          discount: 0,
           issueId: issue.id,
+          currency: currencies.VND,
           type: transactionType.BONUS,
           extra: {
-            eventId: next5StarEvent.id,
+            event: next5StarEvent.toJSON(),
           },
           actorId: user.id,
           method: paymentMethod.CASH,

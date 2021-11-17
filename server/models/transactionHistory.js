@@ -26,17 +26,19 @@ TransactionHistory.init(
     discount: {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: false,
+      defaultValue: 0,
     },
     total: {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: false,
+      defaultValue: 0,
     },
     issueId: {
       type: Sequelize.UUID,
       allowNull: true,
     },
     type: {
-      type: Sequelize.ENUM('DEPOSIT', 'WITHDRAW', 'WAGE', 'PAY'),
+      type: Sequelize.ENUM('DEPOSIT', 'WITHDRAW', 'WAGE', 'PAY', 'BONUS'),
     },
     method: {
       type: Sequelize.ENUM(Object.values(paymentMethod)),
