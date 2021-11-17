@@ -1,7 +1,7 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
 import Sequelize, { Op } from 'sequelize';
 import { get, isNil, pick, isEmpty } from 'lodash';
-import { saleEventTypes } from 'constants';
+import { saleEventTypes, currencies } from 'constants';
 
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
