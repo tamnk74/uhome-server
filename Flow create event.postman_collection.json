@@ -1,0 +1,252 @@
+{
+	"info": {
+		"_postman_id": "bbb99496-2cf9-40d1-8e9c-5f940a453c82",
+		"name": "Flow create event",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Customer creates an issue",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = JSON.parse(responseBody)\r",
+							"\r",
+							"const req = JSON.parse(request.data);\r",
+							"\r",
+							"postman.setEnvironmentVariable('issueId', response.id);\r",
+							"\r",
+							"pm.environment.set(\"issueId\", response.id);\r",
+							"\r",
+							"postman.setNextRequest(\"Login\");\r",
+							"\r",
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{customer}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Cần thợ sửa ống nước bị rò rĩ\",\r\n    \"location\": \"Da Nang, Viet Nam\",\r\n    \"category_ids\": [\"{{categoryId}}\"],\r\n    \"lat\": \"16.0738013\",\r\n    \"lon\": \"108.1477255\",\r\n    \"event_id\": \"{{eventId}}\",\r\n    \"attachment_ids\": [],\r\n    \"payment_method\": \"momo\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/issues",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"issues"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Worker request supporting",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"postman.setNextRequest('Create an issue');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{worker}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"message\": \"Hi\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/issues/{{issueId}}/request-supportings",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"issues",
+						"{{issueId}}",
+						"request-supportings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3 Customer create a group chat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = JSON.parse(responseBody)",
+							"",
+							"pm.collectionVariables.set(\"channelId\", response.channel_id);",
+							"pm.collectionVariables.set(\"channelsId\", response.channel_sid);",
+							"",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{customer}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"issue_id\": \"{{issueId}}\",\n    \"user_id\": \"{{workerId}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/chat/chat-groups",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"chat",
+						"chat-groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Worker create estimation",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const startTime  = new Date();",
+							"startTime.setDate(startTime.getDate() + 1)",
+							"startTime.setHours(8);",
+							"startTime.setMinutes(0);",
+							"startTime.setMilliseconds(0);",
+							"pm.environment.set(\"startTime\", startTime);",
+							"",
+							"const endTime  = new Date();",
+							"endTime.setDate(startTime.getDate() + 1)",
+							"endTime.setHours(16);",
+							"endTime.setMinutes(0);",
+							"endTime.setMilliseconds(0);",
+							"pm.environment.set(\"endTime\", endTime);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{worker}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": \"HOTFIX\",\r\n    \"unit_time\": \"HOUR\",\r\n    \"working_times\": [{\r\n        \"start_time\": \"{{startTime}}\",\r\n        \"end_time\": \"{{endTime}}\"\r\n    }],\r\n    \"total_time\":6,\r\n    \"num_of_worker\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/issues/{{issueId}}/estimation",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"issues",
+						"{{issueId}}",
+						"estimation"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "channelId",
+			"value": ""
+		}
+	]
+}
