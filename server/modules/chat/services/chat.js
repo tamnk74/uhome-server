@@ -51,43 +51,46 @@ const uploadPromotion = async (file) => {
 };
 
 const getIssueCost = async (receiveIssue) => {
-  const { issueId, issue_estimations: issueEstimations = [], numOfWorker } = receiveIssue;
+  const { issueId, id } = receiveIssue;
 
-  const [materials] = await Promise.all([
+  const [materials, issueEstimation] = await Promise.all([
     IssueMaterial.findAll({
       where: {
         issueId,
       },
     }),
+    IssueEstimation.findOne({
+      where: {
+        receiveIssueId: id,
+      },
+    }),
   ]);
 
-  let customerFee = 0;
-  let workerFee = 0;
-  let discount = 0;
-  const workingTimes = [];
-  let totalTime = 0;
-  let unit = unitTime.HOUR;
+  const {
+    workingTimes,
+    numOfWorker = 0,
+    customerFee = 0,
+    workerFee = 0,
+    unit = unitTime.HOUR,
+    discount = 0,
+    totalTime = 0,
+  } = issueEstimation;
+
   const [materialsCost] = await Promise.all([
     materials.map((item) => ({
       cost: item.cost,
       material: item.material,
     })),
-    issueEstimations.forEach((item) => {
-      customerFee += item.customerFee;
-      workerFee += item.workerFee;
-      discount += item.discount || 0;
-      workingTimes.push(...item.workingTimes);
-      totalTime += item.totalTime;
-      unit = item.unitTime;
-    }),
   ]);
 
   return {
-    customerFee,
-    workerFee,
-    discount,
+    fee: {
+      customerFee: +customerFee,
+      workerFee: +workerFee,
+      discount: +discount,
+    },
     unit,
-    totalTime,
+    totalTime: +totalTime,
     workingTimes,
     numOfWorker: +numOfWorker,
     materials: materialsCost,
@@ -827,7 +830,10 @@ export default class ChatService {
     let chatChannel = await ChatChannel.findChannelGroup(issueId, [customerId, user.id]);
 
     if (!chatChannel) {
-      chatChannel = await ChatChannel.findChannelGroup(issueId, [customerId, receiveIssue.userId]);
+      chatChannel = await ChatChannel.findChannelGroup(issueId, [
+        customerId,
+        get(receiveIssue, 'userId', ''),
+      ]);
     }
 
     if (isNil(chatChannel)) {
