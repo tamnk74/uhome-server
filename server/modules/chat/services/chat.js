@@ -1,6 +1,6 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
 import Sequelize, { Op } from 'sequelize';
-import { get, isNil, pick, isEmpty } from 'lodash';
+import { get, isNil, pick, isEmpty, sumBy } from 'lodash';
 import { saleEventTypes, currencies } from 'constants';
 
 import ChatMember from '../../../models/chatMember';
@@ -423,6 +423,8 @@ export default class ChatService {
     };
     delete data.workerFee;
     delete data.customerFee;
+    delete data.discount;
+
     await this.sendMessage(
       command.APPROVAL_ESTIMATION_TIME,
       chatChannel,
@@ -437,9 +439,10 @@ export default class ChatService {
    * @param {*} param
    */
   static async approveMaterialCost({ chatChannel, user, data }) {
-    const { messageSid } = data;
+    const { messageSid, materials } = data;
     await EstimationMessage.findByMessageSidOrFail(messageSid);
-    data.totalCost = +data.totalCost;
+
+    data.totalCost = +sumBy(materials, (o) => o.cost);
     const { issue } = chatChannel;
 
     const members = await ChatMember.findAll({
@@ -479,14 +482,17 @@ export default class ChatService {
       }
     }
 
+    const issueMaterialData = materials.map((item) => ({
+      id: uuidv4(),
+      userId: supporterId,
+      issueId: issue.id,
+      cost: item.cost,
+      material: item.material,
+    }));
+
     await Promise.all([
-      supporterId
-        ? IssueMaterial.create({
-            userId: supporterId,
-            issueId: issue.id,
-            cost: data.totalCost,
-            material: data.materials,
-          })
+      supporterId && !isEmpty(issueMaterialData)
+        ? IssueMaterial.bulkCreate(issueMaterialData)
         : null,
       this.sendMessage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data),
     ]);

@@ -1,6 +1,6 @@
 import { Sequelize, Op } from 'sequelize';
 import dayjs from 'dayjs';
-import { first, isNil } from 'lodash';
+import { first, isNil, sumBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
@@ -244,7 +244,7 @@ export default class IssueService {
         numOfWorker,
       }
     );
-    data.discount = saleEvent ? saleEvent.getDiscountValue(data.fee.customerFee || 0) : 0;
+    data.fee.discount = saleEvent ? saleEvent.getDiscountValue(data.fee.customerFee || 0) : 0;
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
       user,
@@ -266,7 +266,10 @@ export default class IssueService {
    */
   static async noticeMaterialCost({ user, issue, data }) {
     data.isContinuing = false;
-    data.totalCost = +data.totalCost;
+    const { materials } = data;
+    const totalCost = sumBy(materials, (o) => o.cost);
+    data.totalCost = +totalCost;
+
     const { message, channel } = await this.sendMessage(
       command.INFORM_MATERIAL_COST,
       user,
