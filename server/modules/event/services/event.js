@@ -1,6 +1,9 @@
 import { Op } from 'sequelize';
 import day from 'dayjs';
+import { saleEventTypes, eventStatuses } from 'constants';
+import errorFactory from 'errors/ErrorFactory';
 import Event from '../../../models/event';
+import UserEvent from '../../../models/userEvent';
 import Uploader from '../../../helpers/Uploader';
 
 export class EventService {
@@ -35,6 +38,28 @@ export class EventService {
       attributes: Event.baseAttibutes,
       where: Event.whereCondition(user, params),
     });
+  }
+
+  static async validate({ event, user }) {
+    if (event.type === saleEventTypes.VOUCHER) {
+      const userEvent = await UserEvent.findOne({
+        where: {
+          userId: user.id,
+          eventId: event.id,
+          status: eventStatuses.INACTIVE,
+        },
+      });
+      if (!userEvent) {
+        throw errorFactory.getError('EVSL-0001');
+      }
+    }
+
+    return (
+      Object.values(saleEventTypes).includes(event.type) &&
+      event.from <= new Date() &&
+      event.to >= new Date() &&
+      +event.status !== eventStatuses.INACTIVE
+    );
   }
 
   static async update(id, data, file) {

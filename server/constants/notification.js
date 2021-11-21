@@ -5,4 +5,5 @@ export const notificationType = Object.freeze({
   cancelSupport: 'CANCEL_SUPPORT',
   newIssue: 'NEW_ISSUE',
   cancelRequestSupport: 'CANCEL_REQUEST_SUPPORT',
+  bonus: 'BONUS',
 });

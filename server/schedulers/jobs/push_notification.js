@@ -5,6 +5,7 @@ import { notificationQueue } from '../../helpers/Queue';
 schedule.scheduleJob('15 * * * *', async () => {});
 
 notificationQueue.process('new_issue', NotificationService.pushNewIssueNotification);
+notificationQueue.process('receive_bonus', NotificationService.pushBonusNotification);
 notificationQueue.process(
   'request_supporting',
   NotificationService.pushRequestSupportingNotification
