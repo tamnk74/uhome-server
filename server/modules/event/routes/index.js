@@ -3,6 +3,7 @@ import multer from 'multer';
 
 import EventController from '../controllers/event';
 import { auth } from '../../../middlewares';
+import { verifyEvent } from '../middlewares';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ const upload = multer({ storage }).single('file');
 router.get('/', auth(), EventController.index);
 router.get('/me', auth(), EventController.myEvents);
 router.patch('/:id', auth(), upload, EventController.update);
+router.get('/:id/validate', auth(), verifyEvent, EventController.validate);
 
 export default router;

@@ -303,4 +303,35 @@ export default class NotificationService {
       done(error);
     }
   }
+
+  static async pushBonusNotification(job, done) {
+    try {
+      const { actorId, issue, transaction } = job.data;
+      const subscriptions = await Subscription.findAll({
+        where: {
+          userId: [actorId],
+        },
+      });
+      const tokens = subscriptions.map((item) => item.token);
+      const notification = {
+        title: 'You just got a bonus!',
+        body: {
+          issue,
+          transaction,
+        },
+      };
+
+      const data = {
+        type: notificationType.bonus,
+        issue: JSON.stringify(issue),
+        transaction: JSON.stringify(transaction),
+      };
+
+      await Promise.all([tokens.length ? Fcm.sendNotification(tokens, data, notification) : null]);
+      return done();
+    } catch (error) {
+      sentryConfig.Sentry.captureException(error);
+      done(error);
+    }
+  }
 }

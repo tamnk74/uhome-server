@@ -560,10 +560,11 @@ export default class ChatService {
           userId: receiveIssue.userId,
           eventId: first5StarEvent.id,
         });
-        await TransactionHistory.create({
+        const transaction = await TransactionHistory.create({
           id: uuidv4(),
           userId: receiveIssue.userId,
           amount: first5StarEvent.value || 0,
+          total: first5StarEvent.value || 0,
           discount: 0,
           issueId: issue.id,
           type: transactionType.BONUS,
@@ -573,6 +574,12 @@ export default class ChatService {
           },
           actorId: user.id,
           method: paymentMethod.CASH,
+        });
+
+        notificationQueue.add('receive_bonus', {
+          actorId: receiveIssue.userId,
+          issue: issue.toJSON(),
+          transaction: transaction.toJSON(),
         });
       }
       if (next5StarEvent && userEvents.length > 0 && userEvents.length < 5) {
@@ -590,10 +597,11 @@ export default class ChatService {
           userId: receiveIssue.userId,
           eventId: next5StarEvent.id,
         });
-        await TransactionHistory.create({
+        const transaction = await TransactionHistory.create({
           id: uuidv4(),
           userId: receiveIssue.userId,
           amount: next5StarEvent.value || 0,
+          total: next5StarEvent.value || 0,
           discount: 0,
           issueId: issue.id,
           currency: currencies.VND,
@@ -603,6 +611,12 @@ export default class ChatService {
           },
           actorId: user.id,
           method: paymentMethod.CASH,
+        });
+
+        notificationQueue.add('receive_bonus', {
+          actorId: receiveIssue.userId,
+          issue: issue.toJSON(),
+          transaction: transaction.toJSON(),
         });
       }
     }

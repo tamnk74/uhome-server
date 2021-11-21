@@ -34,6 +34,17 @@ export default class EventController {
     }
   }
 
+  static async validate(req, res, next) {
+    try {
+      const isValid = await EventService.validate(req);
+      return res.status(200).json({
+        isValid,
+      });
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async update(req, res, next) {
     try {
       const { id } = req.params;

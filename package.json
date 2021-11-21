@@ -37,6 +37,7 @@
   "_moduleAliases": {
     "modules": "./server/modules",
     "constants": "./server/constants",
+    "errors": "./server/errors",
     "config": "./server/config",
     "helpers": "./server/helpers",
     "models": "./server/models",
