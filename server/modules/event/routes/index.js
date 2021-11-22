@@ -17,6 +17,6 @@ const upload = multer({ storage }).single('file');
 router.get('/', auth(), EventController.index);
 router.get('/me', auth(), EventController.myEvents);
 router.patch('/:id', auth(), upload, EventController.update);
-router.get('/:id/validate', auth(), verifyEvent, EventController.validate);
+router.get('/:id', auth(), verifyEvent, EventController.getEvent);
 
 export default router;
