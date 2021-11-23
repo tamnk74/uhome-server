@@ -1,11 +1,15 @@
-import { saleEventTypes, eventStatuses } from 'constants';
+import { saleEventTypes, eventStatuses } from '../../../constants';
 import Event from '../../../models/event';
 import UserEvent from '../../../models/userEvent';
 import errorFactory from '../../../errors/ErrorFactory';
 
 export const verifyEvent = async (req, res, next) => {
   try {
-    const saleEvent = await Event.findByPk(req.params.id, {});
+    const saleEvent = await Event.findOne({
+      where: {
+        code: req.params.code,
+      },
+    });
 
     if (!saleEvent) {
       throw errorFactory.getError('EVSL-0001');
