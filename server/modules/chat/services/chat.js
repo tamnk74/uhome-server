@@ -18,6 +18,7 @@ import {
   paymentMethod,
   eventStatuses,
   unitTime,
+  estimationMessageStatus,
 } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
@@ -95,6 +96,22 @@ const getIssueCost = async (receiveIssue) => {
     numOfWorker: +numOfWorker,
     materials: materialsCost,
   };
+};
+
+const isValidEstimation = (payload, estimationMessage, keys = []) => {
+  if (estimationMessage.status !== estimationMessageStatus.WAITING) {
+    return false;
+  }
+
+  const estimation = get(estimationMessage, 'data', {});
+  for (let index = 0; index < keys.length; index++) {
+    const key = keys[index];
+    if (get(payload, key, 0) !== get(estimation, key, 0)) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 export default class ChatService {
@@ -345,7 +362,19 @@ export default class ChatService {
    */
   static async approveEstimateTime({ chatChannel, user, data }) {
     const { messageSid } = data;
-    await EstimationMessage.findByMessageSidOrFail(messageSid);
+    const estimationMessage = await EstimationMessage.findByMessageSidOrFail(messageSid);
+    const isValid = isValidEstimation(data, estimationMessage, [
+      'workerFee',
+      'customerFee',
+      'discount',
+      'numOfWorker',
+      'totalTime',
+    ]);
+
+    if (!isValid) {
+      throw new Error('EST-0403');
+    }
+
     const [chatMembers, userProfile] = await Promise.all([
       ChatMember.findAll({
         where: {
@@ -414,6 +443,7 @@ export default class ChatService {
         type,
         workingTimes,
       }),
+      estimationMessage.update({ status: estimationMessageStatus.APPROVED }),
     ]);
 
     data.fee = {
@@ -440,9 +470,15 @@ export default class ChatService {
    */
   static async approveMaterialCost({ chatChannel, user, data }) {
     const { messageSid, materials } = data;
-    await EstimationMessage.findByMessageSidOrFail(messageSid);
-
     data.totalCost = +sumBy(materials, (o) => o.cost);
+    const estimationMessage = await EstimationMessage.findByMessageSidOrFail(messageSid);
+
+    const isValid = isValidEstimation(data, estimationMessage, ['totalCost']);
+
+    if (!isValid) {
+      throw new Error('EST-0403');
+    }
+
     const { issue } = chatChannel;
 
     const members = await ChatMember.findAll({
@@ -495,6 +531,7 @@ export default class ChatService {
         ? IssueMaterial.bulkCreate(issueMaterialData)
         : null,
       this.sendMessage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data),
+      estimationMessage.update({ status: estimationMessageStatus.APPROVED }),
     ]);
   }
 

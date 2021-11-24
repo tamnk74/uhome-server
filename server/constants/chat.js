@@ -64,3 +64,9 @@ export const notificationMessage = Object.freeze({
   CANCELED: 'notfication.canceled',
   NEW_MESSAGE: 'notfication.new_message',
 });
+
+export const estimationMessageStatus = Object.freeze({
+  CANCELED: 'CANCELED',
+  WAITING: 'WAITING',
+  APPROVED: 'APPROVED',
+});

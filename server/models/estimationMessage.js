@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { isNil } from 'lodash';
 import sequelize from '../databases/database';
 import BaseModel from './model';
-import { command } from '../constants/chat';
+import { command, estimationMessageStatus } from '../constants/chat';
 
 class EstimationMessage extends BaseModel {}
 
@@ -19,6 +19,19 @@ EstimationMessage.init(
     },
     type: {
       type: Sequelize.ENUM(command.INFORM_MATERIAL_COST, command.REQUEST_ESTIMATION_TIME),
+      allowNull: false,
+    },
+    data: {
+      type: Sequelize.JSON,
+      allowNull: false,
+      defaultValue: {},
+    },
+    status: {
+      type: Sequelize.ENUM(
+        estimationMessageStatus.WAITING,
+        estimationMessageStatus.APPROVED,
+        estimationMessageStatus.CANCELED
+      ),
       allowNull: false,
     },
     createdAt: {

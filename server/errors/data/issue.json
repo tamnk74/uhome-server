@@ -22,5 +22,11 @@
     "error": "Estimation not found",
     "title": "Estimation not found",
     "detail": "Estimation not found"
+  },
+  "EST-0403": {
+    "status": 403,
+    "error": "Estimation is not matching",
+    "title": "Estimation is not matching",
+    "detail": "Estimation is not matching"
   }
 }
