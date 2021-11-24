@@ -6,7 +6,7 @@ import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';
 import RequestSupporting from '../../../models/requestSupporting';
-import { issueStatus, command, commandMessage } from '../../../constants';
+import { issueStatus, command, commandMessage, estimationMessageStatus } from '../../../constants';
 import UserProfile from '../../../models/userProfile';
 import ReceiveIssue from '../../../models/receiveIssue';
 import sequelize from '../../../databases/database';
@@ -255,7 +255,12 @@ export default class IssueService {
     await IssueService.updateEstimationMessage(
       command.SUBMIT_ESTIMATION_TIME,
       channel,
-      message.sid
+      message.sid,
+      {
+        ...data.fee,
+        totalTime,
+        numOfWorker,
+      }
     );
   }
 
@@ -277,7 +282,9 @@ export default class IssueService {
       data
     );
 
-    await IssueService.updateEstimationMessage(command.INFORM_MATERIAL_COST, channel, message.sid);
+    await IssueService.updateEstimationMessage(command.INFORM_MATERIAL_COST, channel, message.sid, {
+      totalCost,
+    });
   }
 
   /**
@@ -398,7 +405,7 @@ export default class IssueService {
   /**
    * Update estimation message
    */
-  static async updateEstimationMessage(type, chatChannel, newMessageSid) {
+  static async updateEstimationMessage(type, chatChannel, newMessageSid, data) {
     const oldMessage = await EstimationMessage.findOne({
       where: {
         type,
@@ -420,6 +427,8 @@ export default class IssueService {
       type,
       channelId: chatChannel.id,
       messageSid: newMessageSid,
+      data,
+      status: estimationMessageStatus.WAITING,
     });
   }
 }
