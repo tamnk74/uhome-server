@@ -184,7 +184,7 @@ export default class NotificationService {
       };
       const data = {
         type: notificationType.cancelRequestSupport,
-        issue: JSON.stringify(objectToSnake(issue.fmtRes())),
+        issue: JSON.stringify(objectToSnake(issue)),
         actor: JSON.stringify(objectToSnake(actor.toJSON())),
       };
 
@@ -225,7 +225,7 @@ export default class NotificationService {
       };
       const data = {
         type: notificationType.cancelSupport,
-        issue: JSON.stringify(objectToSnake(issue.fmtRes())),
+        issue: JSON.stringify(objectToSnake(issue)),
         actor: JSON.stringify(objectToSnake(actor.toJSON())),
       };
 
@@ -292,7 +292,7 @@ export default class NotificationService {
       const data = {
         type: notificationType.chat,
         actor: JSON.stringify(objectToSnake(actor.toJSON())),
-        issue: JSON.stringify(objectToSnake(issue.fmtRes())),
+        issue: JSON.stringify(objectToSnake(issue)),
         channel: JSON.stringify(objectToSnake(chatChannel.toJSON())),
       };
 
