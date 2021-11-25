@@ -1,11 +1,24 @@
+import { Op } from 'sequelize';
 import Issue from '../../../models/issue';
 import ReceiveIssue from '../../../models/receiveIssue';
 import errorFactory from '../../../errors/ErrorFactory';
-import { userRoles } from '../../../constants';
+import { issueStatus } from '../../../constants';
 
 export const verifyIssueSupport = async (req, res, next) => {
   try {
+    const { user } = req;
+
     const receiveIssue = await ReceiveIssue.findOne({
+      where: {
+        [Op.or]: [
+          {
+            status: {
+              [Op.in]: [issueStatus.CHATTING, issueStatus.IN_PROGRESS, issueStatus.OPEN],
+            },
+          },
+          { userId: user.id },
+        ],
+      },
       include: [
         {
           model: Issue,
@@ -20,12 +33,8 @@ export const verifyIssueSupport = async (req, res, next) => {
     if (!receiveIssue) {
       return next(errorFactory.getError('ISSU-0001'));
     }
-    const { user } = req;
-    if (user.sessionRole === userRoles.CUSTOMER && receiveIssue.issue.createdBy !== user.id) {
-      return next(errorFactory.getError('ISSU-0001'));
-    }
 
-    if (user.sessionRole === userRoles.WORKER && receiveIssue.userId !== user.id) {
+    if (receiveIssue.issue.createdBy !== user.id && receiveIssue.userId !== user.id) {
       return next(errorFactory.getError('ISSU-0001'));
     }
 
