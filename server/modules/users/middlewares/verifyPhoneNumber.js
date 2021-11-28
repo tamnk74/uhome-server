@@ -1,4 +1,3 @@
-import errorFactory from 'errors/ErrorFactory';
 import User from '../../../models/user';
 
 export const verifyPhoneNumber = async (req, res, next) => {
@@ -10,7 +9,7 @@ export const verifyPhoneNumber = async (req, res, next) => {
     });
 
     if (user) {
-      return next(errorFactory.getError('USER-1003'));
+      return next(new Error('USER-1003'));
     }
 
     return next();
