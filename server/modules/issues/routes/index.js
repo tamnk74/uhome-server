@@ -10,6 +10,7 @@ import {
   verifyOwnerIssue,
   verifyCategory,
   verifySaleEvent,
+  verifyPhoneNumber,
 } from '../middlewares';
 import {
   createIssueSchema,
@@ -29,6 +30,7 @@ router.post(
   validator(createIssueSchema),
   verifyAttachments,
   verifySaleEvent,
+  verifyPhoneNumber,
   IssueController.create
 );
 router.delete(
@@ -45,6 +47,7 @@ router.post(
   auth('requestSupport'),
   active,
   validator(requestSupportSchema),
+  verifyPhoneNumber,
   verifyIssue,
   verifyCategory,
   IssueController.requestSupporting

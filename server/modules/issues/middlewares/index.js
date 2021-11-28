@@ -5,3 +5,4 @@ export * from './verifyIssueSupport';
 export * from './verifyOwnerIssue';
 export * from './verifyCategory';
 export * from './verifySaleEvent';
+export * from './verifyPhoneNumber';
