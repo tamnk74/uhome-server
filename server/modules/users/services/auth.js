@@ -121,6 +121,32 @@ export default class AuthService {
     };
   }
 
+  static async sendOTP({ userId, phoneNumber }) {
+    await sendOTP(userId, phoneNumber);
+
+    return RedisService.savePhoneNumber(userId, phoneNumber);
+  }
+
+  static async updatePhoneNumber({ userId, verifyCode }) {
+    const userVerifyCode = await RedisService.getVerifyCode(userId);
+    const phoneNumber = await RedisService.getPhoneNumber(userId);
+
+    if (userVerifyCode !== verifyCode || !phoneNumber) {
+      throw new Error('USER-2002');
+    }
+
+    return User.update(
+      {
+        phoneNumber,
+      },
+      {
+        where: {
+          id: userId,
+        },
+      }
+    );
+  }
+
   static async register({ phoneNumber, password, name }) {
     let user = await User.findOne({
       attributes: { exclude: ['password'] },
