@@ -10,7 +10,7 @@ export const verifyPhoneNumber = async (req, res, next) => {
     });
 
     if (user) {
-      throw errorFactory.getError('USER-1003');
+      return next(errorFactory.getError('USER-1003'));
     }
 
     return next();
