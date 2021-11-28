@@ -74,5 +74,9 @@
   "USER-1003": {
     "status": 400,
     "detail": "Phone number exists"
+  },
+  "USER-1004": {
+    "status": 400,
+    "detail": "Please update your phone number"
   }
 }
