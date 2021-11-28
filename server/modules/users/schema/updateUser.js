@@ -9,3 +9,9 @@ export const updateUserSchema = Joi.object().keys({
   lat: Joi.number(),
   gender: Joi.string().valid(...Object.values(gender)),
 });
+
+export const updatePhoneNumberSchema = Joi.object().keys({
+  phone_number: Joi.string()
+    .regex(/^[0-9]{10,11}$/)
+    .required(),
+});

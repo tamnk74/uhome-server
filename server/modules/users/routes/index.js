@@ -22,9 +22,10 @@ import {
   refreshTokenSchema,
   latestLocationSchema,
   updatePasswordSchema,
+  updatePhoneNumberSchema,
 } from '../schema';
 
-import { verifyUser } from '../middlewares';
+import { verifyPhoneNumber, verifyUser } from '../middlewares';
 
 const router = Router();
 
@@ -51,6 +52,18 @@ router
 router.route('/refresh-token').post(validator(refreshTokenSchema), AuthController.refreshToken);
 router.route('/me').get(auth(), AuthController.userInfo);
 router.route('/me').patch(auth(), active, validator(updateUserSchema), AuthController.updateUser);
+router
+  .route('/me/phone-number')
+  .post(
+    auth(),
+    active,
+    validator(updatePhoneNumberSchema),
+    verifyPhoneNumber,
+    AuthController.verifyPhoneNumber
+  );
+router
+  .route('/me/phone-number')
+  .patch(auth(), active, validator(verifyCodeSchema), AuthController.updatePhoneNumber);
 router
   .route('/users/:userId/verify')
   .patch(basicAuth, validator(verifyCodeSchema), AuthController.verifyCode);

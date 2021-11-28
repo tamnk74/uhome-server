@@ -72,6 +72,30 @@ export default class AuthController {
     }
   }
 
+  static async verifyPhoneNumber(req, res, next) {
+    try {
+      await AuthService.sendOTP({
+        userId: req.user.id,
+        phoneNumber: req.body.phoneNumber,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async updatePhoneNumber(req, res, next) {
+    try {
+      await AuthService.updatePhoneNumber({
+        userId: req.user.id,
+        verifyCode: req.body.verifyCode,
+      });
+      return res.status(204).json({});
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async updateUser(req, res, next) {
     try {
       await AuthService.updateUser(req.user.id, req.body);

@@ -56,4 +56,17 @@ export default class RedisService {
   static saveSmsCounter(userId, counter) {
     return redis.set(`${userPrefix + userId}:otp_counter`, counter);
   }
+
+  static savePhoneNumber(userId, phoneNumber) {
+    return redis.set(
+      `${userPrefix + userId}:phone_number`,
+      phoneNumber,
+      'EX',
+      verifyCodeExpiredTime
+    );
+  }
+
+  static getPhoneNumber(userId) {
+    return redis.get(`${userPrefix + userId}:phone_number`);
+  }
 }

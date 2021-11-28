@@ -70,5 +70,9 @@
   "USER-0429": {
     "status": 400,
     "detail": "Too many request"
+  },
+  "USER-1003": {
+    "status": 400,
+    "detail": "Phone number exists"
   }
 }
