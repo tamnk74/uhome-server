@@ -26,39 +26,39 @@ module.exports = {
     const categories = [
       {
         code: 'DL',
-        cost: 400000,
+        cost: 575000,
       },
       {
         code: 'DM',
-        cost: 400000,
+        cost: 575000,
       },
       {
         code: 'DN',
-        cost: 400000,
+        cost: 475000,
       },
       {
         code: 'NT',
-        cost: 400000,
+        cost: 625000,
       },
       {
         code: 'XTVV',
-        cost: 400000,
+        cost: 475000,
       },
       {
         code: 'TVN',
-        cost: 400000,
+        cost: 625000,
       },
       {
         code: 'CK',
-        cost: 400000,
+        cost: 675000,
       },
       {
         code: 'SN',
-        cost: 400000,
+        cost: 575000,
       },
       {
         code: 'NK',
-        cost: 400000,
+        cost: 625000,
       },
     ];
 

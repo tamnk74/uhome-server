@@ -39,13 +39,13 @@ module.exports = {
       },
       {
         code: 'DM',
-        min: 400000,
-        max: 450000,
+        min: 550000,
+        max: 600000,
       },
       {
         code: 'DN',
-        min: 500000,
-        max: 550000,
+        min: 450000,
+        max: 500000,
       },
       {
         code: 'NT',
@@ -59,8 +59,8 @@ module.exports = {
       },
       {
         code: 'TVN',
-        min: 700000,
-        max: 750000,
+        min: 600000,
+        max: 650000,
       },
       {
         code: 'CK',
@@ -74,8 +74,8 @@ module.exports = {
       },
       {
         code: 'NK',
-        min: 750000,
-        max: 800000,
+        min: 600000,
+        max: 650000,
       },
     ];
     const promises = categories.map((item) => createData(item));
