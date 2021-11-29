@@ -579,6 +579,13 @@ export default class ChatService {
       supporterIds
     );
 
+    const { totalTime, customerFee, workerFee, discount } = await ChatService.finishIssue({
+      user,
+      receiveIssue,
+      rate,
+      method: issue.paymentMethod,
+    });
+
     await Promise.all([
       Issue.update(
         {
@@ -593,6 +600,10 @@ export default class ChatService {
       receiveIssue.update({
         status: issueStatus.DONE,
         rating: rate,
+        time: totalTime,
+        customerFee,
+        workerFee,
+        discount,
       }),
       comment
         ? ReceiveIssueComment.create({
@@ -601,7 +612,6 @@ export default class ChatService {
             content: comment,
           })
         : null,
-      ChatService.finishIssue({ user, receiveIssue, rate, method: issue.paymentMethod }),
     ]);
 
     const event = issue.eventId
@@ -820,7 +830,7 @@ export default class ChatService {
       });
     }
 
-    return sequelize.transaction(async (t) => {
+    await sequelize.transaction(async (t) => {
       return Promise.all([
         UserProfile.update(
           {
@@ -859,6 +869,13 @@ export default class ChatService {
         }),
       ]);
     });
+
+    return {
+      totalTime,
+      customerFee,
+      workerFee,
+      discount,
+    };
   }
 
   static async joinChat(user, { issueId }) {
