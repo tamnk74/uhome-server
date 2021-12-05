@@ -262,12 +262,7 @@ export default class ChatService {
   }
 
   static async requestCommand(type, chatChannel, user) {
-    const members = await ChatMember.findAll({
-      where: {
-        channelId: chatChannel.id,
-      },
-    });
-    const supporterIds = members.map((item) => item.userId);
+    const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
     let data = {};
 
     if (type === command.REQUEST_ACCEPTANCE) {
@@ -277,18 +272,13 @@ export default class ChatService {
         supporterIds
       );
 
+      Object.assign(receiveIssue, {
+        status: issueStatus.WAITING_VERIFY,
+      });
+
       [data] = await Promise.all([
         getIssueCost(receiveIssue),
-        ReceiveIssue.update(
-          {
-            status: issueStatus.WAITING_VERIFY,
-          },
-          {
-            where: {
-              issueId: chatChannel.issue.id,
-            },
-          }
-        ),
+        receiveIssue.save(),
         Issue.update(
           {
             status: issueStatus.WAITING_VERIFY,
@@ -303,6 +293,8 @@ export default class ChatService {
     }
 
     await this.sendMessage(type, chatChannel, user, null, data);
+
+    return ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
   }
 
   static async sendMessage(commandName, chatChannel, user, messageId = null, data = {}) {
@@ -375,16 +367,10 @@ export default class ChatService {
       throw new Error('EST-0403');
     }
 
-    const [chatMembers, userProfile] = await Promise.all([
-      ChatMember.findAll({
-        where: {
-          channelId: chatChannel.id,
-        },
-      }),
+    const [supporterIds, userProfile] = await Promise.all([
+      ChatMember.getSupporterIds(chatChannel.id),
       UserProfile.findOne({ where: { userId: user.id } }),
     ]);
-
-    const supporterIds = chatMembers.map((item) => item.userId);
 
     data.totalTime = +data.totalTime;
     data.workerFee = +data.workerFee;
@@ -410,12 +396,7 @@ export default class ChatService {
       throw new Error('ISSUE-0411');
     }
 
-    const receiveIssue = await ReceiveIssue.findOne({
-      where: {
-        issueId: chatChannel.issue.id,
-        userId: supporterIds,
-      },
-    });
+    const receiveIssue = await ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
 
     await Promise.all([
       receiveIssue.update({ status: issueStatus.IN_PROGRESS }),
@@ -462,6 +443,8 @@ export default class ChatService {
       data.messageSid,
       data
     );
+
+    return receiveIssue;
   }
 
   /**
@@ -492,12 +475,7 @@ export default class ChatService {
 
     const supporterIds = members.map((item) => item.userId);
 
-    const receiveIssue = await ReceiveIssue.findOne({
-      where: {
-        issueId: issue.id,
-        userId: supporterIds,
-      },
-    });
+    const receiveIssue = await ReceiveIssue.findBySupporterIds(issue.id, supporterIds);
 
     const supporterId = get(receiveIssue, 'userId');
 
@@ -533,13 +511,15 @@ export default class ChatService {
       this.sendMessage(command.APPROVAL_MATERIAL_COST, chatChannel, user, data.messageSid, data),
       estimationMessage.update({ status: estimationMessageStatus.APPROVED }),
     ]);
+
+    return receiveIssue;
   }
 
   static async trakingProgress({ chatChannel, user, data }) {
     const { attachmentIds, content = '', messageSid } = data;
 
     const { issue } = chatChannel;
-    const [attachments] = await Promise.all([
+    const [attachments, supporterIds] = await Promise.all([
       Attachment.findAll({
         where: {
           id: attachmentIds || [],
@@ -547,6 +527,7 @@ export default class ChatService {
         attributes: ['id', Attachment.buildUrlAttribuiteSelect()],
         raw: true,
       }),
+      ChatMember.getSupporterIds(chatChannel.id),
       issue.addAttachments(attachmentIds),
     ]);
 
@@ -561,18 +542,15 @@ export default class ChatService {
       messageSid,
       messageAttributes
     );
+
+    return ReceiveIssue.findBySupporterIds(issue.id, supporterIds);
   }
 
   static async setRating({ chatChannel, user, data }) {
     const { issue } = chatChannel;
     const { rate, comment = '', messageSid } = data;
 
-    const members = await ChatMember.findAll({
-      where: {
-        channelId: chatChannel.id,
-      },
-    });
-    const supporterIds = members.map((item) => item.userId);
+    const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
 
     const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
       issue.id,
@@ -727,11 +705,17 @@ export default class ChatService {
       }
     }
     await this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
+
+    return receiveIssue;
   }
 
   static async continueChatting({ chatChannel, user, data }) {
     const { messageSid } = data;
-    const message = await twilioClient.fetchMessage(messageSid, chatChannel.channelSid);
+    const [message, supporterIds] = await Promise.all([
+      twilioClient.fetchMessage(messageSid, chatChannel.channelSid),
+      ChatMember.getSupporterIds(chatChannel.id),
+    ]);
+
     const attributes = JSON.parse(message.attributes);
     data = attributes.data || {};
     data.isContinuing = true;
@@ -742,13 +726,15 @@ export default class ChatService {
       messageSid,
       data
     );
+
+    return ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
   }
 
   static async addInformation({ chatChannel, user, data }) {
     const { attachmentIds, content = '', messageSid } = data;
 
     const { issue } = chatChannel;
-    const [attachments] = await Promise.all([
+    const [attachments, supporterIds] = await Promise.all([
       Attachment.findAll({
         where: {
           id: attachmentIds || [],
@@ -756,6 +742,7 @@ export default class ChatService {
         attributes: ['id', Attachment.buildUrlAttribuiteSelect()],
         raw: true,
       }),
+      ChatMember.getSupporterIds(chatChannel.id),
       issue.addAttachments(attachmentIds),
     ]);
 
@@ -770,6 +757,8 @@ export default class ChatService {
       messageSid,
       messageAttributes
     );
+
+    return ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
   }
 
   static async finishIssue({ user, receiveIssue, rate, method }) {

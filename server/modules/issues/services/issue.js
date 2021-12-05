@@ -262,6 +262,10 @@ export default class IssueService {
         numOfWorker,
       }
     );
+
+    const supporterIds = await ChatMember.getSupporterIds(channel.id);
+
+    return ReceiveIssue.findBySupporterIds(issue.id, supporterIds);
   }
 
   /**
@@ -285,6 +289,10 @@ export default class IssueService {
     await IssueService.updateEstimationMessage(command.INFORM_MATERIAL_COST, channel, message.sid, {
       totalCost,
     });
+
+    const supporterIds = await ChatMember.getSupporterIds(channel.id);
+
+    return ReceiveIssue.findBySupporterIds(issue.id, supporterIds);
   }
 
   /**
