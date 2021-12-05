@@ -95,4 +95,14 @@ ChatMember.findMember = (userId, channelId) => {
   });
 };
 
+ChatMember.getSupporterIds = async (channelId) => {
+  const members = await ChatMember.findAll({
+    where: {
+      channelId,
+    },
+  });
+
+  return members.map((item) => item.userId);
+};
+
 module.exports = ChatMember;

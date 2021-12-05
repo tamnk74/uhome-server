@@ -122,12 +122,12 @@ export default class AuthController {
 
   static async estimate(req, res, next) {
     try {
-      await IssueService.estimate({
+      const receiveIssue = await IssueService.estimate({
         user: req.user,
         issue: req.issue,
         data: req.body,
       });
-      return res.status(204).json({});
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
     } catch (e) {
       return next(e);
     }
@@ -135,12 +135,12 @@ export default class AuthController {
 
   static async noticeMaterialCost(req, res, next) {
     try {
-      await IssueService.noticeMaterialCost({
+      const receiveIssue = await IssueService.noticeMaterialCost({
         user: req.user,
         issue: req.issue,
         data: req.body,
       });
-      return res.status(204).json({});
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
     } catch (e) {
       return next(e);
     }

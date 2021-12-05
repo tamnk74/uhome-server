@@ -32,8 +32,13 @@ export default class ChatController {
 
   static async requestCommand(req, res, next) {
     try {
-      await ChatService.requestCommand(req.params.type, req.chatChannel, req.user);
-      return res.status(204).json();
+      const receiveIssue = await ChatService.requestCommand(
+        req.params.type,
+        req.chatChannel,
+        req.user
+      );
+
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
     } catch (e) {
       return next(e);
     }
@@ -41,12 +46,12 @@ export default class ChatController {
 
   static async approveEstimateTime(req, res, next) {
     try {
-      await ChatService.approveEstimateTime({
+      const receiveIssue = await ChatService.approveEstimateTime({
         chatChannel: req.chatChannel,
         user: req.user,
         data: req.body,
       });
-      return res.status(204).json({});
+      return res.status(200).json(receiveIssue);
     } catch (e) {
       return next(e);
     }
@@ -54,12 +59,12 @@ export default class ChatController {
 
   static async approveMaterialCost(req, res, next) {
     try {
-      await ChatService.approveMaterialCost({
+      const receiveIssue = await ChatService.approveMaterialCost({
         chatChannel: req.chatChannel,
         user: req.user,
         data: req.body,
       });
-      return res.status(204).json({});
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
     } catch (e) {
       return next(e);
     }
@@ -67,12 +72,12 @@ export default class ChatController {
 
   static async trakingProgress(req, res, next) {
     try {
-      await ChatService.trakingProgress({
+      const receiveIssue = await ChatService.trakingProgress({
         chatChannel: req.chatChannel,
         user: req.user,
         data: req.body,
       });
-      return res.status(204).json({});
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
     } catch (e) {
       return next(e);
     }
@@ -80,12 +85,12 @@ export default class ChatController {
 
   static async setRating(req, res, next) {
     try {
-      await ChatService.setRating({
+      const receiveIssue = await ChatService.setRating({
         user: req.user,
         chatChannel: req.chatChannel,
         data: req.body,
       });
-      return res.status(204).json({});
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
     } catch (e) {
       return next(e);
     }
@@ -93,12 +98,12 @@ export default class ChatController {
 
   static async continueChatting(req, res, next) {
     try {
-      await ChatService.continueChatting({
+      const receiveIssue = await ChatService.continueChatting({
         user: req.user,
         chatChannel: req.chatChannel,
         data: req.body,
       });
-      return res.status(204).json({});
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
     } catch (e) {
       return next(e);
     }
@@ -106,12 +111,12 @@ export default class ChatController {
 
   static async addMoreInformation(req, res, next) {
     try {
-      await ChatService.addInformation({
+      const receiveIssue = await ChatService.addInformation({
         user: req.user,
         chatChannel: req.chatChannel,
         data: req.body,
       });
-      return res.status(204).json({});
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
     } catch (e) {
       return next(e);
     }

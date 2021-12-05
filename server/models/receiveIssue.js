@@ -127,18 +127,21 @@ ReceiveIssue.cancel = ({ receiveIssue, reason }) => {
   });
 };
 
-ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation = async (issueId, supporterIds = []) => {
-  const receiveIssue = await ReceiveIssue.findOne({
+ReceiveIssue.findBySupporterIds = (issueId, supporterIds = [], include = []) =>
+  ReceiveIssue.findOne({
     where: {
       issueId,
       userId: supporterIds,
     },
-    include: [
-      {
-        model: IssueEstimation,
-      },
-    ],
+    include,
   });
+
+ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation = async (issueId, supporterIds = []) => {
+  const receiveIssue = await ReceiveIssue.findBySupporterIds(issueId, supporterIds, [
+    {
+      model: IssueEstimation,
+    },
+  ]);
 
   const estimations = get(receiveIssue, 'issue_estimations', []);
 
