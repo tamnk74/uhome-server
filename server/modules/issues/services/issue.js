@@ -192,6 +192,7 @@ export default class IssueService {
       userId: user.id,
     });
     const { issue } = receiveIssue;
+    data.issue.status = issue.status;
     notificationQueue.add('cancel_supporting', {
       issue,
       actorId: user.id,
@@ -245,6 +246,7 @@ export default class IssueService {
       }
     );
     data.fee.discount = saleEvent ? saleEvent.getDiscountValue(data.fee.customerFee || 0) : 0;
+    data.issue.status = issue.status;
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
       user,
@@ -278,6 +280,7 @@ export default class IssueService {
     const { materials } = data;
     const totalCost = sumBy(materials, (o) => o.cost);
     data.totalCost = +totalCost;
+    data.issue.status = issue.status;
 
     const { message, channel } = await this.sendMessage(
       command.INFORM_MATERIAL_COST,
