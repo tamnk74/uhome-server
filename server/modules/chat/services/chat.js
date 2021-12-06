@@ -263,10 +263,12 @@ export default class ChatService {
 
   static async requestCommand(type, chatChannel, user) {
     const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
+    const { issue } = chatChannel;
+
     let data = {};
+    data.issue.status = issue.status;
 
     if (type === command.REQUEST_ACCEPTANCE) {
-      const { issue } = chatChannel;
       const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
         issue.id,
         supporterIds
@@ -290,6 +292,8 @@ export default class ChatService {
           }
         ),
       ]);
+
+      data.issue.status = issueStatus.WAITING_VERIFY;
     }
 
     await this.sendMessage(type, chatChannel, user, null, data);
@@ -435,6 +439,7 @@ export default class ChatService {
     delete data.workerFee;
     delete data.customerFee;
     delete data.discount;
+    data.issue.status = receiveIssue.status;
 
     await this.sendMessage(
       command.APPROVAL_ESTIMATION_TIME,
@@ -504,6 +509,8 @@ export default class ChatService {
       material: item.material,
     }));
 
+    data.issue.status = receiveIssue.status;
+
     await Promise.all([
       supporterId && !isEmpty(issueMaterialData)
         ? IssueMaterial.bulkCreate(issueMaterialData)
@@ -534,7 +541,11 @@ export default class ChatService {
     const messageAttributes = {
       content,
       attachments,
+      issue: {
+        status: issue.status,
+      },
     };
+
     await this.sendMessage(
       command.UPDATED_PROGRESS,
       chatChannel,
@@ -704,6 +715,8 @@ export default class ChatService {
         });
       }
     }
+
+    data.issue.status = receiveIssue.status;
     await this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
 
     return receiveIssue;
@@ -719,6 +732,8 @@ export default class ChatService {
     const attributes = JSON.parse(message.attributes);
     data = attributes.data || {};
     data.isContinuing = true;
+    data.issue.status = chatChannel.issue.status;
+
     await this.sendMessage(
       attributes.command_name || command.CONTINUE_CHATTING,
       chatChannel,
@@ -749,7 +764,11 @@ export default class ChatService {
     const messageAttributes = {
       content,
       attachments,
+      issue: {
+        status: chatChannel.issue.status,
+      },
     };
+
     await this.sendMessage(
       command.ADDED_MORE_INFORMATION,
       chatChannel,
