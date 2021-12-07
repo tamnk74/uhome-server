@@ -1,6 +1,6 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
 import Sequelize, { Op } from 'sequelize';
-import { get, isNil, pick, isEmpty, sumBy } from 'lodash';
+import { get, isNil, pick, isEmpty, sumBy, set } from 'lodash';
 import { saleEventTypes, currencies } from 'constants';
 
 import ChatMember from '../../../models/chatMember';
@@ -266,7 +266,7 @@ export default class ChatService {
     const { issue } = chatChannel;
 
     let data = {};
-    data.issue.status = issue.status;
+    set(data, 'issue.status', issue.status);
 
     if (type === command.REQUEST_ACCEPTANCE) {
       const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
@@ -292,8 +292,7 @@ export default class ChatService {
           }
         ),
       ]);
-
-      data.issue.status = issueStatus.WAITING_VERIFY;
+      set(data, 'issue.status', issueStatus.WAITING_VERIFY);
     }
 
     await this.sendMessage(type, chatChannel, user, null, data);
@@ -439,7 +438,7 @@ export default class ChatService {
     delete data.workerFee;
     delete data.customerFee;
     delete data.discount;
-    data.issue.status = receiveIssue.status;
+    set(data, 'issue.status', receiveIssue.status);
 
     await this.sendMessage(
       command.APPROVAL_ESTIMATION_TIME,
@@ -509,7 +508,7 @@ export default class ChatService {
       material: item.material,
     }));
 
-    data.issue.status = receiveIssue.status;
+    set(data, 'issue.status', receiveIssue.status);
 
     await Promise.all([
       supporterId && !isEmpty(issueMaterialData)
@@ -716,7 +715,7 @@ export default class ChatService {
       }
     }
 
-    data.issue.status = receiveIssue.status;
+    set(data, 'issue.status', receiveIssue.status);
     await this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
 
     return receiveIssue;
@@ -732,7 +731,7 @@ export default class ChatService {
     const attributes = JSON.parse(message.attributes);
     data = attributes.data || {};
     data.isContinuing = true;
-    data.issue.status = chatChannel.issue.status;
+    set(data, 'issue.status', chatChannel.issue.status);
 
     await this.sendMessage(
       attributes.command_name || command.CONTINUE_CHATTING,
