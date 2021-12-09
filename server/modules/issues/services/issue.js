@@ -70,6 +70,7 @@ export default class IssueService {
     };
     options.where.id = {
       [Op.in]: Sequelize.literal(`(${Issue.getIssueOption(user.id)})`),
+      [Op.notIn]: Sequelize.literal(`(${Issue.getCancelledIssues(user.id)})`),
     };
 
     const optionsCount = {
