@@ -193,4 +193,16 @@ Issue.getIssueOption = (userId) => {
   return filterIssueSql;
 };
 
+Issue.getCancelledIssues = (userId) => {
+  const filterIssueSql = sequelize.dialect.QueryGenerator.selectQuery('receive_issues', {
+    attributes: ['issue_id'],
+    where: {
+      user_id: userId,
+      status: issueStatus.CANCELLED,
+    },
+  }).slice(0, -1);
+
+  return filterIssueSql;
+};
+
 module.exports = Issue;
