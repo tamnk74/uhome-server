@@ -163,6 +163,7 @@ User.prototype.toPayload = function toPayload() {
     phoneNumber: this.dataValues.phoneNumber,
     name: this.dataValues.name,
     status: this.dataValues.status,
+    verified_at: this.dataValues.verifiedAt,
   };
 };
 

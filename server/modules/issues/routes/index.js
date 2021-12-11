@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import IssueController from '../controllers/issue';
-import { auth, validator, active } from '../../../middlewares';
+import { auth, validator, active, verified } from '../../../middlewares';
 import {
   verifyAttachments,
   verifyIssue,
@@ -45,7 +45,7 @@ router.get('/issues', auth('getIssues'), active, IssueController.index);
 router.post(
   '/issues/:issueId/request-supportings',
   auth('requestSupport'),
-  active,
+  verified,
   validator(requestSupportSchema),
   verifyPhoneNumber,
   verifyIssue,
@@ -80,7 +80,7 @@ router.delete(
 router.post(
   '/issues/:issueId/estimation',
   auth('sendEstimationCost'),
-  active,
+  verified,
   validator(estimationSchema),
   validIssueSupport,
   IssueController.estimate
@@ -89,7 +89,7 @@ router.post(
 router.post(
   '/issues/:issueId/material-cost',
   auth('sendMaterialCost'),
-  active,
+  verified,
   validator(materialCostSchema),
   validIssueSupport,
   IssueController.noticeMaterialCost
