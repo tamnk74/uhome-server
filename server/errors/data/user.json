@@ -35,6 +35,10 @@
     "status": 403,
     "detail": "User is inactive"
   },
+  "USER-0003": {
+    "status": 403,
+    "detail": "User is not verified"
+  },
   "USER-0002": {
     "status": 404,
     "detail": "User not found"
