@@ -613,7 +613,7 @@ export default class ChatService {
     if (event && event.type === saleEventTypes.VOUCHER) {
       await UserEvent.update(
         {
-          status: eventStatuses.ACTIVE,
+          limit: 0,
         },
         {
           where: {
