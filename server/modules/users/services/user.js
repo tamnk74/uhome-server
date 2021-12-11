@@ -61,6 +61,12 @@ export default class Userervice {
             },
           ],
         },
+        {
+          model: User,
+          require: true,
+          as: 'creator',
+          attributes: ['id', 'avatar', 'name', 'phone_number', 'gender', 'status'],
+        },
       ],
       attributes: Issue.baseAttibutes,
       limit,
