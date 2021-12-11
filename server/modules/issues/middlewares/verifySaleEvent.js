@@ -1,4 +1,4 @@
-import { saleEventTypes, eventStatuses } from '../../../constants';
+import { saleEventTypes } from '../../../constants';
 import Event from '../../../models/event';
 import UserEvent from '../../../models/userEvent';
 import errorFactory from '../../../errors/ErrorFactory';
@@ -21,15 +21,21 @@ export const verifySaleEvent = async (req, res, next) => {
         throw errorFactory.getError('EVSL-0003');
       }
 
-      if (saleEvent.type === saleEventTypes.VOUCHER) {
-        const userEvent = await UserEvent.findOne({
+      if (+saleEvent.limit > 0) {
+        const [userEvent] = await UserEvent.findOrCreate({
           where: {
             userId: req.user.id,
             eventId: saleEvent.id,
-            status: eventStatuses.INACTIVE,
+          },
+          defaults: {
+            userId: req.user.id,
+            eventId: saleEvent.id,
+            limit: saleEvent.limit,
           },
         });
-        if (!userEvent) {
+        req.userEvent = userEvent;
+
+        if (userEvent.limit === 0) {
           throw errorFactory.getError('EVSL-0004');
         }
       }

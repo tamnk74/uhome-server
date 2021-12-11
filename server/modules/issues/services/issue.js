@@ -23,8 +23,13 @@ import FeeFactory from '../../../helpers/fee/FeeFactory';
 import TeamFeeConfiguration from '../../../models/teamFeeConfiguration';
 
 export default class IssueService {
-  static async create(user, data) {
+  static async create(user, data, userEvent) {
     const issue = await Issue.addIssue(data);
+    if (userEvent) {
+      await userEvent.update({
+        limit: userEvent.limit - 1,
+      });
+    }
     notificationQueue.add('new_issue', { id: issue.id });
     return this.getDetail(user, issue.id);
   }

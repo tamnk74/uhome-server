@@ -625,100 +625,132 @@ export default class ChatService {
     }
 
     if (rate === 5) {
-      const events = await Event.findAll({
-        where: {
-          code: ['FIRST-5-STAR', 'NEXT-5-5-STAR'],
-          status: eventStatuses.ACTIVE,
-        },
-      });
-      const userEvents = await UserEvent.findAll({
-        where: {
-          userId: receiveIssue.userId,
-          eventId: events.map((event) => event.id),
-        },
-      });
-      const first5StarEvent = events.find((event) => event.code === 'FIRST-5-STAR');
-      const next5StarEvent = events.find((event) => event.code === 'NEXT-5-5-STAR');
-      if (first5StarEvent && userEvents.length === 0) {
-        await UserProfile.update(
-          {
-            accountBalance: Sequelize.literal(`account_balance + ${first5StarEvent.value}`),
-          },
-          {
-            where: {
-              userId: receiveIssue.userId,
-            },
-          }
-        );
-        await UserEvent.create({
-          userId: receiveIssue.userId,
-          eventId: first5StarEvent.id,
-        });
-        const transaction = await TransactionHistory.create({
-          id: uuidv4(),
-          userId: receiveIssue.userId,
-          amount: first5StarEvent.value || 0,
-          total: first5StarEvent.value || 0,
-          discount: 0,
-          issueId: issue.id,
-          type: transactionType.BONUS,
-          currency: currencies.VND,
-          extra: {
-            event: first5StarEvent.toJSON(),
-          },
-          actorId: user.id,
-          method: paymentMethod.CASH,
-        });
-
-        notificationQueue.add('receive_bonus', {
-          actorId: receiveIssue.userId,
-          issue: issue.toJSON(),
-          transaction: transaction.toJSON(),
-        });
-      }
-      if (next5StarEvent && userEvents.length > 0 && userEvents.length < 5) {
-        await UserProfile.update(
-          {
-            accountBalance: Sequelize.literal(`account_balance + ${next5StarEvent.value}`),
-          },
-          {
-            where: {
-              userId: receiveIssue.userId,
-            },
-          }
-        );
-        await UserEvent.create({
-          userId: receiveIssue.userId,
-          eventId: next5StarEvent.id,
-        });
-        const transaction = await TransactionHistory.create({
-          id: uuidv4(),
-          userId: receiveIssue.userId,
-          amount: next5StarEvent.value || 0,
-          total: next5StarEvent.value || 0,
-          discount: 0,
-          issueId: issue.id,
-          currency: currencies.VND,
-          type: transactionType.BONUS,
-          extra: {
-            event: next5StarEvent.toJSON(),
-          },
-          actorId: user.id,
-          method: paymentMethod.CASH,
-        });
-
-        notificationQueue.add('receive_bonus', {
-          actorId: receiveIssue.userId,
-          issue: issue.toJSON(),
-          transaction: transaction.toJSON(),
-        });
-      }
+      await ChatService.checkSaleEvent({ user });
     }
 
     set(data, 'issue.status', receiveIssue.status);
     await this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
 
     return receiveIssue;
+  }
+
+  static async checkSaleEvent({ user }) {
+    const events = await Event.findAll({
+      where: {
+        code: ['FIRST-5-STAR', 'NEXT-5-5-STAR'],
+        status: eventStatuses.ACTIVE,
+      },
+    });
+    const userEvents = await UserEvent.findOne({
+      where: {
+        userId: receiveIssue.userId,
+        eventId: events.map((event) => event.id),
+      },
+    });
+
+    const first5StarEvent = events.find((event) => event.code === 'FIRST-5-STAR');
+    const firstUserEvent = userEvents.find(
+      (userEvent) => first5StarEvent && userEvent.eventId === first5StarEvent.id
+    );
+    const next5StarEvent = events.find((event) => event.code === 'NEXT-5-5-STAR');
+    const next5UserEvent = userEvents.find(
+      (userEvent) => next5StarEvent && userEvent.eventId === next5StarEvent.id
+    );
+
+    if (first5StarEvent && !firstUserEvent) {
+      await UserProfile.update(
+        {
+          accountBalance: Sequelize.literal(`account_balance + ${first5StarEvent.value}`),
+        },
+        {
+          where: {
+            userId: receiveIssue.userId,
+          },
+        }
+      );
+      await UserEvent.create({
+        userId: receiveIssue.userId,
+        eventId: first5StarEvent.id,
+        limit: 0,
+      });
+      const transaction = await TransactionHistory.create({
+        id: uuidv4(),
+        userId: receiveIssue.userId,
+        amount: first5StarEvent.value || 0,
+        total: first5StarEvent.value || 0,
+        discount: 0,
+        issueId: issue.id,
+        type: transactionType.BONUS,
+        currency: currencies.VND,
+        extra: {
+          event: first5StarEvent.toJSON(),
+        },
+        actorId: user.id,
+        method: paymentMethod.CASH,
+      });
+
+      notificationQueue.add('receive_bonus', {
+        actorId: receiveIssue.userId,
+        issue: issue.toJSON(),
+        transaction: transaction.toJSON(),
+      });
+      return;
+    }
+    if (next5StarEvent) {
+      if (!next5UserEvent) {
+        await UserEvent.create({
+          userId: receiveIssue.userId,
+          eventId: first5StarEvent.id,
+          limit: 5,
+        });
+        return;
+      }
+      if (next5UserEvent.limit === 0) {
+        return;
+      }
+      if (next5UserEvent.limit > 1) {
+        await next5UserEvent.update({
+          limit: next5UserEvent.limit - 1,
+        });
+        return;
+      }
+      await UserProfile.update(
+        {
+          accountBalance: Sequelize.literal(`account_balance + ${next5StarEvent.value}`),
+        },
+        {
+          where: {
+            userId: receiveIssue.userId,
+          },
+        }
+      );
+
+      await next5UserEvent.update({
+        limit: 0,
+      });
+
+      const transaction = await TransactionHistory.create({
+        id: uuidv4(),
+        userId: receiveIssue.userId,
+        amount: next5StarEvent.value || 0,
+        total: next5StarEvent.value || 0,
+        discount: 0,
+        issueId: issue.id,
+        currency: currencies.VND,
+        type: transactionType.BONUS,
+        extra: {
+          event: next5StarEvent.toJSON(),
+        },
+        actorId: user.id,
+        method: paymentMethod.CASH,
+      });
+
+      notificationQueue.add('receive_bonus', {
+        actorId: receiveIssue.userId,
+        issue: issue.toJSON(),
+        transaction: transaction.toJSON(),
+      });
+    }
   }
 
   static async continueChatting({ chatChannel, user, data }) {
