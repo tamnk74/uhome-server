@@ -190,7 +190,6 @@ export default class AuthService {
     }
 
     user.status = userStatus.ACTIVE;
-    user.verifiedAt = new Date();
 
     await Promise.all([user.save(), RedisService.removeVerifyCode(user.id)]);
 
