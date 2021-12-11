@@ -15,7 +15,7 @@ UserEvent.init(
       type: Sequelize.UUID,
       allowNull: false,
     },
-    status: {
+    limit: {
       type: Sequelize.DataTypes.TINYINT,
       defautValue: 0,
     },

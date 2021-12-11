@@ -56,6 +56,11 @@ Event.init(
       allowNull: false,
       defaultValue: 0,
     },
+    limit: {
+      type: Sequelize.TINYINT,
+      allowNull: false,
+      defaultValue: -1,
+    },
     minValue: {
       type: Sequelize.DataTypes.DECIMAL(12, 2),
       allowNull: false,
