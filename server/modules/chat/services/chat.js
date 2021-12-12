@@ -269,10 +269,14 @@ export default class ChatService {
     set(data, 'issue.status', issue.status);
 
     if (type === command.REQUEST_ACCEPTANCE) {
-      const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
-        issue.id,
-        supporterIds
-      );
+      const [receiveIssue, estimationMessage] = await Promise.all([
+        ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(issue.id, supporterIds),
+        EstimationMessage.findByChannelIdAndStatus(chatChannel.id, estimationMessageStatus.WAITING),
+      ]);
+
+      if (!isNil(estimationMessage)) {
+        throw new Error('ISSUE-0413');
+      }
 
       Object.assign(receiveIssue, {
         status: issueStatus.WAITING_VERIFY,
@@ -764,6 +768,27 @@ export default class ChatService {
     data = attributes.data || {};
     data.isContinuing = true;
     set(data, 'issue.status', chatChannel.issue.status);
+    const receiveIssue = await ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
+    if (receiveIssue.status === issueStatus.WAITING_VERIFY) {
+      Object.assign(receiveIssue, {
+        status: issueStatus.IN_PROGRESS,
+      });
+
+      await Promise.all([
+        receiveIssue.save(),
+        Issue.update(
+          {
+            status: issueStatus.IN_PROGRESS,
+          },
+          {
+            where: {
+              id: chatChannel.issue.id,
+            },
+          }
+        ),
+      ]);
+      set(data, 'issue.status', issueStatus.IN_PROGRESS);
+    }
 
     await this.sendMessage(
       attributes.command_name || command.CONTINUE_CHATTING,
@@ -773,7 +798,7 @@ export default class ChatService {
       data
     );
 
-    return ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
+    return receiveIssue;
   }
 
   static async addInformation({ chatChannel, user, data }) {
