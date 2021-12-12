@@ -55,8 +55,8 @@ Notification.beforeCreate((notification) => {
 });
 
 // eslint-disable-next-line no-undef
-Notification.getTitle = (key, paramas = {}) => {
-  return i18n.__(key, paramas);
+Notification.getTitle = (key, params = {}) => {
+  return i18n.__(key, params);
 };
 
 module.exports = Notification;

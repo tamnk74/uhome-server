@@ -1,6 +1,7 @@
 import { Sequelize, Op } from 'sequelize';
 import uuid from 'uuid';
-import Notificaion from '../../models/notification';
+import _ from 'lodash';
+import Notification from '../../models/notification';
 import Fcm from '../../helpers/Fcm';
 import Subscription from '../../models/subscription';
 import User from '../../models/user';
@@ -80,8 +81,8 @@ export default class NotificationService {
       const tokens = [];
       const actor = issue.creator;
       const notification = {
-        title: Notificaion.getTitle('notfication.new_issue', { title: issue.title }),
-        body: Notificaion.getTitle('notfication.new_issue', { title: issue.title }),
+        title: Notification.getTitle('notfication.new_issue', { title: issue.title }),
+        body: Notification.getTitle('notfication.new_issue', { title: issue.title }),
       };
       const data = {
         type: notificationType.newIssue,
@@ -104,7 +105,7 @@ export default class NotificationService {
 
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
-        Notificaion.bulkCreate(dataInssert),
+        Notification.bulkCreate(dataInssert),
       ]);
       done();
     } catch (error) {
@@ -139,8 +140,8 @@ export default class NotificationService {
       const actor = supporting.user;
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: Notificaion.getTitle('notfication.request_support', { title: issue.title }),
-        body: Notificaion.getTitle('notfication.request_support', { title: issue.title }),
+        title: Notification.getTitle('notfication.request_support', { title: issue.title }),
+        body: Notification.getTitle('notfication.request_support', { title: issue.title }),
       };
       const data = {
         type: notificationType.requestSupporting,
@@ -149,7 +150,7 @@ export default class NotificationService {
       };
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
-        Notificaion.create({
+        Notification.create({
           id: uuid(),
           actorId: actor.id,
           recipientId: userId,
@@ -179,8 +180,8 @@ export default class NotificationService {
       ]);
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: Notificaion.getTitle('notfication.cancel', { title: issue.title }),
-        body: Notificaion.getTitle('notfication.cancel', { title: issue.title }),
+        title: Notification.getTitle('notfication.cancel', { title: issue.title }),
+        body: Notification.getTitle('notfication.cancel', { title: issue.title }),
       };
       const data = {
         type: notificationType.cancelRequestSupport,
@@ -190,7 +191,7 @@ export default class NotificationService {
 
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
-        Notificaion.create({
+        Notification.create({
           id: uuid(),
           actorId,
           recipientId: userId,
@@ -220,8 +221,8 @@ export default class NotificationService {
       ]);
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: Notificaion.getTitle('notfication.cancel', { title: issue.title }),
-        body: Notificaion.getTitle('notfication.cancel', { title: issue.title }),
+        title: Notification.getTitle('notfication.cancel', { title: issue.title }),
+        body: Notification.getTitle('notfication.cancel', { title: issue.title }),
       };
       const data = {
         type: notificationType.cancelSupport,
@@ -231,7 +232,7 @@ export default class NotificationService {
 
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
-        Notificaion.create({
+        Notification.create({
           id: uuid(),
           actorId,
           recipientId: userId,
@@ -285,7 +286,9 @@ export default class NotificationService {
       });
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: Notificaion.getTitle(notificationMessage[commandName], { title: issue.title }),
+        title: Notification.getTitle(_.get(notificationMessage, commandName, commandName), {
+          title: issue.title,
+        }),
         body: message,
       };
 
