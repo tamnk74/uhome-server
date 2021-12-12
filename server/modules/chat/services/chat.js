@@ -625,7 +625,7 @@ export default class ChatService {
     }
 
     if (rate === 5) {
-      await ChatService.checkSaleEvent({ user });
+      await ChatService.checkSaleEvent({ user, receiveIssue });
     }
 
     set(data, 'issue.status', receiveIssue.status);
@@ -634,7 +634,7 @@ export default class ChatService {
     return receiveIssue;
   }
 
-  static async checkSaleEvent({ user }) {
+  static async checkSaleEvent({ user, receiveIssue }) {
     const events = await Event.findAll({
       where: {
         code: ['FIRST-5-STAR', 'NEXT-5-5-STAR'],
