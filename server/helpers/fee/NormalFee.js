@@ -17,7 +17,21 @@ export default class NormalFee {
 
   // eslint-disable-next-line class-methods-use-this
   getBasicFee(classFee) {
-    return (classFee.normalCost / 8) * this.totalTime;
+    const actualTimes = this.getActualWorkingTimes();
+
+    return actualTimes.reduce((total, currentValue) => {
+      return total + (classFee.normalCost / 8) * (currentValue > 8 ? 8 : currentValue);
+    });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getActualWorkingTimes() {
+    return this.workingTimes.map((item) => {
+      const startTime = dayjs(item.startTime);
+      const endTime = dayjs(item.endTime);
+
+      return endTime.diff(startTime, 'hour');
+    });
   }
 
   getFee(configuration, classFee, teamConfiguration) {
