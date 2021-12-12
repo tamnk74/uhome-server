@@ -108,7 +108,7 @@ Event.prototype.isExpired = function isExpired() {
 
 Event.prototype.getDiscountValue = function getDiscountValue(total) {
   if (this.dataValues.valueType === calculateType.FIXED) {
-    return this.value;
+    return this.dataValues.value < total ? this.dataValues.value : total;
   }
 
   if (this.dataValues.valueType === calculateType.PERCENT) {
