@@ -17,7 +17,7 @@ export default class NormalFee {
 
   // eslint-disable-next-line class-methods-use-this
   getBasicFee(classFee) {
-    return classFee.normalCost * this.totalTime;
+    return (classFee.normalCost / 8) * this.totalTime;
   }
 
   getFee(configuration, classFee, teamConfiguration) {
