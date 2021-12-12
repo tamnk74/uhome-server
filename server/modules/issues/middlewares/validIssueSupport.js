@@ -25,6 +25,10 @@ export const validIssueSupport = async (req, res, next) => {
       return next(errorFactory.getError('ISSU-0001'));
     }
 
+    if (issue.status === issueStatus.WAITING_VERIFY) {
+      return next(errorFactory.getError('EST-0413'));
+    }
+
     req.issue = issue;
     return next();
   } catch (e) {

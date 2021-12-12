@@ -72,4 +72,12 @@ EstimationMessage.findByMessageSidOrFail = async (messageSid) => {
   return message;
 };
 
+EstimationMessage.findByChannelIdAndStatus = (channelId, status) =>
+  EstimationMessage.findOne({
+    where: {
+      channelId,
+      status,
+    },
+  });
+
 module.exports = EstimationMessage;

@@ -28,5 +28,17 @@
     "error": "Estimation is not matching",
     "title": "Estimation is not matching",
     "detail": "Estimation is not matching"
+  },
+  "EST-0413": {
+    "status": 400,
+    "error": "Estimation is not allow",
+    "title": "Estimation is not allow",
+    "detail": "Estimation is not allow"
+  },
+  "ISSUE-0413": {
+    "status": 400,
+    "error": "Issue have an estimation need to approve",
+    "title": "Issue have an estimation need to approve",
+    "detail": "Issue have an estimation need to approve"
   }
 }
