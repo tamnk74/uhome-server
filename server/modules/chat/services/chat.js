@@ -879,10 +879,7 @@ export default class ChatService {
         actorId: user.id,
         method,
       },
-    ];
-
-    if (method === paymentMethod.MOMO) {
-      transactionHistories.push({
+      {
         id: uuidv4(),
         userId: user.id,
         amount: workerFee + sumCost,
@@ -891,8 +888,8 @@ export default class ChatService {
         extra,
         actorId: receiveIssue.userId,
         method,
-      });
-    }
+      },
+    ];
 
     await sequelize.transaction(async (t) => {
       return Promise.all([
