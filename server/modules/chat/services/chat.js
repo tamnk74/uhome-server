@@ -645,7 +645,7 @@ export default class ChatService {
         status: eventStatuses.ACTIVE,
       },
     });
-    const userEvents = await UserEvent.findOne({
+    const userEvents = await UserEvent.findAll({
       where: {
         userId: receiveIssue.userId,
         eventId: events.map((event) => event.id),
