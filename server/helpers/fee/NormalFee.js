@@ -18,10 +18,14 @@ export default class NormalFee {
   // eslint-disable-next-line class-methods-use-this
   getBasicFee(classFee) {
     const actualTimes = this.getActualWorkingTimes();
+    let total = 0;
 
-    return actualTimes.reduce((total, currentValue) => {
-      return total + (classFee.normalCost / 8) * (currentValue > 8 ? 8 : currentValue);
-    });
+    for (let index = 0; index < actualTimes.length; index++) {
+      const element = actualTimes[index];
+      total += (classFee.normalCost / 8) * (element > 8 ? 8 : element);
+    }
+
+    return total;
   }
 
   // eslint-disable-next-line class-methods-use-this
