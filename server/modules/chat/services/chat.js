@@ -1012,6 +1012,15 @@ export default class ChatService {
       }),
     ]);
 
+    if (chatChannel) {
+      await Issue.update(
+        {
+          msgAt: new Date(),
+        },
+        { where: { id: chatChannel.issueId } }
+      );
+    }
+
     notificationQueue.add('chat_notification', {
       chatChannelId: chatChannel.id,
       actorId: get(chatMember, 'userId'),

@@ -65,6 +65,10 @@ Issue.init(
       type: Sequelize.DataTypes.UUID,
       allowNull: true,
     },
+    msgAt: {
+      type: Sequelize.DATE,
+      defautValue: Sequelize.NOW,
+    },
     createdAt: {
       type: Sequelize.DATE,
       defautValue: Sequelize.NOW,
