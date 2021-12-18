@@ -9,6 +9,7 @@ export const verifyEvent = async (req, res, next) => {
       where: {
         code: req.params.code,
       },
+      include: Event.buildRelation(),
     });
 
     if (!saleEvent) {
