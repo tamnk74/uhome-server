@@ -17,6 +17,7 @@ export const roles = Object.freeze({
 export const socialAccount = Object.freeze({
   FACEBOOK: 'FACEBOOK',
   ZALO: 'ZALO',
+  APPLE: 'APPLE',
 });
 
 export const gender = Object.freeze({

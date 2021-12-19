@@ -123,3 +123,4 @@ dist
 firebase-admin-config.json
 momo_public_key
 momo.pub
+AppleAuthKey.p8

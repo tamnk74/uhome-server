@@ -1,9 +1,10 @@
-import { isNil } from 'lodash';
+import { isNil, get } from 'lodash';
 import errorFactory from '../../../errors/ErrorFactory';
 import User from '../../../models/user';
 import JWT from '../../../helpers/JWT';
 import Zalo from '../../../helpers/Zalo';
 import Facebook from '../../../helpers/Facebook';
+import Apple from '../../../helpers/Apple';
 import RedisService from '../../../helpers/Redis';
 import { status as userStatus, socialAccount } from '../../../constants';
 import { sendOTP } from '../../../helpers/SmsOTP';
@@ -344,5 +345,62 @@ export default class AuthService {
       },
     });
     return RedisService.removeAccessToken(user.id, token);
+  }
+
+  static async handleAppleAuth({ code, email, name }) {
+    const tokenPayload = await Apple.getAccessToken(code);
+    const idTokenPayload = Apple.verifyIdToken(get(tokenPayload, 'id_token'));
+    const userProfile = await UserProfile.findOne({
+      where: {
+        email,
+      },
+      include: [
+        {
+          model: User,
+          require: true,
+        },
+      ],
+    });
+
+    let user = get(userProfile, 'user');
+
+    if (!user) {
+      user = await User.create(
+        {
+          name,
+          phoneNumber: null,
+          avatar: null,
+          password: code,
+          status: userStatus.ACTIVE,
+          socialAccounts: {
+            socialId: get(idTokenPayload, 'sub'),
+            type: socialAccount.APPLE,
+          },
+          sessionRole: 'CUSTOMER',
+        },
+        {
+          include: [User.includeZaloAccount(get(idTokenPayload, 'sub'))],
+        }
+      );
+
+      await UserProfile.create({
+        userId: user.id,
+        accountBalance: 0,
+        email,
+        identityCard: JSON.stringify({ before: null, after: null }),
+      });
+    }
+
+    const [accessToken, refreshToken] = await Promise.all([
+      JWT.generateToken(user.toPayload()),
+      JWT.generateRefreshToken(user.id),
+    ]);
+    await RedisService.saveAccessToken(user.id, accessToken, user.sessionRole);
+
+    return {
+      accessToken,
+      refreshToken,
+      tokenType: 'Bearer',
+    };
   }
 }

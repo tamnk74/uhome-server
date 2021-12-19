@@ -26,6 +26,7 @@ jobs:
               git reset --hard HEAD
               git pull origin develop
               ansible local -m copy -a 'src=deploy/secrets-dev.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
+              ansible local -m copy -a 'src=deploy/apple-auth-dev.yaml dest=/home/$USER/uhome-server/AppleAuthKey.p8' --vault-password-file ~/.vault
               npm install
               npm run build
               npx sequelize db:migrate
@@ -50,6 +51,7 @@ jobs:
               git fetch origin && git fetch origin --tags
               git reset --hard $CIRCLE_TAG
               ansible local -m copy -a 'src=deploy/secrets-stg.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
+              ansible local -m copy -a 'src=deploy/apple-auth-stg.yaml dest=/home/$USER/uhome-server/AppleAuthKey.p8' --vault-password-file ~/.vault
               npm install
               npm run build
               pm2 restart all

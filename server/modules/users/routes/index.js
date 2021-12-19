@@ -23,6 +23,7 @@ import {
   latestLocationSchema,
   updatePasswordSchema,
   updatePhoneNumberSchema,
+  loginAppleSchema,
 } from '../schema';
 
 import { verifyPhoneNumber, verifyUser } from '../middlewares';
@@ -112,5 +113,7 @@ router
   .route('/me/transaction-histories')
   .get(auth(), active, UserController.getTransactionHistories);
 router.route('/users/:id/send-otp').put(basicAuth, UserController.sendOTP);
+
+router.route('/auth/apple').post(validator(loginAppleSchema), AuthController.appleLogin);
 
 export default router;
