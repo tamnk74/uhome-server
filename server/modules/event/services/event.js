@@ -37,6 +37,10 @@ export class EventService {
       include: Event.buildRelation(),
       attributes: Event.baseAttibutes,
       where: Event.whereCondition(user, params),
+      order: [
+        ['to', 'ASC'],
+        ['from', 'ASC'],
+      ],
     });
   }
 
