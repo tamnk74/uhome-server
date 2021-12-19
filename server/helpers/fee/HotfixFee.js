@@ -63,6 +63,7 @@ export default class HotfixFee {
 
   getFee(configuration, classFee, teamConfiguration) {
     const workingTime = first(this.workingTimes);
+
     if (isEmpty(workingTime)) {
       return {
         workerFee: 0,
@@ -115,9 +116,10 @@ export default class HotfixFee {
     const ranges = workingsTime.map((workHour) => {
       tmpStartTime = tmpStartTime.set('hour', workHour.from).startOf('hour');
       tmpToTime = tmpToTime.set('hour', workHour.to).startOf('hour');
+
       if (
-        starTime.isBetween(tmpStartTime, tmpToTime, 'minute') ||
-        endTime.isBetween(tmpStartTime, tmpToTime, 'minute')
+        starTime.isBetween(tmpStartTime, tmpToTime, 'minute', '[)') ||
+        endTime.isBetween(tmpStartTime, tmpToTime, 'minute', '(]')
       ) {
         if (endTime.isBefore(tmpToTime, 'minute')) {
           tmpToTime = endTime;
