@@ -34,7 +34,7 @@ export default class NormalFee {
       const startTime = dayjs(item.startTime);
       const endTime = dayjs(item.endTime);
 
-      return endTime.diff(startTime, 'hour');
+      return endTime.diff(startTime, 'hour', true);
     });
   }
 
