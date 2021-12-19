@@ -14,3 +14,4 @@ export * from './resetPasswordSchema';
 export * from './refreshTokenSchema';
 export * from './latestLocationSchema';
 export * from './updatePasswordSchema';
+export * from './loginAppleSchema';

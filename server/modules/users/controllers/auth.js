@@ -167,4 +167,14 @@ export default class AuthController {
       return next(e);
     }
   }
+
+  static async appleLogin(req, res, next) {
+    try {
+      const { code, email, name } = req.body;
+      const authUser = await AuthService.handleAppleAuth({ code, email, name });
+      return res.status(200).json(objectToSnake(authUser));
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
