@@ -1,6 +1,7 @@
 import Sequelize, { Op } from 'sequelize';
 import Bcrypt from 'bcryptjs';
 import uuid from 'uuid';
+import _ from 'lodash';
 import sequelize from '../databases/database';
 import BaseModel from './model';
 import SocialAccount from './socialAccount';
@@ -164,6 +165,7 @@ User.prototype.toPayload = function toPayload() {
     name: this.dataValues.name,
     status: this.dataValues.status,
     verified_at: this.dataValues.verifiedAt,
+    signedSocial: _.get(this, 'signedSocial', false),
   };
 };
 

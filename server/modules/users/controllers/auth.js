@@ -56,6 +56,7 @@ export default class AuthController {
   static async userInfo(req, res, next) {
     try {
       const sessionRole = get(req, 'user.sessionRole');
+      const signedSocial = get(req, 'user.signedSocial', false);
       const user = await AuthService.getUserById(req.user.id, sessionRole);
       const userData = omit(user.toJSON(), [
         'verify_code',
@@ -66,6 +67,8 @@ export default class AuthController {
       ]);
 
       userData.role = req.user.role || userData.role;
+      userData.signedSocial = signedSocial;
+
       return res.status(200).json(objectToSnake(userData));
     } catch (e) {
       return next(e);

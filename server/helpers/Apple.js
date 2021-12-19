@@ -36,7 +36,6 @@ export default class Apple {
       const params = {
         grant_type: 'authorization_code',
         code,
-        redirect_uri: 'https://b295-112-197-200-252.ngrok.io/appleAuth',
         client_id: appleConfig.clientId,
         client_secret: secretKey,
       };

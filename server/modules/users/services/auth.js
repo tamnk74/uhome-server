@@ -11,6 +11,7 @@ import { sendOTP } from '../../../helpers/SmsOTP';
 import UserProfile from '../../../models/userProfile';
 import Subscription from '../../../models/subscription';
 import IdentifyCard from '../../../models/identifyCard';
+import SocialAccount from '../../../models/socialAccount';
 import { fileSystemConfig } from '../../../config';
 
 export default class AuthService {
@@ -226,7 +227,7 @@ export default class AuthService {
         }
       );
     }
-
+    user.signedSocial = true;
     const [accessToken, refreshToken] = await Promise.all([
       JWT.generateToken(user.toPayload()),
       JWT.generateRefreshToken(user.id),
@@ -266,7 +267,7 @@ export default class AuthService {
         }
       );
     }
-
+    user.signedSocial = true;
     const [accessToken, refreshToken] = await Promise.all([
       JWT.generateToken(user.toPayload()),
       JWT.generateRefreshToken(user.id),
@@ -350,9 +351,11 @@ export default class AuthService {
   static async handleAppleAuth({ code, email, name }) {
     const tokenPayload = await Apple.getAccessToken(code);
     const idTokenPayload = Apple.verifyIdToken(get(tokenPayload, 'id_token'));
-    const userProfile = await UserProfile.findOne({
+
+    const socAccount = await SocialAccount.findOne({
       where: {
-        email,
+        socialId: get(idTokenPayload, 'sub'),
+        type: socialAccount.APPLE,
       },
       include: [
         {
@@ -362,7 +365,7 @@ export default class AuthService {
       ],
     });
 
-    let user = get(userProfile, 'user');
+    let user = get(socAccount, 'user');
 
     if (!user) {
       user = await User.create(
@@ -390,7 +393,7 @@ export default class AuthService {
         identityCard: JSON.stringify({ before: null, after: null }),
       });
     }
-
+    user.signedSocial = true;
     const [accessToken, refreshToken] = await Promise.all([
       JWT.generateToken(user.toPayload()),
       JWT.generateRefreshToken(user.id),
