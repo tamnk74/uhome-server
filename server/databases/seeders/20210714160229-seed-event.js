@@ -85,7 +85,7 @@ module.exports = {
         valueType: calculateType.FIXED,
         limit: 3,
         value: 100000,
-        roles: ['WORKER'],
+        roles: ['CUSTOMER'],
       },
       {
         code: 'LIEN-KET-MOMO',

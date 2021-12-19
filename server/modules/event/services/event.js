@@ -38,8 +38,8 @@ export class EventService {
       attributes: Event.baseAttibutes,
       where: Event.whereCondition(user, params),
       order: [
-        ['from', 'DESC'],
-        ['to', 'DESC'],
+        ['to', 'ASC'],
+        ['from', 'ASC'],
       ],
     });
   }
