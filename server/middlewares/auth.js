@@ -1,5 +1,6 @@
 import passport from 'passport';
 import { ExtractJwt } from 'passport-jwt';
+import _ from 'lodash';
 import errorFactory from '../errors/ErrorFactory';
 import RedisService from '../helpers/Redis';
 import { roleRights } from '../config';
@@ -16,6 +17,8 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
     await RedisService.removeAccessToken(user.id, token);
     return reject(errorFactory.getError('ERR-0401'));
   }
+
+  const signedSocial = _.get(user, 'signedSocial', false);
 
   const [storedUser, sessionRole] = await Promise.all([
     User.findByPk(user.id),
@@ -42,6 +45,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
 
   user.sessionRole = sessionRole;
   user.role = storedUser.role;
+  user.signedSocial = signedSocial;
   req.user = user;
   resolve();
 };
