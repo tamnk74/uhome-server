@@ -58,7 +58,7 @@ export default class HotfixFee {
       return this.getBasicTimeFee(configuration, classFee, key, totalWorkingTime[key]);
     });
 
-    return sum(fees);
+    return this.numOfWorker * sum(fees);
   }
 
   getFee(configuration, classFee, teamConfiguration) {
@@ -89,7 +89,7 @@ export default class HotfixFee {
       basicFee +
       basicFee * configuration.workerFee +
       basicFee * distance * configuration.distance +
-      basicFee * this.numOfWorker * get(teamConfiguration, 'fee', 0)
+      basicFee * get(teamConfiguration, 'fee', 0)
     );
   }
 
