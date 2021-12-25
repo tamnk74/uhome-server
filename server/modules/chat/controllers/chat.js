@@ -125,7 +125,7 @@ export default class ChatController {
   static async postWebhook(req, res, next) {
     try {
       const { body: data } = req;
-      const channelSid = get(data, 'ChannelSid');
+      const channelSid = get(data, 'ChannelSid', get(data, 'ConversationSid', ''));
       const clientIdentity = get(data, 'ClientIdentity');
       const message = get(data, 'Body');
       await ChatService.handleWebhook({ channelSid, clientIdentity, message });
