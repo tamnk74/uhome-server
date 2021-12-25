@@ -41,11 +41,10 @@ export default class NormalFee {
   getFee(configuration, classFee, teamConfiguration) {
     const basicFee = this.getBasicFee(classFee);
     const workerFee = this.getWorkerFee(basicFee, configuration, teamConfiguration);
-    const customerFee = this.getCustomerFee(workerFee, configuration);
 
     return {
       workerFee: Math.ceil(workerFee / 1000) * 1000,
-      customerFee: Math.ceil(customerFee / 1000) * 1000,
+      customerFee: Math.ceil(workerFee / 1000) * 1000,
     };
   }
 
@@ -60,6 +59,26 @@ export default class NormalFee {
 
   // eslint-disable-next-line class-methods-use-this
   getCustomerFee(workerFee, configuration) {
+    return workerFee * configuration.customerFee + workerFee;
+  }
+
+  getTotalFee(basicWorkerFee, configuration) {
+    const workerFee = this.getTotalWorkerFee(basicWorkerFee, configuration);
+    const customerFee = this.getTotalCustomerFee(basicWorkerFee, configuration);
+
+    return {
+      workerFee: Math.ceil(workerFee / 1000) * 1000,
+      customerFee: Math.ceil(customerFee / 1000) * 1000,
+    };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getTotalWorkerFee(basicWorkerFee, configuration) {
+    return basicWorkerFee + basicWorkerFee * configuration.workerFee;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getTotalCustomerFee(workerFee, configuration) {
     return workerFee * configuration.customerFee + workerFee;
   }
 }

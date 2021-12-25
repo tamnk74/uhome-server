@@ -35,6 +35,8 @@ import Uploader from '../../../helpers/Uploader';
 import { fileSystemConfig } from '../../../config';
 import RequestSupporting from '../../../models/requestSupporting';
 import IssueEstimation from '../../../models/issueEstimation';
+import FeeFactory from '../../../helpers/fee/FeeFactory';
+import FeeConfiguration from '../../../models/feeConfiguration';
 
 const uploadPromotion = async (file) => {
   const id = uuidv4();
@@ -54,7 +56,7 @@ const uploadPromotion = async (file) => {
 const getIssueCost = async (receiveIssue) => {
   const { issueId, id } = receiveIssue;
 
-  const [materials, issueEstimation] = await Promise.all([
+  const [materials, issueEstimation, feeConfiguration] = await Promise.all([
     IssueMaterial.findAll({
       where: {
         issueId,
@@ -64,30 +66,39 @@ const getIssueCost = async (receiveIssue) => {
       where: {
         receiveIssueId: id,
       },
+      order: [['createdAt', 'DESC']],
     }),
+    FeeConfiguration.findOne({}),
   ]);
 
   const {
     workingTimes,
     numOfWorker = 0,
-    customerFee = 0,
     workerFee = 0,
     unit = unitTime.HOUR,
     discount = 0,
     totalTime = 0,
+    type,
   } = issueEstimation;
 
-  const [materialsCost] = await Promise.all([
-    materials.map((item) => ({
-      cost: item.cost,
-      material: item.material,
-    })),
-  ]);
+  let totalMaterialCost = 0;
+  const materialsCost = [];
+  for (let index = 0; index < materials.length; index++) {
+    const element = materials[index];
+    materialsCost.push({
+      cost: element.cost,
+      material: element.material,
+    });
+
+    totalMaterialCost += element.cost;
+  }
+
+  const fee = FeeFactory.getTotalFee(type, +workerFee, feeConfiguration);
 
   return {
     fee: {
-      customerFee: +customerFee,
-      workerFee: +workerFee,
+      customerFee: +fee.customerFee,
+      workerFee: +fee.workerFee,
       discount: +discount,
     },
     unit,
@@ -95,6 +106,7 @@ const getIssueCost = async (receiveIssue) => {
     workingTimes,
     numOfWorker: +numOfWorker,
     materials: materialsCost,
+    totalCost: fee.workerFee + totalMaterialCost - discount,
   };
 };
 
@@ -343,7 +355,8 @@ export default class ChatService {
     if (messageId) {
       await twilioClient.updateMessage(messageId, chatChannel.channelSid, messageData);
     } else {
-      await twilioClient.sendMessage(chatChannel.channelSid, messageData);
+      const message = await twilioClient.sendMessage(chatChannel.channelSid, messageData);
+      console.log(message);
     }
 
     notificationQueue.add('chat_notification', {
@@ -1075,6 +1088,7 @@ export default class ChatService {
 
   static async acceptPayment({ chatChannel, user, data }) {
     const { issue } = chatChannel;
+    const { messageSid } = data;
 
     const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
 
