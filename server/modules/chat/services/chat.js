@@ -1072,4 +1072,36 @@ export default class ChatService {
       await twilioClient.sendMessage(chatChannel.channelSid, messageData);
     }
   }
+
+  static async acceptPayment({ chatChannel, user, data }) {
+    const { issue } = chatChannel;
+
+    const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
+
+    const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
+      issue.id,
+      supporterIds
+    );
+
+    await Promise.all([
+      Issue.update(
+        {
+          status: issueStatus.WAITING_PAYMENT,
+        },
+        {
+          where: {
+            id: issue.id,
+          },
+        }
+      ),
+      receiveIssue.update({
+        status: issueStatus.WAITING_PAYMENT,
+      }),
+    ]);
+
+    set(data, 'issue.status', issueStatus.WAITING_PAYMENT);
+    await this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
+
+    return receiveIssue;
+  }
 }

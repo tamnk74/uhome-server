@@ -147,4 +147,17 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async acceptPayment(req, res, next) {
+    try {
+      const receiveIssue = await ChatService.acceptPayment({
+        user: req.user,
+        chatChannel: req.chatChannel,
+        data: req.body,
+      });
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
