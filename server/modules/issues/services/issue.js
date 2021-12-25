@@ -254,6 +254,7 @@ export default class IssueService {
     );
     data.fee.discount = saleEvent ? saleEvent.getDiscountValue(data.fee.customerFee || 0) : 0;
     set(data, 'issue.status', issue.status);
+
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
       user,

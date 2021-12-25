@@ -75,11 +75,10 @@ export default class HotfixFee {
     const endTime = dayjs(startTime).add(this.totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
     const basicFee = this.getBasicFee(configuration, classFee, startTime, endTime);
     const workerFee = this.getWorkerFee(basicFee, configuration, teamConfiguration, 0);
-    const customerFee = this.getCustomerFee(workerFee, configuration);
 
     return {
       workerFee: Math.ceil(workerFee / 1000) * 1000,
-      customerFee: Math.ceil(customerFee / 1000) * 1000,
+      customerFee: Math.ceil(workerFee / 1000) * 1000,
     };
   }
 
@@ -87,15 +86,9 @@ export default class HotfixFee {
   getWorkerFee(basicFee, configuration, teamConfiguration, distance = 0) {
     return (
       basicFee +
-      basicFee * configuration.workerFee +
       basicFee * distance * configuration.distance +
       basicFee * get(teamConfiguration, 'fee', 0)
     );
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getCustomerFee(workerFee, configuration) {
-    return workerFee * configuration.customerFee + workerFee;
   }
 
   getWorkingTimes(startTime, endTime) {
@@ -168,5 +161,25 @@ export default class HotfixFee {
     });
 
     return timeWorking;
+  }
+
+  getTotalFee(basicWorkerFee, configuration) {
+    const workerFee = this.getTotalWorkerFee(basicWorkerFee, configuration);
+    const customerFee = this.getTotalCustomerFee(workerFee, configuration);
+
+    return {
+      workerFee: Math.ceil(workerFee / 1000) * 1000,
+      customerFee: Math.ceil(customerFee / 1000) * 1000,
+    };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getTotalWorkerFee(basicWorkerFee, configuration) {
+    return basicWorkerFee + basicWorkerFee * configuration.workerFee;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getTotalCustomerFee(workerFee, configuration) {
+    return workerFee * configuration.customerFee + workerFee;
   }
 }

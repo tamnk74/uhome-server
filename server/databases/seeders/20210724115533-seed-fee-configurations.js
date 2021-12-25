@@ -3,8 +3,8 @@ const FeeConfiguration = require('../../models/feeConfiguration');
 module.exports = {
   up: async () => {
     const data = {
-      workerFee: 0,
-      customerFee: 0.1,
+      workerFee: 0.1,
+      customerFee: 0,
       distance: 0.1,
       nightTime: 0.5,
       urgentTime: 1,
@@ -12,13 +12,12 @@ module.exports = {
       experienceFee: 0.95,
     };
 
-    const [feeConfiguration, created] = await FeeConfiguration.findOrCreate({
-      where: {},
-      defaults: data,
-    });
+    const feeConfiguration = await FeeConfiguration.findOne();
 
-    if (!created) {
+    if (feeConfiguration) {
       await feeConfiguration.update(data);
+    } else {
+      await FeeConfiguration.create(data);
     }
 
     return Promise.resolve();

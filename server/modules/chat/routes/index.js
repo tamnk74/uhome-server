@@ -112,4 +112,6 @@ router.post(
   ChatController.addPromotion
 );
 
+// router.post('/chat/:channelId/payments', auth(), active, verifyChannel, ChatController.payment);
+
 export default router;
