@@ -46,5 +46,11 @@
     "error": "Need to resolve another issue",
     "title": "Need to resolve another issue",
     "detail": "Need to resolve another issue"
+  },
+  "ISSUE-0415": {
+    "status": 400,
+    "error": "Your location must be in Da Nang, Quang Nam",
+    "title": "Your location must be in Da Nang, Quang Nam",
+    "detail": "Your location must be in Da Nang, Quang Nam"
   }
 }

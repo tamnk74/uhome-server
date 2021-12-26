@@ -20,6 +20,7 @@ import {
   updateIssueSchema,
   requestSupportSchema,
 } from '../schema';
+import { verifyLocation } from '../middlewares/verifyLocation';
 
 const router = Router();
 
@@ -29,6 +30,7 @@ router.post(
   active,
   validator(createIssueSchema),
   verifyAttachments,
+  verifyLocation,
   verifySaleEvent,
   verifyPhoneNumber,
   IssueController.create
