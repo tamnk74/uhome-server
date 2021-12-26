@@ -346,7 +346,7 @@ export default class IssueService {
       type: 'command',
       commandName: command,
       data,
-      actor: actor.toJSON(),
+      actor: actor.toChatActor(),
       isContinuing: data.isContinuing || false,
       is_expired: false,
     };

@@ -160,4 +160,16 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async finish(req, res, next) {
+    try {
+      const receiveIssue = await ChatService.finish({
+        user: req.user,
+        chatChannel: req.chatChannel,
+      });
+      return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

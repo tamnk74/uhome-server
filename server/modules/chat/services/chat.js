@@ -37,6 +37,7 @@ import RequestSupporting from '../../../models/requestSupporting';
 import IssueEstimation from '../../../models/issueEstimation';
 import FeeFactory from '../../../helpers/fee/FeeFactory';
 import FeeConfiguration from '../../../models/feeConfiguration';
+import Acceptance from '../../../models/acceptance';
 
 const uploadPromotion = async (file) => {
   const id = uuidv4();
@@ -90,7 +91,7 @@ const getIssueCost = async (receiveIssue) => {
       material: element.material,
     });
 
-    totalMaterialCost += element.cost;
+    totalMaterialCost += +element.cost;
   }
 
   const fee = FeeFactory.getTotalFee(type, +workerFee, feeConfiguration);
@@ -100,13 +101,14 @@ const getIssueCost = async (receiveIssue) => {
       customerFee: +fee.customerFee,
       workerFee: +fee.workerFee,
       discount: +discount,
+      totalAmount: fee.workerFee + totalMaterialCost - discount,
+      amountIntoWallet: +fee.workerFee - workerFee,
     },
     unit,
     totalTime: +totalTime,
     workingTimes,
     numOfWorker: +numOfWorker,
     materials: materialsCost,
-    totalCost: fee.workerFee + totalMaterialCost - discount,
   };
 };
 
@@ -278,10 +280,11 @@ export default class ChatService {
     const { issue } = chatChannel;
 
     let data = {};
-    set(data, 'issue.status', issue.status);
+    let receiveIssue = null;
+    let estimationMessage = null;
 
     if (type === command.REQUEST_ACCEPTANCE) {
-      const [receiveIssue, estimationMessage] = await Promise.all([
+      [receiveIssue, estimationMessage] = await Promise.all([
         ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(issue.id, supporterIds),
         EstimationMessage.findByChannelIdAndStatus(chatChannel.id, estimationMessageStatus.WAITING),
       ]);
@@ -308,12 +311,29 @@ export default class ChatService {
           }
         ),
       ]);
-      set(data, 'issue.status', issueStatus.WAITING_VERIFY);
     }
 
-    await this.sendMessage(type, chatChannel, user, null, data);
+    set(data, 'issue.status', get(receiveIssue, 'status', get(issue, 'status')));
 
-    return ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
+    const message = await this.sendMessage(type, chatChannel, user, null, data);
+    receiveIssue =
+      receiveIssue || (await ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds));
+
+    if (type === command.REQUEST_ACCEPTANCE) {
+      await Acceptance.updateOrCreate(
+        {
+          receiveIssueId: receiveIssue.id,
+        },
+        {
+          messageSid: message.sid,
+          channelId: chatChannel.id,
+          status: issueStatus.WAITING_VERIFY,
+          data,
+        }
+      );
+    }
+
+    return receiveIssue;
   }
 
   static async sendMessage(commandName, chatChannel, user, messageId = null, data = {}) {
@@ -337,7 +357,7 @@ export default class ChatService {
       type: 'command',
       commandName,
       data,
-      actor: actor.toJSON(),
+      actor: actor.toChatActor(),
       isContinuing: data.isContinuing || false,
       is_expired: false,
     };
@@ -351,12 +371,16 @@ export default class ChatService {
       body: message,
       attributes: JSON.stringify(objectToSnake(messageAttributes)),
     };
+    let messageTwilio = null;
 
     if (messageId) {
-      await twilioClient.updateMessage(messageId, chatChannel.channelSid, messageData);
+      messageTwilio = await twilioClient.updateMessage(
+        messageId,
+        chatChannel.channelSid,
+        messageData
+      );
     } else {
-      const message = await twilioClient.sendMessage(chatChannel.channelSid, messageData);
-      console.log(message);
+      messageTwilio = await twilioClient.sendMessage(chatChannel.channelSid, messageData);
     }
 
     notificationQueue.add('chat_notification', {
@@ -365,6 +389,8 @@ export default class ChatService {
       message,
       commandName,
     });
+
+    return messageTwilio;
   }
 
   /**
@@ -417,6 +443,12 @@ export default class ChatService {
     }
 
     const receiveIssue = await ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
+    await IssueEstimation.destroy({
+      where: {
+        receiveIssueId: receiveIssue.id,
+      },
+      force: true,
+    });
 
     await Promise.all([
       receiveIssue.update({ status: issueStatus.IN_PROGRESS }),
@@ -573,21 +605,31 @@ export default class ChatService {
     return ReceiveIssue.findBySupporterIds(issue.id, supporterIds);
   }
 
-  static async setRating({ chatChannel, user, data }) {
+  static async finish({ chatChannel, user }) {
     const { issue } = chatChannel;
-    const { rate, comment = '', messageSid } = data;
 
-    const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
+    const [supporterIds, acceptance] = await Promise.all([
+      ChatMember.getSupporterIds(chatChannel.id),
+      Acceptance.findOne({
+        where: {
+          channelId: chatChannel.id,
+        },
+      }),
+    ]);
 
     const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
       issue.id,
       supporterIds
     );
 
-    const { totalTime, customerFee, workerFee, discount } = await ChatService.finishIssue({
+    const acceptanceData = get(acceptance, 'data', {});
+    const comment = get(acceptanceData, 'comment');
+    const rate = get(acceptanceData, 'rate');
+
+    await ChatService.finishIssue({
       user,
       receiveIssue,
-      rate,
+      acceptanceData,
       method: issue.paymentMethod,
     });
 
@@ -604,11 +646,11 @@ export default class ChatService {
       ),
       receiveIssue.update({
         status: issueStatus.DONE,
-        rating: rate,
-        time: totalTime,
-        customerFee,
-        workerFee,
-        discount,
+        rating: get(acceptanceData, 'rate', 0),
+        time: get(acceptanceData, 'totalTime', 0),
+        customerFee: get(acceptanceData, 'fee.customerFee', 0),
+        workerFee: get(acceptanceData, 'fee.workerFee', 0),
+        discount: get(acceptanceData, 'fee.discount', 0),
       }),
       comment
         ? ReceiveIssueComment.create({
@@ -645,8 +687,15 @@ export default class ChatService {
       await ChatService.checkSaleEvent({ user, receiveIssue, issue });
     }
 
-    set(data, 'issue.status', receiveIssue.status);
-    await this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
+    set(acceptanceData, 'issue.status', receiveIssue.status);
+
+    await Promise.all([
+      this.sendMessage(command.COMPLETED, chatChannel, user, acceptance.messageSid, acceptanceData),
+      acceptance.update({
+        data: acceptanceData,
+        status: issueStatus.DONE,
+      }),
+    ]);
 
     return receiveIssue;
   }
@@ -850,45 +899,29 @@ export default class ChatService {
     return ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
   }
 
-  static async finishIssue({ user, receiveIssue, rate, method }) {
-    const { issueId, issue_estimations: issueEstimations = [] } = receiveIssue;
-    let customerFee = 0;
-    let workerFee = 0;
-    let discount = 0;
-    const workingTimes = [];
-    let totalTime = 0;
-    let unit = unitTime.HOUR;
-
-    await issueEstimations.forEach((item) => {
-      customerFee += item.customerFee;
-      workerFee += item.workerFee;
-      discount += item.discount || 0;
-      workingTimes.push(...item.workingTimes);
-      totalTime += item.totalTime;
-      unit = item.unitTime;
-    });
-
+  static async finishIssue({ user, receiveIssue, acceptanceData, method }) {
+    const { issueId } = receiveIssue;
     const extra = {
-      workingTimes,
-      totalTime,
-      unitTime: unit,
+      workingTimes: get(acceptanceData, 'workingTimes', []),
+      totalTime: get(acceptanceData, 'totalTime', 0),
+      unitTime: get(acceptanceData, 'unit', 0),
     };
-    const sumCost = await IssueMaterial.sumCost(issueId, receiveIssue.userId);
-
-    const total = customerFee + sumCost - discount;
+    const totalAmount = get(acceptanceData, 'fee.totalAmount', 0);
+    const rate = get(acceptanceData, 'rate', 0);
+    const amountIntoWallet = get(acceptanceData, 'fee.amountIntoWallet', 0);
 
     const transactionHistories = [
       {
         id: uuidv4(),
         userId: receiveIssue.userId,
-        amount: customerFee + sumCost,
-        discount,
-        total,
+        amount: totalAmount,
+        discount: get(acceptanceData, 'fee.workerDiscount', 0),
+        total: totalAmount,
         issueId,
         type: transactionType.WAGE,
         extra: {
           ...extra,
-          systemFee: customerFee - workerFee,
+          systemFee: amountIntoWallet,
         },
         actorId: user.id,
         method,
@@ -896,7 +929,9 @@ export default class ChatService {
       {
         id: uuidv4(),
         userId: user.id,
-        amount: workerFee + sumCost,
+        amount: totalAmount,
+        total: totalAmount,
+        discount: get(acceptanceData, 'fee.discount', 0),
         issueId,
         type: transactionType.PAY,
         extra,
@@ -911,8 +946,8 @@ export default class ChatService {
           {
             accountBalance:
               method === paymentMethod.MOMO
-                ? Sequelize.literal(`account_balance + ${workerFee + sumCost}`)
-                : Sequelize.literal(`account_balance - ${customerFee - workerFee}`),
+                ? Sequelize.literal(`account_balance + ${totalAmount - amountIntoWallet}`)
+                : Sequelize.literal(`account_balance - ${amountIntoWallet}`),
             totalIssueCompleted: Sequelize.literal(`total_issue_completed + 1`),
             totalRating: Sequelize.literal(`total_rating + ${rate}`),
             reliability: Sequelize.literal(
@@ -929,7 +964,7 @@ export default class ChatService {
         method === paymentMethod.MOMO
           ? UserProfile.update(
               {
-                accountBalance: Sequelize.literal(`account_balance - ${total}`),
+                accountBalance: Sequelize.literal(`account_balance - ${totalAmount}`),
               },
               {
                 where: {
@@ -944,13 +979,6 @@ export default class ChatService {
         }),
       ]);
     });
-
-    return {
-      totalTime,
-      customerFee,
-      workerFee,
-      discount,
-    };
   }
 
   static async joinChat(user, { issueId }) {
@@ -1088,9 +1116,16 @@ export default class ChatService {
 
   static async acceptPayment({ chatChannel, user, data }) {
     const { issue } = chatChannel;
-    const { messageSid } = data;
+    const { rate, comment = '', messageSid } = data;
 
-    const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
+    const [supporterIds, acceptance] = await Promise.all([
+      ChatMember.getSupporterIds(chatChannel.id),
+      Acceptance.findOne({
+        where: {
+          channelId: chatChannel.id,
+        },
+      }),
+    ]);
 
     const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
       issue.id,
@@ -1113,8 +1148,18 @@ export default class ChatService {
       }),
     ]);
 
-    set(data, 'issue.status', issueStatus.WAITING_PAYMENT);
-    await this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, data);
+    const acceptanceData = get(acceptance, 'data', {});
+    set(acceptanceData, 'rate', rate);
+    set(acceptanceData, 'comment', comment);
+    set(acceptanceData, 'issue.status', issueStatus.WAITING_PAYMENT);
+
+    await Promise.all([
+      this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, acceptanceData),
+      acceptance.update({
+        data: acceptanceData,
+        status: issueStatus.WAITING_PAYMENT,
+      }),
+    ]);
 
     return receiveIssue;
   }
