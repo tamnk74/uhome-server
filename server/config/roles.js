@@ -30,6 +30,7 @@ const allRoles = {
     'updatedProgress',
     'joinChat',
     'changeSessionRole',
+    'complete',
   ],
 };
 

@@ -231,4 +231,8 @@ User.prototype.toJSON = function toJSON() {
   return values;
 };
 
+User.prototype.toChatActor = function toChatActor() {
+  return _.pick(this, ['id', 'name', 'avatar']);
+};
+
 module.exports = User;

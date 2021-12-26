@@ -16,7 +16,8 @@
 		"added_more_information": "Tôi thêm thông tin hình ảnh",
 		"canceled": "Tôi muốn tìm kiếm 1 thợ khác",
 		"added_promotion": "Tôi gởi một số hình ảnh",
-		"update_progresss": "chat.update_progresss"
+		"update_progresss": "chat.update_progresss",
+		"completed": "chat.completed"
 	},
 	"otp": {
 		"branch": "U-HOME",

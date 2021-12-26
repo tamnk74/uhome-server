@@ -15,6 +15,7 @@ export const command = Object.freeze({
   ADDED_MORE_INFORMATION: 'ADDED_MORE_INFORMATION',
   CANCELED: 'CANCELED',
   ADDED_PROMOTION: 'ADDED_PROMOTION',
+  COMPLETED: 'COMPLETED',
 });
 
 export const commandMessage = Object.freeze({
@@ -34,6 +35,7 @@ export const commandMessage = Object.freeze({
   ADDED_MORE_INFORMATION: 'chat.added_more_information',
   CANCELED: 'chat.canceled',
   ADDED_PROMOTION: 'chat.added_promotion',
+  COMPLETED: 'chat.completed',
 });
 
 export const commandRequests = [
@@ -64,6 +66,7 @@ export const notificationMessage = Object.freeze({
   CANCELED: 'notification.canceled',
   NEW_MESSAGE: 'notification.new_message',
   ADDED_PROMOTION: 'notification.added_promotion',
+  COMPLETED: 'notification.completed',
 });
 
 export const estimationMessageStatus = Object.freeze({

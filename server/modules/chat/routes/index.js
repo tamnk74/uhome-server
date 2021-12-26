@@ -10,7 +10,12 @@ import {
   acceptanceIssueSchema,
   continueChattingchema,
 } from '../schema';
-import { verifyChannel, verifyRequestType, isAllowCreateGroupChat } from '../middlewares';
+import {
+  verifyChannel,
+  verifyRequestType,
+  isAllowCreateGroupChat,
+  isValidCompletion,
+} from '../middlewares';
 
 const router = Router();
 
@@ -112,6 +117,13 @@ router.post(
   ChatController.addPromotion
 );
 
-// router.post('/chat/:channelId/payments', auth(), active, verifyChannel, ChatController.payment);
+router.post(
+  '/chat/:channelId/completions',
+  auth('complete'),
+  active,
+  verifyChannel,
+  isValidCompletion,
+  ChatController.finish
+);
 
 export default router;
