@@ -653,6 +653,7 @@ export default class ChatService {
         data: acceptanceData,
         status: issueStatus.DONE,
       }),
+      this.sendMessage(command.CONFIRMED_PAYMENT, chatChannel, user, null, acceptanceData),
     ]);
 
     return receiveIssue;
