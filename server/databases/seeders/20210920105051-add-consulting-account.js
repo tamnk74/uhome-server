@@ -11,7 +11,7 @@ module.exports = {
       {
         id: uuidv4(),
         name: 'Consulting',
-        phone_number: '9999999999',
+        phone_number: '999999999',
         password,
         role: roles.CONSULTING,
         status: 1,
@@ -39,7 +39,7 @@ module.exports = {
     await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true });
     await User.destroy({
       where: {
-        phoneNumber: '0799999999',
+        phoneNumber: '999999999',
       },
       force: true,
     });
