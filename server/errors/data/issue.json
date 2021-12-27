@@ -52,5 +52,11 @@
     "error": "Your location must be in Da Nang, Quang Nam",
     "title": "Your location must be in Da Nang, Quang Nam",
     "detail": "Your location must be in Da Nang, Quang Nam"
+  },
+  "ISSUE-0416": {
+    "status": 400,
+    "error": "Please update your location",
+    "title": "Please update your location",
+    "detail": "Please update your location"
   }
 }

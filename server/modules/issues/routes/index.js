@@ -11,6 +11,7 @@ import {
   verifyCategory,
   verifySaleEvent,
   verifyPhoneNumber,
+  verifyWorkerLocation,
 } from '../middlewares';
 import {
   createIssueSchema,
@@ -48,6 +49,7 @@ router.post(
   '/issues/:issueId/request-supportings',
   auth('requestSupport'),
   verified,
+  verifyWorkerLocation,
   isFinished,
   validator(requestSupportSchema),
   verifyPhoneNumber,
