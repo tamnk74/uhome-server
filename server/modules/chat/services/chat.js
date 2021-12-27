@@ -277,63 +277,21 @@ export default class ChatService {
 
   static async requestCommand(type, chatChannel, user) {
     const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
+    const data = {};
     const { issue } = chatChannel;
-
-    let data = {};
-    let receiveIssue = null;
-    let estimationMessage = null;
-
-    if (type === command.REQUEST_ACCEPTANCE) {
-      [receiveIssue, estimationMessage] = await Promise.all([
-        ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(issue.id, supporterIds),
-        EstimationMessage.findByChannelIdAndStatus(chatChannel.id, estimationMessageStatus.WAITING),
-      ]);
-
-      if (!isNil(estimationMessage)) {
-        throw new Error('ISSUE-0413');
-      }
-
-      Object.assign(receiveIssue, {
-        status: issueStatus.WAITING_VERIFY,
-      });
-
-      [data] = await Promise.all([
-        getIssueCost(receiveIssue),
-        receiveIssue.save(),
-        Issue.update(
-          {
-            status: issueStatus.WAITING_VERIFY,
-          },
-          {
-            where: {
-              id: chatChannel.issue.id,
-            },
-          }
-        ),
-      ]);
+    switch (type) {
+      case command.REQUEST_ACCEPTANCE:
+        return this.requestAcceptance(chatChannel, user);
+      case command.REQUEST_CONFIRM_PAYMENT:
+        await this.requestConfirmPayment(chatChannel, user);
+        break;
+      default:
+        set(data, 'issue.status', get(issue, 'status'));
+        await this.sendMessage(type, chatChannel, user, null, data);
+        break;
     }
 
-    set(data, 'issue.status', get(receiveIssue, 'status', get(issue, 'status')));
-
-    const message = await this.sendMessage(type, chatChannel, user, null, data);
-    receiveIssue =
-      receiveIssue || (await ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds));
-
-    if (type === command.REQUEST_ACCEPTANCE) {
-      await Acceptance.updateOrCreate(
-        {
-          receiveIssueId: receiveIssue.id,
-        },
-        {
-          messageSid: message.sid,
-          channelId: chatChannel.id,
-          status: issueStatus.WAITING_VERIFY,
-          data,
-        }
-      );
-    }
-
-    return receiveIssue;
+    return ReceiveIssue.findBySupporterIds(issue.id, supporterIds);
   }
 
   static async sendMessage(commandName, chatChannel, user, messageId = null, data = {}) {
@@ -1162,5 +1120,81 @@ export default class ChatService {
     ]);
 
     return receiveIssue;
+  }
+
+  static async requestAcceptance(chatChannel, user) {
+    const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
+    const { issue } = chatChannel;
+
+    const [receiveIssue, estimationMessage] = await Promise.all([
+      ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(issue.id, supporterIds),
+      EstimationMessage.findByChannelIdAndStatus(chatChannel.id, estimationMessageStatus.WAITING),
+    ]);
+
+    if (!isNil(estimationMessage)) {
+      throw new Error('ISSUE-0413');
+    }
+
+    Object.assign(receiveIssue, {
+      status: issueStatus.WAITING_VERIFY,
+    });
+
+    const [data] = await Promise.all([
+      getIssueCost(receiveIssue),
+      receiveIssue.save(),
+      Issue.update(
+        {
+          status: issueStatus.WAITING_VERIFY,
+        },
+        {
+          where: {
+            id: issue.id,
+          },
+        }
+      ),
+    ]);
+
+    set(data, 'issue.status', get(receiveIssue, 'status', get(issue, 'status')));
+
+    const message = await this.sendMessage(
+      command.REQUEST_ACCEPTANCE,
+      chatChannel,
+      user,
+      null,
+      data
+    );
+
+    await Acceptance.updateOrCreate(
+      {
+        receiveIssueId: receiveIssue.id,
+      },
+      {
+        messageSid: message.sid,
+        channelId: chatChannel.id,
+        status: issueStatus.WAITING_VERIFY,
+        data,
+      }
+    );
+
+    return receiveIssue;
+  }
+
+  static async requestConfirmPayment(chatChannel, user) {
+    const { issue } = chatChannel;
+    const acceptance = await Acceptance.findOne({
+      where: {
+        channelId: chatChannel.id,
+      },
+    });
+
+    const acceptanceData = get(acceptance, 'data', {});
+    set(acceptanceData, 'issue.status', get(issue, 'status'));
+    await this.sendMessage(
+      command.REQUEST_CONFIRM_PAYMENT,
+      chatChannel,
+      user,
+      null,
+      acceptanceData
+    );
   }
 }

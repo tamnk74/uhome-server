@@ -40,5 +40,11 @@
     "error": "Issue have an estimation need to approve",
     "title": "Issue have an estimation need to approve",
     "detail": "Issue have an estimation need to approve"
+  },
+  "ISSUE-0414": {
+    "status": 400,
+    "error": "Need to resolve another issue",
+    "title": "Need to resolve another issue",
+    "detail": "Need to resolve another issue"
   }
 }

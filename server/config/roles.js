@@ -31,6 +31,7 @@ const allRoles = {
     'joinChat',
     'changeSessionRole',
     'complete',
+    'requestConfirmPayment',
   ],
 };
 

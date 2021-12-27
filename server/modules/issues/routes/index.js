@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import IssueController from '../controllers/issue';
-import { auth, validator, active, verified } from '../../../middlewares';
+import { auth, validator, active, verified, isFinished } from '../../../middlewares';
 import {
   verifyAttachments,
   verifyIssue,
@@ -46,6 +46,7 @@ router.post(
   '/issues/:issueId/request-supportings',
   auth('requestSupport'),
   verified,
+  isFinished,
   validator(requestSupportSchema),
   verifyPhoneNumber,
   verifyIssue,
@@ -73,6 +74,7 @@ router.delete(
   '/issues/:issueId/request-supportings',
   auth('cancelSupport'),
   active,
+  isFinished,
   verifyIssue,
   IssueController.cancelRequestSupporting
 );

@@ -81,8 +81,8 @@ export default class NotificationService {
       const tokens = [];
       const actor = issue.creator;
       const notification = {
-        title: Notification.getTitle('notfication.new_issue', { title: issue.title }),
-        body: Notification.getTitle('notfication.new_issue', { title: issue.title }),
+        title: Notification.getTitle('notification.new_issue', { title: issue.title }),
+        body: Notification.getTitle('notification.new_issue', { title: issue.title }),
       };
       const data = {
         type: notificationType.newIssue,
@@ -140,8 +140,8 @@ export default class NotificationService {
       const actor = supporting.user;
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: Notification.getTitle('notfication.request_support', { title: issue.title }),
-        body: Notification.getTitle('notfication.request_support', { title: issue.title }),
+        title: Notification.getTitle('notification.request_support', { title: issue.title }),
+        body: Notification.getTitle('notification.request_support', { title: issue.title }),
       };
       const data = {
         type: notificationType.requestSupporting,
@@ -180,8 +180,8 @@ export default class NotificationService {
       ]);
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: Notification.getTitle('notfication.cancel', { title: issue.title }),
-        body: Notification.getTitle('notfication.cancel', { title: issue.title }),
+        title: Notification.getTitle('notification.cancel', { title: issue.title }),
+        body: Notification.getTitle('notification.cancel', { title: issue.title }),
       };
       const data = {
         type: notificationType.cancelRequestSupport,
@@ -221,8 +221,8 @@ export default class NotificationService {
       ]);
       const tokens = subscriptions.map((item) => item.token);
       const notification = {
-        title: Notification.getTitle('notfication.cancel', { title: issue.title }),
-        body: Notification.getTitle('notfication.cancel', { title: issue.title }),
+        title: Notification.getTitle('notification.cancel', { title: issue.title }),
+        body: Notification.getTitle('notification.cancel', { title: issue.title }),
       };
       const data = {
         type: notificationType.cancelSupport,

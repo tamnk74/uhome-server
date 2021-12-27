@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import ChatController from '../controllers/chat';
-import { auth, validator, active } from '../../../middlewares';
+import { auth, validator, active, isFinished } from '../../../middlewares';
 import {
   createChatSchema,
   approveEstimateTimeSchema,
@@ -32,6 +32,7 @@ router.post(
   active,
   validator(createChatSchema),
   isAllowCreateGroupChat,
+  isFinished,
   ChatController.create
 );
 
