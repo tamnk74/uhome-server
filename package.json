@@ -46,6 +46,7 @@
     "@": "./server"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.3.4",
     "@sentry/node": "^6.3.5",
     "aws-sdk": "^2.863.0",
     "axios": "^0.21.1",

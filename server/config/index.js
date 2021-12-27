@@ -32,3 +32,7 @@ export const appPassword = process.env.APP_PASSWORD || '';
 export const otpLength = parseInt(process.env.SMS_OTP_LENGTH, 10) || 4;
 export const maximumReuestOtpPerDay = parseInt(process.env.MAXIMUM_REQUEST_OTP_PER_DAY, 10) || 5;
 export const maximumReuestOtpPerHour = parseInt(process.env.MAXIMUM_REQUEST_OTP_PER_HOUR, 10) || 5;
+
+export const googleAPIConfig = {
+  key: process.env.GOOGLE_API_KEY || '',
+};
