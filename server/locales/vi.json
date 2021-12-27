@@ -16,8 +16,9 @@
 		"added_more_information": "Tôi thêm thông tin hình ảnh",
 		"canceled": "Tôi muốn tìm kiếm 1 thợ khác",
 		"added_promotion": "Tôi gởi một số hình ảnh",
-		"update_progresss": "chat.update_progresss",
-		"completed": "chat.completed"
+		"update_progresss": "Tôi gởi một số hình ảnh",
+		"completed": "Hoàn thành công việc",
+		"request_confirm_payment": "Yêu cầu xác nhận thanh toán"
 	},
 	"otp": {
 		"branch": "U-HOME",
@@ -44,6 +45,8 @@
 		"new_issue": "Công việc {{title}} cần hỗ trợ.",
 		"cancel": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
 		"new_message": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
-		"added_promotion": "Công việc {{title}} đã cập nhật. Hãy kiểm tra."
+		"added_promotion": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
+		"completed": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
+		"request_confirm_payment": "Bạn có một yêu cầu xác nhận thanh toán công việc"
 	}
 }
