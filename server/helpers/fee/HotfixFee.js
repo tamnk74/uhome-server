@@ -63,7 +63,6 @@ export default class HotfixFee {
 
   getFee(configuration, classFee, teamConfiguration) {
     const workingTime = first(this.workingTimes);
-
     if (isEmpty(workingTime)) {
       return {
         workerFee: 0,
@@ -73,6 +72,7 @@ export default class HotfixFee {
 
     const startTime = dayjs(workingTime.startTime).tz('Asia/Ho_Chi_Minh');
     const endTime = dayjs(startTime).add(this.totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
+
     const basicFee = this.getBasicFee(configuration, classFee, startTime, endTime);
     const workerFee = this.getWorkerFee(basicFee, configuration, teamConfiguration, 0);
 
@@ -93,6 +93,7 @@ export default class HotfixFee {
 
   getWorkingTimes(startTime, endTime) {
     const workingTimes = this.generateMatrixWorkingTime(startTime, endTime);
+
     const workingRangeTimes = workingTimes.map((item) =>
       this.getWorkingTime(item.startTime, item.endTime)
     );
@@ -105,15 +106,10 @@ export default class HotfixFee {
     let tmpStartTime = starTime.clone();
     let tmpToTime = endTime.clone();
     const workingsTime = workingTime[type];
-
     const ranges = workingsTime.map((workHour) => {
       tmpStartTime = tmpStartTime.set('hour', workHour.from).startOf('hour');
       tmpToTime = tmpToTime.set('hour', workHour.to).startOf('hour');
-
-      if (
-        starTime.isBetween(tmpStartTime, tmpToTime, 'minute', '[)') ||
-        endTime.isBetween(tmpStartTime, tmpToTime, 'minute', '(]')
-      ) {
+      if (starTime.isBefore(tmpToTime, 'minute') && tmpStartTime.isBefore(endTime, 'minute')) {
         if (endTime.isBefore(tmpToTime, 'minute')) {
           tmpToTime = endTime;
         }
@@ -121,7 +117,7 @@ export default class HotfixFee {
         if (starTime.isAfter(tmpStartTime, 'minute')) {
           tmpStartTime = starTime;
         }
-
+        starTime = tmpToTime;
         return tmpToTime.diff(tmpStartTime, 'hour', true);
       }
 

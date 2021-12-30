@@ -25,7 +25,7 @@ export default class NormalFee {
       total += (classFee.normalCost / 8) * (element > 8 ? 8 : element);
     }
 
-    return total;
+    return total * this.numOfWorker;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -52,7 +52,7 @@ export default class NormalFee {
   getWorkerFee(basicFee, configuration, teamConfiguration, distance = 0) {
     return (
       basicFee +
-      basicFee * this.numOfWorker * get(teamConfiguration, 'fee', 0) +
+      basicFee * get(teamConfiguration, 'fee', 0) +
       basicFee * distance * configuration.distance
     );
   }

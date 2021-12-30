@@ -1,6 +1,6 @@
 import { Sequelize, Op } from 'sequelize';
 import dayjs from 'dayjs';
-import { first, isNil, sumBy, set } from 'lodash';
+import { get, isNil, sumBy, set } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
@@ -219,26 +219,28 @@ export default class IssueService {
     data.totalTime = +data.totalTime;
     data.numOfWorker = +data.numOfWorker;
     const { type, totalTime, workingTimes, numOfWorker } = data;
-    const category = first(issue.categories);
-    const [feeConfiguration, feeCategory, teamConfiguration, saleEvent] = await Promise.all([
+    const categories = get(issue, 'categories', []);
+    const categoriesId = categories.map((item) => item.id);
+    const [feeConfiguration, feeCategory, saleEvent] = await Promise.all([
       FeeConfiguration.findOne({}),
       FeeCategory.findOne({
         where: {
-          categoryId: category.id,
+          categoryId: categoriesId,
         },
-      }),
-      TeamFeeConfiguration.findOne({
-        where: {
-          categoryId: category.id,
-          minWorker: {
-            [Op.gte]: numOfWorker,
-          },
-        },
-        order: [['minWorker', 'ASC']],
+        order: [['max', 'DESC']],
       }),
       Event.findByPk(issue.eventId),
     ]);
 
+    const teamConfiguration = await TeamFeeConfiguration.findOne({
+      where: {
+        categoryId: feeCategory.categoryId,
+        minWorker: {
+          [Op.lte]: numOfWorker,
+        },
+      },
+      order: [['minWorker', 'DESC']],
+    });
     data.fee = FeeFactory.getFee(
       type,
       {
@@ -252,6 +254,7 @@ export default class IssueService {
         numOfWorker,
       }
     );
+    console.log(data.fee);
     data.fee.discount = saleEvent ? saleEvent.getDiscountValue(data.fee.customerFee || 0) : 0;
     set(data, 'issue.status', issue.status);
 
