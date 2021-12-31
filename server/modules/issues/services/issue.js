@@ -254,7 +254,7 @@ export default class IssueService {
         numOfWorker,
       }
     );
-    console.log(data.fee);
+
     data.fee.discount = saleEvent ? saleEvent.getDiscountValue(data.fee.customerFee || 0) : 0;
     set(data, 'issue.status', issue.status);
 
