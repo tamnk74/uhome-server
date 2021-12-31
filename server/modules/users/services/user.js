@@ -370,6 +370,7 @@ export default class Userervice {
 
     const result = await TransactionHistory.findAndCountAll({
       ...options,
+      order: [['createdAt', 'DESC']],
       limit,
       offset,
     });
