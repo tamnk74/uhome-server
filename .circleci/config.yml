@@ -50,7 +50,7 @@ jobs:
               cd ~/uhome-server
               cp .env backup.env
               git reset --hard HEAD
-              git pull origin develop
+              git pull origin qa
               ansible local -m copy -a 'src=deploy/secrets-qa.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
               ansible local -m copy -a 'src=deploy/apple-auth-qa.yaml dest=/home/$USER/uhome-server/AppleAuthKey.p8' --vault-password-file ~/.vault
               npm install
