@@ -46,7 +46,7 @@ jobs:
       - run:
           name: Deployment server over SSH
           command: |
-            ssh -oStrictHostKeyChecking=no -v $USER@$IP_QA"
+            ssh -oStrictHostKeyChecking=no -v $USER@$IP_QA "
               cd ~/uhome-server
               cp .env backup.env
               git reset --hard HEAD
@@ -58,13 +58,6 @@ jobs:
               npx sequelize db:migrate
               pm2 restart all
               pm2 status"
-      - slack/notify:
-          event: fail
-          mentions: '@channel'
-          template: basic_fail_1
-      - slack/notify:
-          event: pass
-          template: basic_success_1
   deploy-staging:
     machine:
       enabled: true
