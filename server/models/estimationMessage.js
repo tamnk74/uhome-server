@@ -105,6 +105,7 @@ EstimationMessage.baseAttributeOnData = () => [
   'totalTime',
   'numOfWorker',
   'workingTimes',
+  'totalAmount',
 ];
 
 module.exports = EstimationMessage;

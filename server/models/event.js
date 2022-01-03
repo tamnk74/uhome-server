@@ -172,7 +172,7 @@ Event.whereCondition = (user, params) => {
 };
 
 Event.prototype.getDiscount = function getDiscount(workerCost = 0, customerCost = 0) {
-  const eventScopes = _.get(this, 'eventScopes', []);
+  const eventScopes = _.get(this, 'EventScopes', []);
   const workerEvent = _.find(eventScopes, (o) => o.scope === userRoles.WORKER);
   const customerEvent = _.find(eventScopes, (o) => o.scope === userRoles.CUSTOMER);
 

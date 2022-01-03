@@ -58,6 +58,13 @@ jobs:
               npx sequelize db:migrate
               pm2 restart all
               pm2 status"
+      - slack/notify:
+          event: fail
+          mentions: '@channel'
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
   deploy-staging:
     machine:
       enabled: true
