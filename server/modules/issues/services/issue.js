@@ -264,7 +264,7 @@ export default class IssueService {
     );
     set(data, 'worker', cost.worker);
     set(data, 'customer', cost.customer);
-    const discount = saleEvent ? saleEvent.getDiscount(cost) : null;
+    const discount = saleEvent ? saleEvent.getDiscount(cost.worker.cost, cost.customer.cost) : null;
     set(data, 'worker.discount', get(discount, 'worker', 0));
     set(data, 'customer.discount', get(discount, 'customer', 0));
     set(data, 'issue.status', issue.status);
@@ -374,7 +374,6 @@ export default class IssueService {
     };
 
     const messageTwilio = await twilioClient.sendMessage(chatChannel.channelSid, messageData);
-
     notificationQueue.add('chat_notification', {
       chatChannelId: chatChannel.id,
       actorId: user.id,
