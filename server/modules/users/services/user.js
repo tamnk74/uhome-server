@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Op } from 'sequelize';
+import { Sequelize, Op } from 'sequelize';
 import { fileSystemConfig } from '../../../config';
 import Issue from '../../../models/issue';
 import Category from '../../../models/category';
@@ -96,7 +96,14 @@ export default class Userervice {
   static async getReceiveIssues(query) {
     const { limit, offset, userId } = query;
     const options = ReceiveIssue.buildOptionQuery(query);
-    options.where.userId = userId;
+    options.where = {
+      [Op.or]: [
+        {
+          userId,
+        },
+        Sequelize.literal(`\`issue\`.\`created_by\` = '${userId}'`),
+      ],
+    };
     return ReceiveIssue.findAndCountAll({
       ...options,
       include: [
