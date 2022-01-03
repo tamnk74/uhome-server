@@ -17,7 +17,6 @@ import {
   transactionType,
   paymentMethod,
   eventStatuses,
-  unitTime,
   estimationMessageStatus,
 } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
@@ -34,9 +33,6 @@ import EstimationMessage from '../../../models/estimationMessage';
 import Uploader from '../../../helpers/Uploader';
 import { fileSystemConfig } from '../../../config';
 import RequestSupporting from '../../../models/requestSupporting';
-import IssueEstimation from '../../../models/issueEstimation';
-import FeeFactory from '../../../helpers/fee/FeeFactory';
-import FeeConfiguration from '../../../models/feeConfiguration';
 import Acceptance from '../../../models/acceptance';
 
 const uploadPromotion = async (file) => {
@@ -54,33 +50,14 @@ const uploadPromotion = async (file) => {
   return { path: `${fileSystemConfig.clout_front}/${path}` };
 };
 
-const getIssueCost = async (receiveIssue) => {
-  const { issueId, id } = receiveIssue;
+const getIssueCost = async (receiveIssue, estimationMessage) => {
+  const { issueId } = receiveIssue;
 
-  const [materials, issueEstimation, feeConfiguration] = await Promise.all([
-    IssueMaterial.findAll({
-      where: {
-        issueId,
-      },
-    }),
-    IssueEstimation.findOne({
-      where: {
-        receiveIssueId: id,
-      },
-      order: [['createdAt', 'DESC']],
-    }),
-    FeeConfiguration.findOne({}),
-  ]);
-
-  const {
-    workingTimes,
-    numOfWorker = 0,
-    workerFee = 0,
-    unit = unitTime.HOUR,
-    discount = 0,
-    totalTime = 0,
-    type,
-  } = issueEstimation;
+  const materials = await IssueMaterial.findAll({
+    where: {
+      issueId,
+    },
+  });
 
   let totalMaterialCost = 0;
   const materialsCost = [];
@@ -94,21 +71,23 @@ const getIssueCost = async (receiveIssue) => {
     totalMaterialCost += +element.cost;
   }
 
-  const fee = FeeFactory.getTotalFee(type, +workerFee, feeConfiguration);
+  const estimationMessageData = get(estimationMessage, 'data', {});
+  const worker = get(estimationMessageData, 'worker', {});
+  const customer = get(estimationMessageData, 'customer', {});
+  const totalCost = customer.cost + totalMaterialCost;
+  const totalCustomerPay = totalCost - customer.discount - customer.fee;
+  const totalWorkerReceive = worker.cost + totalMaterialCost;
+  const amountIntoWalletWorker = totalWorkerReceive - totalCustomerPay - worker.fee;
+
+  set(worker, 'amountIntoWallet', amountIntoWalletWorker);
+  set(customer, 'amountIntoWallet', 0);
 
   return {
-    fee: {
-      customerFee: +fee.customerFee,
-      workerFee: +fee.workerFee,
-      discount: +discount,
-      totalAmount: fee.workerFee + totalMaterialCost - discount,
-      amountIntoWallet: +fee.workerFee - workerFee,
-    },
-    unit,
-    totalTime: +totalTime,
-    workingTimes,
-    numOfWorker: +numOfWorker,
+    ...estimationMessageData,
+    worker,
+    customer,
     materials: materialsCost,
+    totalAmount: totalCustomerPay,
   };
 };
 
@@ -359,54 +338,27 @@ export default class ChatService {
   static async approveEstimateTime({ chatChannel, user, data }) {
     const { messageSid } = data;
     const estimationMessage = await EstimationMessage.findByMessageSidOrFail(messageSid);
-    const isValid = isValidEstimation(data, estimationMessage, [
-      'workerFee',
-      'customerFee',
-      'discount',
-      'numOfWorker',
-      'totalTime',
-    ]);
-
-    if (!isValid) {
-      throw new Error('EST-0403');
-    }
 
     const [supporterIds, userProfile] = await Promise.all([
       ChatMember.getSupporterIds(chatChannel.id),
       UserProfile.findOne({ where: { userId: user.id } }),
     ]);
 
-    data.totalTime = +data.totalTime;
-    data.workerFee = +data.workerFee;
-    data.customerFee = +data.customerFee;
-    data.numOfWorker = +data.numOfWorker;
-    data.discount = +data.discount;
-    const {
-      workerFee,
-      customerFee,
-      numOfWorker,
-      totalTime,
-      unitTime: unit,
-      type,
-      discount,
-      workingTimes,
-    } = data;
+    const estimationData = get(estimationMessage, 'data', {});
+    const customerCost = get(estimationData, 'customer.cost', 0);
+    const customerDiscount = get(estimationData, 'customer.discount', 0);
+    const customerFee = get(estimationData, 'customer.fee', 0);
+
     const { issue } = chatChannel;
 
     if (
       issue.paymentMethod === paymentMethod.MOMO &&
-      userProfile.accountBalance < customerFee - discount
+      userProfile.accountBalance < customerCost + customerFee - customerDiscount
     ) {
       throw new Error('ISSUE-0411');
     }
 
     const receiveIssue = await ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
-    await IssueEstimation.destroy({
-      where: {
-        receiveIssueId: receiveIssue.id,
-      },
-      force: true,
-    });
 
     await Promise.all([
       receiveIssue.update({ status: issueStatus.IN_PROGRESS }),
@@ -423,36 +375,17 @@ export default class ChatService {
           },
         }
       ),
-      IssueEstimation.create({
-        receiveIssueId: receiveIssue.id,
-        totalTime,
-        unitTime: unit,
-        numOfWorker,
-        workerFee,
-        customerFee,
-        discount,
-        type,
-        workingTimes,
-      }),
       estimationMessage.update({ status: estimationMessageStatus.APPROVED }),
     ]);
 
-    data.fee = {
-      workerFee,
-      customerFee,
-      discount,
-    };
-    delete data.workerFee;
-    delete data.customerFee;
-    delete data.discount;
-    set(data, 'issue.status', receiveIssue.status);
+    set(estimationData, 'issue.status', receiveIssue.status);
 
     await this.sendMessage(
       command.APPROVAL_ESTIMATION_TIME,
       chatChannel,
       user,
-      data.messageSid,
-      data
+      messageSid,
+      estimationData
     );
 
     return receiveIssue;
@@ -575,10 +508,18 @@ export default class ChatService {
       }),
     ]);
 
-    const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
-      issue.id,
-      supporterIds
-    );
+    const [receiveIssue, estimationMessage] = await Promise.all([
+      ReceiveIssue.findBySupporterIds(issue.id, supporterIds),
+      EstimationMessage.findByChannelIdAndStatusAndType(
+        chatChannel.id,
+        estimationMessageStatus.APPROVED,
+        command.SUBMIT_ESTIMATION_TIME
+      ),
+    ]);
+
+    if (isNil(receiveIssue) || isEmpty(estimationMessage)) {
+      throw new Error('ISSUE-0412');
+    }
 
     const acceptanceData = get(acceptance, 'data', {});
     const comment = get(acceptanceData, 'comment');
@@ -606,9 +547,9 @@ export default class ChatService {
         status: issueStatus.DONE,
         rating: get(acceptanceData, 'rate', 0),
         time: get(acceptanceData, 'totalTime', 0),
-        customerFee: get(acceptanceData, 'fee.customerFee', 0),
-        workerFee: get(acceptanceData, 'fee.workerFee', 0),
-        discount: get(acceptanceData, 'fee.discount', 0),
+        customerFee: get(acceptanceData, 'totalAmount', 0),
+        workerFee: get(acceptanceData, 'totalAmount', 0),
+        discount: get(acceptanceData, 'customer.discount', 0),
       }),
       comment
         ? ReceiveIssueComment.create({
@@ -863,25 +804,23 @@ export default class ChatService {
     const extra = {
       workingTimes: get(acceptanceData, 'workingTimes', []),
       totalTime: get(acceptanceData, 'totalTime', 0),
-      unitTime: get(acceptanceData, 'unit', 0),
+      unitTime: get(acceptanceData, 'unitTime', 0),
     };
-    const totalAmount = get(acceptanceData, 'fee.totalAmount', 0);
+    const totalAmount = get(acceptanceData, 'totalAmount', 0);
     const rate = get(acceptanceData, 'rate', 0);
-    const amountIntoWallet = get(acceptanceData, 'fee.amountIntoWallet', 0);
+    const amountIntoWalletCustomer = get(acceptanceData, 'customer.amountIntoWallet', 0);
+    const amountIntoWalletWorker = get(acceptanceData, 'worker.amountIntoWallet', 0);
 
     const transactionHistories = [
       {
         id: uuidv4(),
         userId: receiveIssue.userId,
         amount: totalAmount,
-        discount: get(acceptanceData, 'fee.workerDiscount', 0),
+        discount: get(acceptanceData, 'worker.discount', 0),
         total: totalAmount,
         issueId,
         type: transactionType.WAGE,
-        extra: {
-          ...extra,
-          systemFee: amountIntoWallet,
-        },
+        extra,
         actorId: user.id,
         method,
       },
@@ -890,7 +829,7 @@ export default class ChatService {
         userId: user.id,
         amount: totalAmount,
         total: totalAmount,
-        discount: get(acceptanceData, 'fee.discount', 0),
+        discount: get(acceptanceData, 'customer.discount', 0),
         issueId,
         type: transactionType.PAY,
         extra,
@@ -905,8 +844,8 @@ export default class ChatService {
           {
             accountBalance:
               method === paymentMethod.MOMO
-                ? Sequelize.literal(`account_balance + ${totalAmount - amountIntoWallet}`)
-                : Sequelize.literal(`account_balance - ${amountIntoWallet}`),
+                ? Sequelize.literal(`account_balance + ${totalAmount + amountIntoWalletWorker}`)
+                : Sequelize.literal(`account_balance + ${amountIntoWalletWorker}`),
             totalIssueCompleted: Sequelize.literal(`total_issue_completed + 1`),
             totalRating: Sequelize.literal(`total_rating + ${rate}`),
             reliability: Sequelize.literal(
@@ -923,7 +862,9 @@ export default class ChatService {
         method === paymentMethod.MOMO
           ? UserProfile.update(
               {
-                accountBalance: Sequelize.literal(`account_balance - ${totalAmount}`),
+                accountBalance: Sequelize.literal(
+                  `account_balance - ${totalAmount + amountIntoWalletCustomer}`
+                ),
               },
               {
                 where: {
@@ -1086,10 +1027,18 @@ export default class ChatService {
       }),
     ]);
 
-    const receiveIssue = await ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(
-      issue.id,
-      supporterIds
-    );
+    const [receiveIssue, estimationMessage] = await Promise.all([
+      ReceiveIssue.findBySupporterIds(issue.id, supporterIds),
+      EstimationMessage.findByChannelIdAndStatusAndType(
+        chatChannel.id,
+        estimationMessageStatus.APPROVED,
+        command.SUBMIT_ESTIMATION_TIME
+      ),
+    ]);
+
+    if (isNil(receiveIssue) || isEmpty(estimationMessage)) {
+      throw new Error('ISSUE-0412');
+    }
 
     await Promise.all([
       Issue.update(
@@ -1127,12 +1076,21 @@ export default class ChatService {
     const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
     const { issue } = chatChannel;
 
-    const [receiveIssue, estimationMessage] = await Promise.all([
-      ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation(issue.id, supporterIds),
-      EstimationMessage.findByChannelIdAndStatus(chatChannel.id, estimationMessageStatus.WAITING),
+    const [receiveIssue, waitingEstimationMessage, estimationMessage] = await Promise.all([
+      ReceiveIssue.findBySupporterIds(issue.id, supporterIds),
+      EstimationMessage.findByWaitingStatus(chatChannel.id),
+      EstimationMessage.findByChannelIdAndStatusAndType(
+        chatChannel.id,
+        estimationMessageStatus.APPROVED,
+        command.SUBMIT_ESTIMATION_TIME
+      ),
     ]);
 
-    if (!isNil(estimationMessage)) {
+    if (isNil(receiveIssue) || isEmpty(estimationMessage)) {
+      throw new Error('ISSUE-0412');
+    }
+
+    if (!isNil(waitingEstimationMessage)) {
       throw new Error('ISSUE-0413');
     }
 
@@ -1141,7 +1099,7 @@ export default class ChatService {
     });
 
     const [data] = await Promise.all([
-      getIssueCost(receiveIssue),
+      getIssueCost(receiveIssue, estimationMessage),
       receiveIssue.save(),
       Issue.update(
         {
@@ -1164,7 +1122,6 @@ export default class ChatService {
       null,
       data
     );
-
     await Acceptance.updateOrCreate(
       {
         receiveIssueId: receiveIssue.id,
@@ -1173,7 +1130,7 @@ export default class ChatService {
         messageSid: message.sid,
         channelId: chatChannel.id,
         status: issueStatus.WAITING_VERIFY,
-        data,
+        data: pick(data, EstimationMessage.baseAttributeOnData()),
       }
     );
 

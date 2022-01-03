@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import _, { get } from 'lodash';
 import { objectToCamel, objectToSnake } from '../../../helpers/Util';
 import ChatService from '../services/chat';
 import { roles } from '../../../constants';
@@ -168,6 +168,22 @@ export default class ChatController {
         chatChannel: req.chatChannel,
       });
       return res.status(200).json(objectToSnake(receiveIssue.toJSON()));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async getChatHistories(req, res, next) {
+    try {
+      const transactionHistory = get(req, 'transactionHistory');
+
+      const { user } = req;
+      const issue = await ChatService.create(user, {
+        issueId: _.get(transactionHistory, 'issueId'),
+        userId: transactionHistory.userId === user.id ? user.id : transactionHistory.actorId,
+      });
+
+      return res.status(200).send(issue);
     } catch (e) {
       return next(e);
     }

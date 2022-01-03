@@ -15,6 +15,7 @@ import {
   verifyRequestType,
   isAllowCreateGroupChat,
   isValidCompletion,
+  verifyTransactionHistory,
 } from '../middlewares';
 
 const router = Router();
@@ -125,6 +126,14 @@ router.post(
   verifyChannel,
   isValidCompletion,
   ChatController.finish
+);
+
+router.get(
+  '/transaction-histories/:id/chat',
+  auth(),
+  active,
+  verifyTransactionHistory,
+  ChatController.getChatHistories
 );
 
 export default router;

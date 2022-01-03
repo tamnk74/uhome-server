@@ -4,20 +4,22 @@ import isBetween from 'dayjs/plugin/isBetween';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { workingTime } from '../../constants';
+import Fee from './Fee';
 
 dayjs.extend(isBetween);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default class HotfixFee {
+export default class HotfixFee extends Fee {
   constructor(workingTimes = [], totalTime = 0, numOfWorker = 1) {
+    super();
     this.workingTimes = workingTimes;
     this.totalTime = totalTime;
     this.numOfWorker = numOfWorker;
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getBasicTimeFee(configuration, classFee, workingType, hours) {
+  getBasicTime(configuration, classFee, workingType, hours) {
     const factor = get(configuration, workingType, 0);
     const fee1 = classFee.min / 8;
 
@@ -46,7 +48,7 @@ export default class HotfixFee {
     return hours * (fee32 * factor + fee32);
   }
 
-  getBasicFee(configuration, classFee, starTime, endTime) {
+  getBasicCost(configuration, classFee, starTime, endTime) {
     const workingTimes = this.getWorkingTimes(starTime, endTime);
     const totalWorkingTime = {};
 
@@ -55,44 +57,38 @@ export default class HotfixFee {
     });
 
     const fees = Object.keys(totalWorkingTime).map((key) => {
-      return this.getBasicTimeFee(configuration, classFee, key, totalWorkingTime[key]);
+      return this.getBasicTime(configuration, classFee, key, totalWorkingTime[key]);
     });
 
     return this.numOfWorker * sum(fees);
   }
 
-  getFee(configuration, classFee, teamConfiguration) {
+  getCost(configuration, classFee, teamConfiguration) {
     const workingTime = first(this.workingTimes);
-
     if (isEmpty(workingTime)) {
       return {
-        workerFee: 0,
-        customerFee: 0,
+        worker: {
+          cost: 0,
+          fee: 0,
+        },
+        customer: {
+          cost: 0,
+          fee: 0,
+        },
       };
     }
 
     const startTime = dayjs(workingTime.startTime).tz('Asia/Ho_Chi_Minh');
     const endTime = dayjs(startTime).add(this.totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
-    const basicFee = this.getBasicFee(configuration, classFee, startTime, endTime);
-    const workerFee = this.getWorkerFee(basicFee, configuration, teamConfiguration, 0);
 
-    return {
-      workerFee: Math.ceil(workerFee / 1000) * 1000,
-      customerFee: Math.ceil(workerFee / 1000) * 1000,
-    };
-  }
+    const basicCost = this.getBasicCost(configuration, classFee, startTime, endTime);
 
-  // eslint-disable-next-line class-methods-use-this
-  getWorkerFee(basicFee, configuration, teamConfiguration, distance = 0) {
-    return (
-      basicFee +
-      basicFee * distance * configuration.distance +
-      basicFee * get(teamConfiguration, 'fee', 0)
-    );
+    return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);
   }
 
   getWorkingTimes(startTime, endTime) {
     const workingTimes = this.generateMatrixWorkingTime(startTime, endTime);
+
     const workingRangeTimes = workingTimes.map((item) =>
       this.getWorkingTime(item.startTime, item.endTime)
     );
@@ -105,15 +101,10 @@ export default class HotfixFee {
     let tmpStartTime = starTime.clone();
     let tmpToTime = endTime.clone();
     const workingsTime = workingTime[type];
-
     const ranges = workingsTime.map((workHour) => {
       tmpStartTime = tmpStartTime.set('hour', workHour.from).startOf('hour');
       tmpToTime = tmpToTime.set('hour', workHour.to).startOf('hour');
-
-      if (
-        starTime.isBetween(tmpStartTime, tmpToTime, 'minute', '[)') ||
-        endTime.isBetween(tmpStartTime, tmpToTime, 'minute', '(]')
-      ) {
+      if (starTime.isBefore(tmpToTime, 'minute') && tmpStartTime.isBefore(endTime, 'minute')) {
         if (endTime.isBefore(tmpToTime, 'minute')) {
           tmpToTime = endTime;
         }
@@ -121,7 +112,7 @@ export default class HotfixFee {
         if (starTime.isAfter(tmpStartTime, 'minute')) {
           tmpStartTime = starTime;
         }
-
+        starTime = tmpToTime;
         return tmpToTime.diff(tmpStartTime, 'hour', true);
       }
 
@@ -161,25 +152,5 @@ export default class HotfixFee {
     });
 
     return timeWorking;
-  }
-
-  getTotalFee(basicWorkerFee, configuration) {
-    const workerFee = this.getTotalWorkerFee(basicWorkerFee, configuration);
-    const customerFee = this.getTotalCustomerFee(workerFee, configuration);
-
-    return {
-      workerFee: Math.ceil(workerFee / 1000) * 1000,
-      customerFee: Math.ceil(customerFee / 1000) * 1000,
-    };
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getTotalWorkerFee(basicWorkerFee, configuration) {
-    return basicWorkerFee + basicWorkerFee * configuration.workerFee;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getTotalCustomerFee(workerFee, configuration) {
-    return workerFee * configuration.customerFee + workerFee;
   }
 }
