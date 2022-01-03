@@ -1,22 +1,23 @@
 import dayjs from 'dayjs';
-import { get } from 'lodash';
 import isBetween from 'dayjs/plugin/isBetween';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import Fee from './Fee';
 
 dayjs.extend(isBetween);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default class NormalFee {
+export default class NormalFee extends Fee {
   constructor(workingTimes = [], totalTime = 0, numOfWorker = 1) {
+    super();
     this.workingTimes = workingTimes;
     this.totalTime = totalTime;
     this.numOfWorker = numOfWorker;
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getBasicFee(classFee) {
+  getBasicCost(classFee) {
     const actualTimes = this.getActualWorkingTimes();
     let total = 0;
 
@@ -38,47 +39,9 @@ export default class NormalFee {
     });
   }
 
-  getFee(configuration, classFee, teamConfiguration) {
-    const basicFee = this.getBasicFee(classFee);
-    const workerFee = this.getWorkerFee(basicFee, configuration, teamConfiguration);
+  getCost(configuration, classFee, teamConfiguration) {
+    const basicCost = this.getBasicCost(classFee);
 
-    return {
-      workerFee: Math.ceil(workerFee / 1000) * 1000,
-      customerFee: Math.ceil(workerFee / 1000) * 1000,
-    };
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getWorkerFee(basicFee, configuration, teamConfiguration, distance = 0) {
-    return (
-      basicFee +
-      basicFee * get(teamConfiguration, 'fee', 0) +
-      basicFee * distance * configuration.distance
-    );
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getCustomerFee(workerFee, configuration) {
-    return workerFee * configuration.customerFee + workerFee;
-  }
-
-  getTotalFee(basicWorkerFee, configuration) {
-    const workerFee = this.getTotalWorkerFee(basicWorkerFee, configuration);
-    const customerFee = this.getTotalCustomerFee(basicWorkerFee, configuration);
-
-    return {
-      workerFee: Math.ceil(workerFee / 1000) * 1000,
-      customerFee: Math.ceil(customerFee / 1000) * 1000,
-    };
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getTotalWorkerFee(basicWorkerFee, configuration) {
-    return basicWorkerFee + basicWorkerFee * configuration.workerFee;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getTotalCustomerFee(workerFee, configuration) {
-    return workerFee * configuration.customerFee + workerFee;
+    return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);
   }
 }

@@ -1,6 +1,6 @@
 import { Sequelize, Op } from 'sequelize';
 import dayjs from 'dayjs';
-import { get, isNil, sumBy, set } from 'lodash';
+import { get, isNil, sumBy, set, pick } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
@@ -21,6 +21,7 @@ import Fee from '../../../helpers/fee/NormalFee';
 import EstimationMessage from '../../../models/estimationMessage';
 import FeeFactory from '../../../helpers/fee/FeeFactory';
 import TeamFeeConfiguration from '../../../models/teamFeeConfiguration';
+import EventScope from '../../../models/eventScope';
 
 export default class IssueService {
   static async create(user, data, userEvent) {
@@ -229,7 +230,13 @@ export default class IssueService {
         },
         order: [['max', 'DESC']],
       }),
-      Event.findByPk(issue.eventId),
+      Event.findByPk(issue.eventId, {
+        include: [
+          {
+            model: EventScope,
+          },
+        ],
+      }),
     ]);
 
     const teamConfiguration = await TeamFeeConfiguration.findOne({
@@ -241,7 +248,8 @@ export default class IssueService {
       },
       order: [['minWorker', 'DESC']],
     });
-    data.fee = FeeFactory.getFee(
+
+    const cost = FeeFactory.getCost(
       type,
       {
         teamConfiguration,
@@ -254,8 +262,11 @@ export default class IssueService {
         numOfWorker,
       }
     );
-
-    data.fee.discount = saleEvent ? saleEvent.getDiscountValue(data.fee.customerFee || 0) : 0;
+    set(data, 'worker', cost.worker);
+    set(data, 'customer', cost.customer);
+    const discount = saleEvent ? saleEvent.getDiscount(cost) : null;
+    set(data, 'worker.discount', get(discount, 'worker', 0));
+    set(data, 'customer.discount', get(discount, 'customer', 0));
     set(data, 'issue.status', issue.status);
 
     const { message, channel } = await this.sendMessage(
@@ -264,13 +275,12 @@ export default class IssueService {
       issue,
       data
     );
-
     await IssueService.updateEstimationMessage(
       command.SUBMIT_ESTIMATION_TIME,
       channel,
       message.sid,
       {
-        ...data.fee,
+        ...pick(data, EstimationMessage.baseAttributeOnData()),
         totalTime,
         numOfWorker,
       }

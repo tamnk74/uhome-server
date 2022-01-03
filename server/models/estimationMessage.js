@@ -80,4 +80,31 @@ EstimationMessage.findByChannelIdAndStatus = (channelId, status) =>
     },
   });
 
+EstimationMessage.findByWaitingStatus = (channelId) =>
+  EstimationMessage.findOne({
+    where: {
+      channelId,
+      status: estimationMessageStatus.WAITING,
+    },
+  });
+
+EstimationMessage.findByChannelIdAndStatusAndType = (channelId, status, type) =>
+  EstimationMessage.findOne({
+    where: {
+      channelId,
+      status,
+      type,
+    },
+  });
+
+EstimationMessage.baseAttributeOnData = () => [
+  'type',
+  'worker',
+  'customer',
+  'unitTime',
+  'totalTime',
+  'numOfWorker',
+  'workingTimes',
+];
+
 module.exports = EstimationMessage;

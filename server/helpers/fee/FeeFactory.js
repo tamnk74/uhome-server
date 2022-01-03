@@ -11,18 +11,13 @@ export default class FeeFactory {
     return new NormalFee(workingTimes, totalTime, numOfWorker);
   }
 
-  static getFee(
+  static getCost(
     type,
     { configuration, classFee, teamConfiguration },
     { workingTimes, totalTime, numOfWorker }
   ) {
     const instance = FeeFactory.getInstance(type, workingTimes, totalTime, numOfWorker);
 
-    return instance.getFee(configuration, classFee, teamConfiguration);
-  }
-
-  static getTotalFee(type, basicWorkerFee, configuration) {
-    const instance = FeeFactory.getInstance(type);
-    return instance.getTotalFee(basicWorkerFee, configuration);
+    return instance.getCost(configuration, classFee, teamConfiguration);
   }
 }

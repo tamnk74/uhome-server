@@ -1,6 +1,5 @@
 import Sequelize from 'sequelize';
 import uuid from 'uuid';
-import { isEmpty, isNil, get } from 'lodash';
 
 import BaseModel from './model';
 import sequelize from '../databases/database';
@@ -63,11 +62,11 @@ ReceiveIssue.init(
     },
     createdAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     deletedAt: {
       type: Sequelize.DATE,
@@ -135,21 +134,5 @@ ReceiveIssue.findBySupporterIds = (issueId, supporterIds = [], include = []) =>
     },
     include,
   });
-
-ReceiveIssue.findByIssueIdAndUserIdsAndCheckHasEstimation = async (issueId, supporterIds = []) => {
-  const receiveIssue = await ReceiveIssue.findBySupporterIds(issueId, supporterIds, [
-    {
-      model: IssueEstimation,
-    },
-  ]);
-
-  const estimations = get(receiveIssue, 'issue_estimations', []);
-
-  if (isNil(receiveIssue) || isEmpty(estimations)) {
-    throw new Error('ISSUE-0412');
-  }
-
-  return receiveIssue;
-};
 
 module.exports = ReceiveIssue;
