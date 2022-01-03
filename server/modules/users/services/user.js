@@ -96,14 +96,13 @@ export default class Userervice {
   static async getReceiveIssues(query) {
     const { limit, offset, userId } = query;
     const options = ReceiveIssue.buildOptionQuery(query);
-    options.where = {
-      [Op.or]: [
-        {
-          userId,
-        },
-        Sequelize.literal(`\`issue\`.\`created_by\` = '${userId}'`),
-      ],
-    };
+    options.where[Op.or] = [
+      {
+        userId,
+      },
+      Sequelize.literal(`\`issue\`.\`created_by\` = '${userId}'`),
+    ];
+
     return ReceiveIssue.findAndCountAll({
       ...options,
       include: [
