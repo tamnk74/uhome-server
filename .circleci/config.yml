@@ -107,13 +107,20 @@ workflows:
             branches:
               only:
                 - develop
+  qa:
+    jobs:
+      - build:
+          filters: &filters-qa
+            branches:
+              only:
+                - qa
       - deploy-qa:
           requires:
             - build # Only deploy once build job has completed
           filters:
             branches:
               only:
-                - develop
+                - qa
   staging:
     jobs:
       - build:
