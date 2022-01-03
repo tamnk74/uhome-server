@@ -41,5 +41,6 @@ EventScope.beforeCreate((instance) => {
 });
 
 EventScope.belongsTo(Event);
+Event.hasMany(EventScope);
 
 module.exports = EventScope;

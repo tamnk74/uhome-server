@@ -1,11 +1,12 @@
 import Sequelize, { Op } from 'sequelize';
 import uuid from 'uuid';
+import _ from 'lodash';
 import BaseModel from './model';
 import Category from './category';
 import EventCategory from './eventCategory';
 import sequelize from '../databases/database';
 import { fileSystemConfig } from '../config';
-import { saleEventTypes, eventStatuses, calculateType } from '../constants';
+import { saleEventTypes, eventStatuses, calculateType, userRoles } from '../constants';
 
 class Event extends BaseModel {}
 
@@ -167,6 +168,17 @@ Event.whereCondition = (user, params) => {
     },
     status: eventStatuses.ACTIVE,
     ...(types.length ? { type: types } : null),
+  };
+};
+
+Event.prototype.getDiscount = function getDiscount(workerCost = 0, customerCost = 0) {
+  const eventScopes = _.get(this, 'eventScopes', []);
+  const workerEvent = _.find(eventScopes, (o) => o.scope === userRoles.WORKER);
+  const customerEvent = _.find(eventScopes, (o) => o.scope === userRoles.CUSTOMER);
+
+  return {
+    worker: _.isEmpty(workerEvent) ? 0 : this.getDiscountValue(workerCost),
+    customer: _.isEmpty(customerEvent) ? 0 : this.getDiscountValue(customerCost),
   };
 };
 
