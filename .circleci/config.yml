@@ -39,6 +39,32 @@ jobs:
       - slack/notify:
           event: pass
           template: basic_success_1
+  deploy-qa:
+    machine:
+      enabled: true
+    steps:
+      - run:
+          name: Deployment server over SSH
+          command: |
+            ssh -oStrictHostKeyChecking=no -v $USER@$IP_QA"
+              cd ~/uhome-server
+              cp .env backup.env
+              git reset --hard HEAD
+              git pull origin develop
+              ansible local -m copy -a 'src=deploy/secrets-qa.yml dest=/home/$USER/uhome-server/.env' --vault-password-file ~/.vault
+              ansible local -m copy -a 'src=deploy/apple-auth-qa.yaml dest=/home/$USER/uhome-server/AppleAuthKey.p8' --vault-password-file ~/.vault
+              npm install
+              npm run build
+              npx sequelize db:migrate
+              pm2 restart all
+              pm2 status"
+      - slack/notify:
+          event: fail
+          mentions: '@channel'
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: basic_success_1
   deploy-staging:
     machine:
       enabled: true
@@ -75,6 +101,13 @@ workflows:
               only:
                 - develop
       - deploy-develop:
+          requires:
+            - build # Only deploy once build job has completed
+          filters:
+            branches:
+              only:
+                - develop
+      - deploy-qa:
           requires:
             - build # Only deploy once build job has completed
           filters:
