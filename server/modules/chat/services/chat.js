@@ -529,7 +529,6 @@ export default class ChatService {
 
     const acceptanceData = get(acceptance, 'data', {});
     const comment = get(acceptanceData, 'comment');
-    const rate = get(acceptanceData, 'rate');
 
     await ChatService.finishIssue({
       receiveIssue,
@@ -1042,6 +1041,10 @@ export default class ChatService {
     set(acceptanceData, 'rate', rate);
     set(acceptanceData, 'comment', comment);
     set(acceptanceData, 'issue.status', issueStatus.WAITING_PAYMENT);
+
+    if (rate === 5) {
+      await ChatService.checkSaleEvent({ user, receiveIssue, issue });
+    }
 
     await Promise.all([
       this.sendMessage(command.ACCEPTANCE, chatChannel, user, messageSid, acceptanceData),
