@@ -424,16 +424,21 @@ export default class ChatService {
     const supporterId = get(receiveIssue, 'userId');
 
     if (issue.paymentMethod === paymentMethod.MOMO) {
-      const [customerProfile] = await Promise.all([
+      const [customerProfile, estimate] = await Promise.all([
         UserProfile.findOne({
           where: {
             userId: user.id,
           },
         }),
+        EstimationMessage.findByChannelIdAndStatusAndType(
+          chatChannel.id,
+          estimationMessageStatus.APPROVED,
+          command.SUBMIT_ESTIMATION_TIME
+        ),
       ]);
 
-      const customerFee = get(receiveIssue, 'customerFee', 0);
-      const discount = get(receiveIssue, 'discount', 0);
+      const customerFee = get(estimate, 'customer.cost', 0);
+      const discount = get(receiveIssue, 'customer.discount', 0);
       const totalCost = customerFee + data.totalCost - discount;
       if (customerProfile.accountBalance < totalCost) {
         throw new Error('ISSUE-0411');
