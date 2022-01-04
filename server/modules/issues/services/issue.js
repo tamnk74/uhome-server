@@ -1,6 +1,6 @@
 import { Sequelize, Op } from 'sequelize';
 import dayjs from 'dayjs';
-import { get, isNil, sumBy, set, pick } from 'lodash';
+import { get, sumBy, set, pick } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
@@ -310,8 +310,15 @@ export default class IssueService {
       data
     );
 
-    await IssueService.updateEstimationMessage(command.INFORM_MATERIAL_COST, channel, message.sid, {
-      totalCost,
+    await EstimationMessage.create({
+      id: uuidv4(),
+      type: command.INFORM_MATERIAL_COST,
+      channelId: channel.id,
+      messageSid: message.sid,
+      data: {
+        totalCost,
+      },
+      status: estimationMessageStatus.WAITING,
     });
 
     const supporterIds = await ChatMember.getSupporterIds(channel.id);
@@ -437,29 +444,39 @@ export default class IssueService {
    * Update estimation message
    */
   static async updateEstimationMessage(type, chatChannel, newMessageSid, data) {
-    const oldMessage = await EstimationMessage.findOne({
+    const [message, isCreated] = await EstimationMessage.findOrCreate({
       where: {
         type,
         channelId: chatChannel.id,
       },
+      defaults: {
+        id: uuidv4(),
+        type,
+        channelId: chatChannel.id,
+        messageSid: newMessageSid,
+        data,
+        status: estimationMessageStatus.WAITING,
+      },
     });
-    if (!isNil(oldMessage)) {
+
+    if (!isCreated) {
       chatMessageQueue.add('update_message', {
-        sid: oldMessage.messageSid,
+        sid: message.messageSid,
         attributes: {
           is_expired: true,
         },
         channelSid: chatChannel.channelSid,
       });
+
+      await message.update({
+        type,
+        channelId: chatChannel.id,
+        messageSid: newMessageSid,
+        data,
+        status: estimationMessageStatus.WAITING,
+      });
     }
 
-    return EstimationMessage.upsert({
-      id: uuidv4(),
-      type,
-      channelId: chatChannel.id,
-      messageSid: newMessageSid,
-      data,
-      status: estimationMessageStatus.WAITING,
-    });
+    return message;
   }
 }
