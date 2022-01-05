@@ -1169,4 +1169,43 @@ export default class ChatService {
       acceptanceData
     );
   }
+
+  static async joinChatHistory(user, issueId) {
+    const [issue, receiveIssue] = await Promise.all([
+      Issue.findOne({
+        where: {
+          id: issueId,
+          status: issueStatus.DONE,
+        },
+      }),
+      ReceiveIssue.findOne({
+        where: {
+          issueId,
+          status: issueStatus.DONE,
+        },
+      }),
+    ]);
+
+    if (isEmpty(receiveIssue) || isEmpty(issue)) {
+      throw new Error('ISSU-0001');
+    }
+
+    const userIds = [receiveIssue.userId, issue.createdBy];
+
+    if (!userIds.includes(user.id)) {
+      throw new Error('ERR-0403');
+    }
+
+    const chatChannel = await ChatChannel.findChannelGroup(issueId, userIds);
+
+    if (isNil(chatChannel)) {
+      throw new Error('CHAT-0404');
+    }
+
+    const authorChat = await this.addUserToChat(chatChannel, user);
+    const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
+    authorChat.setDataValue('token', twilioToken);
+
+    return authorChat;
+  }
 }
