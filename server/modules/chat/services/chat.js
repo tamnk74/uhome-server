@@ -766,6 +766,15 @@ export default class ChatService {
       data
     );
 
+    await EstimationMessage.update(
+      { status: estimationMessageStatus.CANCELED },
+      {
+        where: {
+          messageSid,
+        },
+      }
+    );
+
     return receiveIssue;
   }
 
