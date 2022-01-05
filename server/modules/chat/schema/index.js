@@ -4,3 +4,4 @@ export * from './approveMaterialCostSchema';
 export * from './trackingSchema';
 export * from './acceptanceIssueSchema';
 export * from './continueChattingSchema';
+export * from './joinChatSchema';
