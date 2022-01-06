@@ -9,13 +9,13 @@ import {
   trackingSchema,
   acceptanceIssueSchema,
   continueChattingchema,
+  joinChatSchema,
 } from '../schema';
 import {
   verifyChannel,
   verifyRequestType,
   isAllowCreateGroupChat,
   isValidCompletion,
-  verifyTransactionHistory,
 } from '../middlewares';
 
 const router = Router();
@@ -128,12 +128,12 @@ router.post(
   ChatController.finish
 );
 
-router.get(
-  '/transaction-histories/:id/chat',
-  auth(),
+router.post(
+  '/chat/histories',
+  auth('joinChat'),
   active,
-  verifyTransactionHistory,
-  ChatController.getChatHistories
+  validator(joinChatSchema),
+  ChatController.joinChatHistory
 );
 
 export default router;

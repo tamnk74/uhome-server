@@ -1,4 +1,4 @@
-import _, { get } from 'lodash';
+import { get } from 'lodash';
 import { objectToCamel, objectToSnake } from '../../../helpers/Util';
 import ChatService from '../services/chat';
 import { roles } from '../../../constants';
@@ -16,7 +16,6 @@ export default class ChatController {
       const issue = await ChatService.joinChat(user, objectToCamel(req.body));
       return res.status(201).json(objectToSnake(issue.toJSON()));
     } catch (e) {
-      console.log(e);
       return next(e);
     }
   }
@@ -173,17 +172,13 @@ export default class ChatController {
     }
   }
 
-  static async getChatHistories(req, res, next) {
+  static async joinChatHistory(req, res, next) {
     try {
-      const transactionHistory = get(req, 'transactionHistory');
-
       const { user } = req;
-      const issue = await ChatService.create(user, {
-        issueId: _.get(transactionHistory, 'issueId'),
-        userId: transactionHistory.userId === user.id ? user.id : transactionHistory.actorId,
-      });
+      const issueId = get(req, 'body.issueId');
+      const author = await ChatService.joinChatHistory(user, issueId);
 
-      return res.status(200).send(issue);
+      return res.status(200).send(objectToSnake(author.toJSON()));
     } catch (e) {
       return next(e);
     }

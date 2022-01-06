@@ -766,6 +766,15 @@ export default class ChatService {
       data
     );
 
+    await EstimationMessage.update(
+      { status: estimationMessageStatus.CANCELED },
+      {
+        where: {
+          messageSid,
+        },
+      }
+    );
+
     return receiveIssue;
   }
 
@@ -1159,5 +1168,50 @@ export default class ChatService {
       null,
       acceptanceData
     );
+  }
+
+  static async joinChatHistory(user, issueId) {
+    const [issue, receiveIssue] = await Promise.all([
+      Issue.findOne({
+        where: {
+          id: issueId,
+          status: issueStatus.DONE,
+        },
+      }),
+      ReceiveIssue.findOne({
+        where: {
+          issueId,
+          status: issueStatus.DONE,
+        },
+      }),
+    ]);
+
+    if (isEmpty(receiveIssue) || isEmpty(issue)) {
+      throw new Error('ISSU-0001');
+    }
+
+    const userIds = [receiveIssue.userId, issue.createdBy];
+
+    if (!userIds.includes(user.id)) {
+      throw new Error('ERR-0403');
+    }
+
+    const memberId = user.id === receiveIssue.userId ? issue.createdBy : receiveIssue.userId;
+
+    const [chatChannel, member] = await Promise.all([
+      ChatChannel.findChannelGroup(issueId, userIds),
+      User.findByPk(memberId),
+    ]);
+
+    if (isNil(chatChannel)) {
+      throw new Error('CHAT-0404');
+    }
+
+    const authorChat = await this.addUserToChat(chatChannel, user);
+    const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
+    authorChat.setDataValue('token', twilioToken);
+    authorChat.setDataValue('member', member.toChatActor());
+
+    return authorChat;
   }
 }
