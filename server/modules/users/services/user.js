@@ -334,12 +334,7 @@ export default class Userervice {
   static async getTransactionHistories({ user, query }) {
     const { limit, offset, from, to } = query;
     const options = TransactionHistory.buildOptionQuery(query);
-    options.where[Op.or] = [
-      {
-        userId: user.id,
-      },
-      Sequelize.literal(`\`issue\`.\`created_by\` = '${user.id}'`),
-    ];
+    options.where.userId = user.id;
     options.include = [
       {
         model: Issue,

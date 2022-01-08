@@ -557,7 +557,7 @@ export default class ChatService {
       }),
       comment
         ? ReceiveIssueComment.create({
-            userId: user.id,
+            userId: issue.createdBy,
             receiveIssueId: receiveIssue.id,
             content: comment,
           })
@@ -579,7 +579,7 @@ export default class ChatService {
         },
         {
           where: {
-            userId: user.id,
+            userId: issue.createdBy,
             eventId: event.id,
           },
         }
@@ -587,7 +587,7 @@ export default class ChatService {
     }
 
     if (rate === 5) {
-      await ChatService.checkSaleEvent({ user, receiveIssue, issue });
+      await ChatService.checkSaleEvent({ receiveIssue, issue });
     }
 
     set(acceptanceData, 'issue.status', receiveIssue.status);
@@ -604,7 +604,7 @@ export default class ChatService {
     return receiveIssue;
   }
 
-  static async checkSaleEvent({ user, receiveIssue, issue }) {
+  static async checkSaleEvent({ receiveIssue, issue }) {
     const events = await Event.findAll({
       where: {
         code: ['FIRST-5-STAR', 'NEXT-5-5-STAR'],
@@ -656,7 +656,7 @@ export default class ChatService {
         extra: {
           event: first5StarEvent.toJSON(),
         },
-        actorId: user.id,
+        actorId: issue.createdBy,
         method: paymentMethod.CASH,
       });
 
@@ -712,7 +712,7 @@ export default class ChatService {
         extra: {
           event: next5StarEvent.toJSON(),
         },
-        actorId: user.id,
+        actorId: issue.createdBy,
         method: paymentMethod.CASH,
       });
 
