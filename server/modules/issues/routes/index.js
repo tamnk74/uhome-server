@@ -78,7 +78,6 @@ router.delete(
   '/issues/:issueId/request-supportings',
   auth('cancelSupport'),
   active,
-  isFinished,
   verifyIssue,
   IssueController.cancelRequestSupporting
 );
