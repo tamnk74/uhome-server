@@ -531,10 +531,9 @@ export default class ChatService {
     const rate = get(acceptanceData, 'rate');
 
     await ChatService.finishIssue({
-      user,
       receiveIssue,
       acceptanceData,
-      method: issue.paymentMethod,
+      issue,
     });
 
     await Promise.all([
@@ -813,8 +812,12 @@ export default class ChatService {
     return ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
   }
 
-  static async finishIssue({ user, receiveIssue, acceptanceData, method }) {
+  static async finishIssue({ receiveIssue, acceptanceData, issue }) {
     const { issueId } = receiveIssue;
+    const method = get(issue, 'method');
+    const workerId = get(receiveIssue, 'userId');
+    const customerId = get(issue, 'createdBy');
+
     const extra = {
       workingTimes: get(acceptanceData, 'workingTimes', []),
       totalTime: get(acceptanceData, 'totalTime', 0),
@@ -828,26 +831,26 @@ export default class ChatService {
     const transactionHistories = [
       {
         id: uuidv4(),
-        userId: receiveIssue.userId,
+        userId: workerId,
         amount: totalAmount,
         discount: get(acceptanceData, 'worker.discount', 0),
         total: totalAmount,
         issueId,
         type: transactionType.WAGE,
         extra,
-        actorId: user.id,
+        actorId: customerId,
         method,
       },
       {
         id: uuidv4(),
-        userId: user.id,
+        userId: customerId,
         amount: totalAmount,
         total: totalAmount,
         discount: get(acceptanceData, 'customer.discount', 0),
         issueId,
         type: transactionType.PAY,
         extra,
-        actorId: receiveIssue.userId,
+        actorId: workerId,
         method,
       },
     ];
@@ -868,7 +871,7 @@ export default class ChatService {
           },
           {
             where: {
-              userId: receiveIssue.userId,
+              userId: workerId,
             },
             transaction: t,
           }
@@ -882,7 +885,7 @@ export default class ChatService {
               },
               {
                 where: {
-                  userId: user.id,
+                  userId: customerId,
                 },
                 transaction: t,
               }
