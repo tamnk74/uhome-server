@@ -5,7 +5,7 @@ import Notification from '../../models/notification';
 import Fcm from '../../helpers/Fcm';
 import Subscription from '../../models/subscription';
 import User from '../../models/user';
-import { notificationType, userRoles, notificationMessage } from '../../constants';
+import { notificationType, userRoles, notificationMessage, roles } from '../../constants';
 import Issue from '../../models/issue';
 import sequelize from '../../databases/database';
 import RequestSupporting from '../../models/requestSupporting';
@@ -41,7 +41,7 @@ export default class NotificationService {
         },
       }).slice(0, -1);
 
-      const [subscriptions, issue] = await Promise.all([
+      const [subscriptions, issue, subscriptionsConsulting] = await Promise.all([
         Subscription.findAll({
           where: {
             [Op.and]: [
@@ -75,6 +75,17 @@ export default class NotificationService {
             },
           ],
         }),
+        Subscription.findAll({
+          include: [
+            {
+              model: User,
+              require: true,
+              where: {
+                role: roles.CONSULTING,
+              },
+            },
+          ],
+        }),
       ]);
 
       const dataInssert = [];
@@ -101,6 +112,10 @@ export default class NotificationService {
           ...notification,
           status: true,
         });
+      });
+
+      subscriptionsConsulting.forEach((item) => {
+        tokens.push(item.token);
       });
 
       await Promise.all([

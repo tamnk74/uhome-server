@@ -6,7 +6,7 @@ const User = require('../../models/user');
 module.exports = {
   up: async (queryInterface) => {
     const salt = await bcrypt.genSalt(10);
-    const password = await bcrypt.hash('uhome123!@#', salt);
+    const password = await bcrypt.hash('success123!@#', salt);
     const users = [
       {
         id: uuidv4(),
