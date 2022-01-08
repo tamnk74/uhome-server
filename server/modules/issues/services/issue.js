@@ -268,6 +268,7 @@ export default class IssueService {
     set(data, 'worker.discount', get(discount, 'worker', 0));
     set(data, 'customer.discount', get(discount, 'customer', 0));
     set(data, 'issue.status', issue.status);
+    set(data, 'workingTimes', IssueService.convertEstimateTimeToUTC(workingTimes));
 
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
@@ -478,5 +479,15 @@ export default class IssueService {
     }
 
     return message;
+  }
+
+  /**
+   * Convert estimate time to UTC
+   */
+  static convertEstimateTimeToUTC(estimateTimes = []) {
+    return estimateTimes.map((item) => ({
+      startTime: dayjs(item.startTime).utc().toISOString(),
+      endTime: dayjs(item.endTime).utc().toISOString(),
+    }));
   }
 }
