@@ -88,10 +88,11 @@ export default class UserController {
 
   static async subscribe(req, res, next) {
     try {
+      console.log(req.user);
       await UserService.subscribe({
         userId: req.user.id,
         token: req.body.deviceToken,
-        role: req.user.sessionRole,
+        role: get(req, 'user.sessionRole') ? get(req, 'user.role') : null,
       });
       return res.status(204).json({});
     } catch (e) {
