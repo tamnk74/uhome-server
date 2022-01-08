@@ -25,7 +25,11 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
     RedisService.getRoleAccessToken(user.id, token),
   ]);
 
-  if (storedUser.role === roles.USER && !sessionRole) {
+  if (_.isEmpty(storedUser)) {
+    return reject(errorFactory.getError('ERR-0401'));
+  }
+
+  if (_.get(storedUser, 'role') === roles.USER && !sessionRole) {
     await RedisService.removeAccessToken(user.id, token);
     return reject(errorFactory.getError('ERR-0401'));
   }
