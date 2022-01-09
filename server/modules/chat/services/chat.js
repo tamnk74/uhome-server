@@ -612,23 +612,12 @@ export default class ChatService {
       },
     });
 
-    const userEvents = await UserEvent.findAll({
-      where: {
-        userId: receiveIssue.userId,
-        eventId: events.map((event) => event.id),
-      },
-    });
-
     const first5StarEvent = events.find((event) => event.code === 'FIRST-5-STAR');
-    const firstUserEvent = userEvents.find(
-      (userEvent) => first5StarEvent && userEvent.eventId === first5StarEvent.id
-    );
     const next5StarEvent = events.find((event) => event.code === 'NEXT-5-5-STAR');
-    const next5UserEvent = userEvents.find(
-      (userEvent) => next5StarEvent && userEvent.eventId === next5StarEvent.id
-    );
-
-    if (first5StarEvent && !firstUserEvent) {
+    const fiveStarQty = await ReceiveIssue.count({
+      where: { userId: receiveIssue.userId, issueId: issue.id },
+    });
+    if (first5StarEvent && fiveStarQty === 1) {
       await UserProfile.update(
         {
           accountBalance: Sequelize.literal(`account_balance + ${first5StarEvent.value}`),
@@ -639,11 +628,7 @@ export default class ChatService {
           },
         }
       );
-      await UserEvent.create({
-        userId: receiveIssue.userId,
-        eventId: first5StarEvent.id,
-        limit: 0,
-      });
+
       const transaction = await TransactionHistory.create({
         id: uuidv4(),
         userId: receiveIssue.userId,
@@ -667,24 +652,7 @@ export default class ChatService {
       });
       return;
     }
-    if (next5StarEvent) {
-      if (!next5UserEvent) {
-        await UserEvent.create({
-          userId: receiveIssue.userId,
-          eventId: first5StarEvent.id,
-          limit: 5,
-        });
-        return;
-      }
-      if (next5UserEvent.limit === 0) {
-        return;
-      }
-      if (next5UserEvent.limit > 1) {
-        await next5UserEvent.update({
-          limit: next5UserEvent.limit - 1,
-        });
-        return;
-      }
+    if (next5StarEvent && fiveStarQty === 6) {
       await UserProfile.update(
         {
           accountBalance: Sequelize.literal(`account_balance + ${next5StarEvent.value}`),
@@ -695,10 +663,6 @@ export default class ChatService {
           },
         }
       );
-
-      await next5UserEvent.update({
-        limit: 0,
-      });
 
       const transaction = await TransactionHistory.create({
         id: uuidv4(),
