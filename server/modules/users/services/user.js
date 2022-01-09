@@ -124,7 +124,10 @@ export default class Userervice {
                 'path',
                 Attachment.buildUrlAttribuiteSelect(),
               ],
-              order: [[Issue, 'created', 'DESC']],
+              order: [
+                [Issue, 'msgAt', 'DESC'],
+                [Issue, 'created', 'DESC'],
+              ],
             },
             {
               model: Category,
