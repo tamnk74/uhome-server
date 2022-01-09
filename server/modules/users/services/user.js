@@ -68,6 +68,10 @@ export default class Userervice {
           attributes: ['id', 'avatar', 'name', 'phone_number', 'gender', 'status'],
         },
       ],
+      order: [
+        [Issue, 'msgAt', 'DESC'],
+        [Issue, 'updatedAt', 'DESC'],
+      ],
       attributes: Issue.baseAttibutes,
       limit,
       offset,
@@ -102,6 +106,7 @@ export default class Userervice {
       },
       Sequelize.literal(`\`issue\`.\`created_by\` = '${userId}'`),
     ];
+    options.order = [];
 
     return ReceiveIssue.findAndCountAll({
       ...options,
@@ -124,7 +129,6 @@ export default class Userervice {
                 'path',
                 Attachment.buildUrlAttribuiteSelect(),
               ],
-              order: [[Issue, 'created', 'DESC']],
             },
             {
               model: Category,
