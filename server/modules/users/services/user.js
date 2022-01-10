@@ -153,6 +153,7 @@ export default class Userervice {
           ],
         },
       ],
+      order: [['updatedAt', 'DESC']],
       limit,
       offset,
     });
