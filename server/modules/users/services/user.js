@@ -69,8 +69,8 @@ export default class Userervice {
         },
       ],
       order: [
-        [Issue, 'msgAt', 'DESC'],
-        [Issue, 'updatedAt', 'DESC'],
+        ['msgAt', 'DESC'],
+        ['updatedAt', 'DESC'],
       ],
       attributes: Issue.baseAttibutes,
       limit,
