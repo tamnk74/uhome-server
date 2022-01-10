@@ -3,7 +3,7 @@ import uuid from 'uuid';
 
 import BaseModel from './model';
 import sequelize from '../databases/database';
-import { issueStatus } from '../constants';
+import { issueStatus, unitTime } from '../constants';
 import User from './user';
 import Issue from './issue';
 import IssueEstimation from './issueEstimation';
@@ -29,6 +29,10 @@ ReceiveIssue.init(
     time: {
       type: Sequelize.FLOAT,
       allowNull: true,
+    },
+    timeUnit: {
+      type: Sequelize.ENUM(Object.values(unitTime)),
+      defaultValue: unitTime.HOUR,
     },
     numOfWorker: {
       type: Sequelize.INTEGER,
