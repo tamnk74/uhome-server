@@ -18,6 +18,7 @@ import {
   paymentMethod,
   eventStatuses,
   estimationMessageStatus,
+  unitTime,
 } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue } from '../../../helpers/Queue';
@@ -348,6 +349,8 @@ export default class ChatService {
     const customerCost = get(estimationData, 'customer.cost', 0);
     const customerDiscount = get(estimationData, 'customer.discount', 0);
     const customerFee = get(estimationData, 'customer.fee', 0);
+    const totalTime = get(estimationData, 'totalTime', 0);
+    const timeUnit = get(estimationData, 'unitTime', unitTime.HOUR);
 
     const { issue } = chatChannel;
 
@@ -361,7 +364,7 @@ export default class ChatService {
     const receiveIssue = await ReceiveIssue.findBySupporterIds(chatChannel.issue.id, supporterIds);
 
     await Promise.all([
-      receiveIssue.update({ status: issueStatus.IN_PROGRESS }),
+      receiveIssue.update({ status: issueStatus.IN_PROGRESS, time: totalTime, timeUnit }),
       chatChannel.issue.update({
         status: issueStatus.IN_PROGRESS,
       }),

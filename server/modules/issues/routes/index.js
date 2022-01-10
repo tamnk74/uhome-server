@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import IssueController from '../controllers/issue';
-import { auth, validator, active, verified, isFinished } from '../../../middlewares';
+import { auth, validator, active, verified } from '../../../middlewares';
 import {
   verifyAttachments,
   verifyIssue,
@@ -50,7 +50,6 @@ router.post(
   auth('requestSupport'),
   verified,
   verifyWorkerLocation,
-  isFinished,
   validator(requestSupportSchema),
   verifyPhoneNumber,
   verifyIssue,
