@@ -16,8 +16,8 @@ export default class Fee {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getTotalWorkerCost(basicWorkerCost, configuration) {
-    return basicWorkerCost + basicWorkerCost * configuration.workerFee;
+  getTotalWorkerCost(basicWorkerCost) {
+    return basicWorkerCost;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -47,14 +47,13 @@ export default class Fee {
       teamConfiguration,
       distance
     );
-    const workerCost = this.getTotalWorkerCost(basicWorkerCost, configuration);
     const workerFee = this.getWorkerFee(basicWorkerCost, configuration);
-    const customerCost = this.getTotalCustomerCost(workerCost, configuration);
+    const customerCost = this.getTotalCustomerCost(basicWorkerCost, configuration);
     const customerFee = this.getCustomerFee(customerCost, configuration);
 
     return {
       worker: {
-        cost: Math.ceil(workerCost / 1000) * 1000,
+        cost: Math.ceil(customerCost / 1000) * 1000,
         fee: Math.ceil(workerFee / 1000) * 1000,
       },
       customer: {
