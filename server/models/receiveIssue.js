@@ -7,6 +7,7 @@ import { issueStatus, unitTime } from '../constants';
 import User from './user';
 import Issue from './issue';
 import IssueEstimation from './issueEstimation';
+import RequestSupporting from './requestSupporting';
 
 class ReceiveIssue extends BaseModel {
   static get mapFilterFields() {
@@ -124,6 +125,13 @@ ReceiveIssue.cancel = ({ receiveIssue, reason }) => {
         },
         options
       ),
+      RequestSupporting.destroy({
+        where: {
+          userId: receiveIssue.userId,
+          issueId: receiveIssue.issueId,
+        },
+        force: true,
+      }),
     ]);
 
     return receiveIssue;
