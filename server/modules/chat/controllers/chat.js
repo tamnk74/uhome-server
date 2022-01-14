@@ -6,15 +6,15 @@ import { roles } from '../../../constants';
 export default class ChatController {
   static async create(req, res, next) {
     try {
-      const { user } = req;
+      const { user, issue } = req;
       const { role } = user;
       if (role === roles.USER) {
-        const issue = await ChatService.create(user, objectToCamel(req.body));
-        return res.status(201).json(objectToSnake(issue.toJSON()));
+        const result = await ChatService.create(user, issue, objectToCamel(req.body));
+        return res.status(201).json(objectToSnake(result.toJSON()));
       }
 
-      const issue = await ChatService.joinChat(user, objectToCamel(req.body));
-      return res.status(201).json(objectToSnake(issue.toJSON()));
+      const result = await ChatService.joinChat(user, objectToCamel(req.body));
+      return res.status(201).json(objectToSnake(result.toJSON()));
     } catch (e) {
       return next(e);
     }
