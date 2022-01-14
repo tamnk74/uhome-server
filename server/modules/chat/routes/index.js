@@ -16,6 +16,7 @@ import {
   verifyRequestType,
   isAllowCreateGroupChat,
   isValidCompletion,
+  validIssue,
 } from '../middlewares';
 
 const router = Router();
@@ -32,6 +33,7 @@ router.post(
   auth('joinChat'),
   active,
   validator(createChatSchema),
+  validIssue,
   isAllowCreateGroupChat,
   ChatController.create
 );

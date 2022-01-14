@@ -113,24 +113,22 @@ export default class ChatService {
     return 'promotions';
   }
 
-  static async create(user, data) {
-    const { userId, issueId } = data;
+  static async create(user, issue, data) {
+    const { userId } = data;
+    const issueId = issue.id;
+
     /* eslint-disable prefer-const */
-    let [chatChannel, worker, issue] = await Promise.all([
+    let [chatChannel, worker] = await Promise.all([
       ChatChannel.findChannelGroup(issueId, [userId, user.id]),
       User.findByPk(userId, {
         attributes: User.getAttributes(),
       }),
-      Issue.findByPk(issueId, {
-        include: [
-          {
-            model: User,
-            require: true,
-            as: 'creator',
-          },
-        ],
-      }),
     ]);
+
+    if (!chatChannel && issue.status !== issueStatus.OPEN) {
+      throw new Error('CHAT-0404');
+    }
+
     let isNewGroup = false;
     if (!chatChannel) {
       const channel = await twilioClient.createChannel();
