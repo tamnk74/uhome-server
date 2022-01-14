@@ -2,9 +2,9 @@
 	"chat": {
 		"update_progress": "Yêu cầu cập nhập tiến độ",
 		"cancel": "Huỷ yêu cầu",
-		"send_media": "Gởi hình ảnh cho tôi",
-		"estimate_time": "Gởi ước lượng thời gian cho tôi",
-		"submit_estimate_time": "Tôi gởi ước lượng thời gian",
+		"send_media": "Gửi hình ảnh cho tôi",
+		"estimate_time": "Gửi ước lượng thời gian cho tôi",
+		"submit_estimate_time": "Tôi gửi ước lượng thời gian",
 		"approval_estimate_time": "Tôi đồng ý ước lượng thời gian này",
 		"inform_material_cost": "Thông báo chí phí nguyên vật liệu",
 		"approval_material_cost": "Tôi đồng ý với chi phí nguyên vật liệu này",
@@ -15,8 +15,8 @@
 		"request_add_more_information": "Tôi cần thêm hình ảnh, thông tin",
 		"added_more_information": "Tôi thêm thông tin hình ảnh",
 		"canceled": "Tôi muốn tìm kiếm 1 thợ khác",
-		"added_promotion": "Tôi gởi một số hình ảnh",
-		"update_progresss": "Tôi gởi một số hình ảnh",
+		"added_promotion": "Tôi gửi một số hình ảnh",
+		"update_progresss": "Tôi gửi một số hình ảnh",
 		"completed": "Hoàn thành công việc",
 		"request_confirm_payment": "Yêu cầu xác nhận thanh toán",
 		"confirmed_payment": "Đã thanh toán tiền. Công việc hoàn tất"
