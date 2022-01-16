@@ -272,6 +272,12 @@ export default class ChatService {
     return ReceiveIssue.findBySupporterIds(issue.id, supporterIds);
   }
 
+  static async getUploadVideoLink({ chatChannel }) {
+    return Uploader.preSignedUrl({
+      path: `/chat/${chatChannel.id}/videos/${chatChannel.friendlyName}_Date.now().mp4`,
+    });
+  }
+
   static async sendMessage(commandName, chatChannel, user, messageId = null, data = {}) {
     const [chatMember, actor] = await Promise.all([
       ChatMember.findOne({

@@ -38,8 +38,9 @@ export default class Uploader {
     return instance.remove(path);
   }
 
-  static async preSignedUrl(path, ttl = 3600) {
-    const url = await this.uploader.preSignedUrl(path, ttl);
+  static async preSignedUrl(path, ttl = 360) {
+    const instance = this.getInstance();
+    const url = await instance.preSignedUrl(path, ttl);
     return url;
   }
 

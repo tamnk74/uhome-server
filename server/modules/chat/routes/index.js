@@ -56,6 +56,14 @@ router.get(
 );
 
 router.post(
+  '/chat/:channelId/videos',
+  auth('actionOnChat'),
+  active,
+  verifyChannel,
+  ChatController.getUploadVideoLink
+);
+
+router.post(
   '/chat/:channelId/approval-time',
   auth('approveEstimationCost'),
   active,
