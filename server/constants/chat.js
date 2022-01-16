@@ -25,6 +25,7 @@ export const commandMessage = Object.freeze({
   REQUEST_UPDATE_PROGRESS: 'chat.update_progress',
   REQUEST_CANCEL: 'chat.cancel',
   REQUEST_SEND_MEDIA: 'chat.send_media',
+  NEW_VIDEO: 'chat.new_video',
   REQUEST_ESTIMATION_TIME: 'chat.estimate_time',
   SUBMIT_ESTIMATION_TIME: 'chat.submit_estimate_time',
   APPROVAL_ESTIMATION_TIME: 'chat.approval_estimate_time',

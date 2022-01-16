@@ -58,6 +58,22 @@ export default class ChatController {
     }
   }
 
+  static async sendUploadVideoMessage(req, res, next) {
+    try {
+      const rs = await ChatService.sendUploadVideoMessage({
+        chatChannel: req.chatChannel,
+        user: req.user,
+        link: req.body.link,
+      });
+
+      return res.status(200).json({
+        link: rs,
+      });
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async approveEstimateTime(req, res, next) {
     try {
       const receiveIssue = await ChatService.approveEstimateTime({
