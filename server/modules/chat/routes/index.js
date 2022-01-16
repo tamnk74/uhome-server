@@ -10,6 +10,7 @@ import {
   acceptanceIssueSchema,
   continueChattingchema,
   joinChatSchema,
+  uploadVideoSchema,
 } from '../schema';
 import {
   verifyChannel,
@@ -53,6 +54,23 @@ router.get(
   verifyRequestType,
   verifyChannel,
   ChatController.requestCommand
+);
+
+router.get(
+  '/chat/:channelId/videos',
+  auth('actionOnChat'),
+  active,
+  verifyChannel,
+  ChatController.getUploadVideoLink
+);
+
+router.post(
+  '/chat/:channelId/videos',
+  auth('actionOnChat'),
+  active,
+  validator(uploadVideoSchema),
+  verifyChannel,
+  ChatController.sendUploadVideoMessage
 );
 
 router.post(
