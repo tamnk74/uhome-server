@@ -22,6 +22,7 @@ import EstimationMessage from '../../../models/estimationMessage';
 import FeeFactory from '../../../helpers/fee/FeeFactory';
 import TeamFeeConfiguration from '../../../models/teamFeeConfiguration';
 import EventScope from '../../../models/eventScope';
+import Holiday from '../../../models/holiday';
 
 export default class IssueService {
   static async create(user, data, userEvent) {
@@ -222,7 +223,8 @@ export default class IssueService {
     const { type, totalTime, workingTimes, numOfWorker } = data;
     const categories = get(issue, 'categories', []);
     const categoriesId = categories.map((item) => item.id);
-    const [feeConfiguration, feeCategory, saleEvent] = await Promise.all([
+
+    const [feeConfiguration, feeCategory, saleEvent, holidays] = await Promise.all([
       FeeConfiguration.findOne({}),
       FeeCategory.findOne({
         where: {
@@ -237,8 +239,14 @@ export default class IssueService {
           },
         ],
       }),
+      Holiday.findAll({
+        where: {
+          from: {
+            [Op.gte]: dayjs().toISOString(),
+          },
+        },
+      }),
     ]);
-
     const teamConfiguration = await TeamFeeConfiguration.findOne({
       where: {
         categoryId: feeCategory.categoryId,
@@ -260,8 +268,10 @@ export default class IssueService {
         workingTimes,
         totalTime,
         numOfWorker,
+        holidays,
       }
     );
+
     set(data, 'worker', cost.worker);
     set(data, 'customer', cost.customer);
     const discount = saleEvent ? saleEvent.getDiscount(cost.worker.cost, cost.customer.cost) : null;
