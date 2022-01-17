@@ -24,6 +24,7 @@ import FeeFactory from '../../../helpers/fee/FeeFactory';
 import TeamFeeConfiguration from '../../../models/teamFeeConfiguration';
 import EventScope from '../../../models/eventScope';
 import Attachment from '../../../models/attachment';
+import Holiday from '../../../models/holiday';
 
 export default class IssueService {
   static async getUploadVideoLink({ thumbnail }) {
