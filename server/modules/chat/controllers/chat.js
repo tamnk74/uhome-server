@@ -66,9 +66,7 @@ export default class ChatController {
         link: req.body.link,
       });
 
-      return res.status(200).json({
-        link: rs,
-      });
+      return res.status(200).json(rs);
     } catch (e) {
       return next(e);
     }
