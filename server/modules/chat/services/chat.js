@@ -273,9 +273,23 @@ export default class ChatService {
   }
 
   static async getUploadVideoLink({ chatChannel }) {
-    return Uploader.preSignedUrl({
-      path: `chat/${chatChannel.id}/videos/video_${Date.now()}.mp4`,
-    });
+    const name = `${uuidv4()}.mp4`;
+    const path = `chat/${chatChannel.id}/videos/${name}`;
+    const [s3PreSingedLink, attachment] = await Promise.all([
+      Uploader.preSignedUrl({
+        path,
+      }),
+      Attachment.create({
+        path,
+        name,
+        mimeType: 'video/mp4',
+      }),
+    ]);
+
+    return {
+      attachment,
+      link: s3PreSingedLink,
+    };
   }
 
   static async sendUploadVideoMessage({ chatChannel, user, link }) {

@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import { fileSystemConfig } from '../config';
@@ -59,5 +60,9 @@ Attachment.init(
 );
 
 Attachment.baseAttibutes = ['name', 'path', 'size', 'mime_type'];
+
+Attachment.beforeCreate((instance) => {
+  instance.id = uuid.v4();
+});
 
 module.exports = Attachment;

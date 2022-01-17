@@ -45,14 +45,12 @@ export default class ChatController {
 
   static async getUploadVideoLink(req, res, next) {
     try {
-      const rs = await ChatService.getUploadVideoLink({
+      const result = await ChatService.getUploadVideoLink({
         chatChannel: req.chatChannel,
         user: req.user,
       });
 
-      return res.status(200).json({
-        link: rs,
-      });
+      return res.status(200).json(objectToSnake(result));
     } catch (e) {
       return next(e);
     }
@@ -66,9 +64,7 @@ export default class ChatController {
         link: req.body.link,
       });
 
-      return res.status(200).json({
-        link: rs,
-      });
+      return res.status(200).json(rs);
     } catch (e) {
       return next(e);
     }
