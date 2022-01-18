@@ -5,6 +5,11 @@ import User from '../../../models/user';
 export const verifyWorkerLocation = async (req, res, next) => {
   const { user } = req;
   const updatedUser = await User.findByPk(user.id);
+
+  if (process.env.NODE_ENV === 'qa') {
+    return next();
+  }
+
   if (!updatedUser) {
     return next(errorFactory.getError('USER-0002'));
   }
