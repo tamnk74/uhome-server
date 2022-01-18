@@ -25,6 +25,7 @@ import { verifyLocation } from '../middlewares/verifyLocation';
 
 const router = Router();
 
+router.get('/issues/videos', auth('createIssue'), active, IssueController.getUploadVideoLink);
 router.post(
   '/issues',
   auth('createIssue'),
@@ -45,6 +46,7 @@ router.delete(
 );
 router.get('/issues/:issueId', auth('getIssue'), active, verifyIssue, IssueController.show);
 router.get('/issues', auth('getIssues'), active, IssueController.index);
+
 router.post(
   '/issues/:issueId/request-supportings',
   auth('requestSupport'),
