@@ -2,6 +2,7 @@ import { Sequelize, Op } from 'sequelize';
 import dayjs from 'dayjs';
 import { get, sumBy, set, pick } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import Uploader from 'helpers/Uploader';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';
@@ -22,8 +23,29 @@ import EstimationMessage from '../../../models/estimationMessage';
 import FeeFactory from '../../../helpers/fee/FeeFactory';
 import TeamFeeConfiguration from '../../../models/teamFeeConfiguration';
 import EventScope from '../../../models/eventScope';
+import Attachment from '../../../models/attachment';
 
 export default class IssueService {
+  static async getUploadVideoLink() {
+    const name = `${uuidv4()}.mp4`;
+    const path = `/attachments/${name}`;
+    const [s3PreSingedLink, attachment] = await Promise.all([
+      Uploader.preSignedUrl({
+        path,
+      }),
+      Attachment.create({
+        path,
+        name,
+        mimeType: 'video/mp4',
+      }),
+    ]);
+
+    return {
+      attachment,
+      link: s3PreSingedLink,
+    };
+  }
+
   static async create(user, data, userEvent) {
     const issue = await Issue.addIssue(data);
     if (userEvent) {
