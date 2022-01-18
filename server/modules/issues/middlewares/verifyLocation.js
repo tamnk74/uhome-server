@@ -4,6 +4,9 @@ import errorFactory from '../../../errors/ErrorFactory';
 export const verifyLocation = async (req, res, next) => {
   try {
     const { lat, lon } = req.body;
+    if (process.env.NODE_ENV === 'qa') {
+      return next();
+    }
     const allowedProvinces = ['Đà Nẵng', 'Quang Nam Province', 'Quảng Nam', 'Da Nang'];
     const province = await googleMap.getProvince({
       lat,
