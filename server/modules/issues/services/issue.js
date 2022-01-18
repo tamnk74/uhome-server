@@ -31,7 +31,7 @@ import Category from '../../../models/category';
 
 export default class IssueService {
   static async getUploadVideoLink({ thumbnail }) {
-    const name = `${uuidv4()}`;
+    const name = `${uuidv4()}.mp4`;
     const path = `attachments/${name}.mp4`;
     const thumbnailPath = `attachments/thumbnails/${name}.png`;
     const [s3PreSingedLink, attachment] = await Promise.all([
