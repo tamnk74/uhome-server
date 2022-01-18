@@ -4,6 +4,18 @@ import { objectToCamel, objectToSnake } from '../../../helpers/Util';
 import Pagination from '../../../helpers/Pagination';
 
 export default class AuthController {
+  static async getUploadVideoLink(req, res, next) {
+    try {
+      const result = await IssueService.getUploadVideoLink({
+        user: req.user,
+      });
+
+      return res.status(200).json(objectToSnake(result));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async create(req, res, next) {
     try {
       const issue = await IssueService.create(req.user, {
