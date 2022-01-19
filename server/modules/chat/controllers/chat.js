@@ -164,9 +164,10 @@ export default class ChatController {
 
   static async addPromotion(req, res, next) {
     try {
-      const { files, user, chatChannel } = req;
+      const { user, chatChannel } = req;
+      const attachmentIds = get(req, 'body.attachmentIds', []);
 
-      await ChatService.addPromotion({ user, files, chatChannel });
+      await ChatService.addPromotion({ user, chatChannel, attachmentIds });
 
       return res.status(200).json({});
     } catch (e) {

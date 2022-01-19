@@ -32,24 +32,8 @@ import TransactionHistory from '../../../models/transactionHistory';
 import sequelize from '../../../databases/database';
 import EstimationMessage from '../../../models/estimationMessage';
 import Uploader from '../../../helpers/Uploader';
-import { fileSystemConfig } from '../../../config';
 import RequestSupporting from '../../../models/requestSupporting';
 import Acceptance from '../../../models/acceptance';
-
-const uploadPromotion = async (file) => {
-  const id = uuidv4();
-  const fileName = `${id}-${file.originalname}`;
-  // eslint-disable-next-line no-use-before-define
-  const path = `${ChatService.filePath}/${fileName}`;
-
-  await Uploader.upload(file, {
-    path,
-    'x-amz-meta-mimeType': file.mimetype,
-    'x-amz-meta-size': file.size.toString(),
-  });
-
-  return { path: `${fileSystemConfig.clout_front}/${path}` };
-};
 
 const getIssueCost = async (receiveIssue, estimationMessage) => {
   const { issueId } = receiveIssue;
@@ -978,10 +962,24 @@ export default class ChatService {
     });
   }
 
-  static async addPromotion({ user, files = [], chatChannel }) {
-    const promises = files.map((file) => uploadPromotion(file));
+  static async addPromotion({ user, chatChannel, attachmentIds }) {
+    const { issue } = chatChannel;
+    const [attachments] = await Promise.all([
+      Attachment.findAll({
+        where: {
+          id: attachmentIds || [],
+        },
+        attributes: ['id', Attachment.buildUrlAttribuiteSelect(), 'mime_type'],
+        raw: true,
+      }),
+      issue.addAttachments(attachmentIds),
+    ]);
 
-    const promotions = await Promise.all(promises);
+    const promotions = attachments.map((item) => ({
+      path: item.url,
+      mimeType: item.mime_type,
+    }));
+
     const messageAttributes = {
       promotions,
     };
