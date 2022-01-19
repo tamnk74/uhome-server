@@ -6,3 +6,4 @@ export * from './acceptanceIssueSchema';
 export * from './continueChattingSchema';
 export * from './joinChatSchema';
 export * from './uploadVideoSchema';
+export * from './addPromotionSchema';
