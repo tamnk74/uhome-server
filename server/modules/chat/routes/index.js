@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import multer from 'multer';
 import ChatController from '../controllers/chat';
 import { auth, validator, active } from '../../../middlewares';
 import {
@@ -11,6 +10,7 @@ import {
   continueChattingchema,
   joinChatSchema,
   uploadVideoSchema,
+  addPromotionSchema,
 } from '../schema';
 import {
   verifyChannel,
@@ -21,13 +21,6 @@ import {
 } from '../middlewares';
 
 const router = Router();
-
-const storage = multer.memoryStorage({
-  destination(req, file, callback) {
-    callback(null, '');
-  },
-});
-const multipleUpload = multer({ storage }).array('files');
 
 router.post(
   '/chat/chat-groups',
@@ -133,8 +126,8 @@ router.post(
   '/chat/:channelId/promotions',
   auth(),
   active,
+  validator(addPromotionSchema),
   verifyChannel,
-  multipleUpload,
   ChatController.addPromotion
 );
 
