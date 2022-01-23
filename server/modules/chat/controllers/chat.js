@@ -48,6 +48,7 @@ export default class ChatController {
       const result = await ChatService.getUploadVideoLink({
         chatChannel: req.chatChannel,
         user: req.user,
+        thumbnail: req.thumbnail,
       });
 
       return res.status(200).json(objectToSnake(result));

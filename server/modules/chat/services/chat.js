@@ -256,17 +256,24 @@ export default class ChatService {
     return ReceiveIssue.findBySupporterIds(issue.id, supporterIds);
   }
 
-  static async getUploadVideoLink({ chatChannel }) {
-    const name = `${uuidv4()}.mp4`;
-    const path = `chat/${chatChannel.id}/videos/${name}`;
+  static async getUploadVideoLink({ chatChannel, thumbnail }) {
+    const name = `${uuidv4()}`;
+    const path = `chat/${chatChannel.id}/videos/${name}.mp4`;
+    const thumbnailPath = `chat/${chatChannel.id}/videos/thumbnails/${name}.png`;
     const [s3PreSingedLink, attachment] = await Promise.all([
       Uploader.preSignedUrl({
         path,
       }),
       Attachment.create({
         path,
+        thumbnail: thumbnailPath,
         name,
         mimeType: 'video/mp4',
+      }),
+      Uploader.upload(thumbnail, {
+        path: thumbnailPath,
+        'x-amz-meta-mimeType': thumbnail.mimetype,
+        'x-amz-meta-size': thumbnail.size.toString(),
       }),
     ]);
 

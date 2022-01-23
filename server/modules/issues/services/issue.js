@@ -26,17 +26,24 @@ import EventScope from '../../../models/eventScope';
 import Attachment from '../../../models/attachment';
 
 export default class IssueService {
-  static async getUploadVideoLink() {
-    const name = `${uuidv4()}.mp4`;
-    const path = `attachments/${name}`;
+  static async getUploadVideoLink({ thumbnail }) {
+    const name = `${uuidv4()}`;
+    const path = `attachments/${name}.mp4`;
+    const thumbnailPath = `attachments/thumbnails/${name}.png`;
     const [s3PreSingedLink, attachment] = await Promise.all([
       Uploader.preSignedUrl({
         path,
       }),
       Attachment.create({
         path,
+        thumbnail: thumbnailPath,
         name,
         mimeType: 'video/mp4',
+      }),
+      Uploader.upload(thumbnail, {
+        path: thumbnailPath,
+        'x-amz-meta-mimeType': thumbnail.mimetype,
+        'x-amz-meta-size': thumbnail.size.toString(),
       }),
     ]);
 

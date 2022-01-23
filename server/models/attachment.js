@@ -12,6 +12,13 @@ class Attachment extends BaseModel {
   static buildUrlAttribuiteSelect() {
     return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}/', path)`), 'url'];
   }
+
+  static getThumbnailAttr() {
+    return [
+      Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}/', thumbnail)`),
+      'thumbnail_path',
+    ];
+  }
 }
 
 Attachment.init(
@@ -23,6 +30,10 @@ Attachment.init(
     path: {
       type: Sequelize.STRING,
       allowNull: false,
+    },
+    thumbnail: {
+      type: Sequelize.STRING,
+      allowNull: true,
     },
     issueId: {
       type: Sequelize.UUID,
