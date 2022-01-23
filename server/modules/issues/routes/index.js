@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import multer from 'multer';
 import IssueController from '../controllers/issue';
 import { auth, validator, active, verified } from '../../../middlewares';
 import {
@@ -12,6 +13,7 @@ import {
   verifySaleEvent,
   verifyPhoneNumber,
   verifyWorkerLocation,
+  verifyThumbnail,
 } from '../middlewares';
 import {
   createIssueSchema,
@@ -25,7 +27,22 @@ import { verifyLocation } from '../middlewares/verifyLocation';
 
 const router = Router();
 
-router.get('/issues/videos', auth('createIssue'), active, IssueController.getUploadVideoLink);
+const storage = multer.memoryStorage({
+  destination(req, file, callback) {
+    callback(null, '');
+  },
+});
+const uploadThumbnail = multer({ storage }).single('thumbnail');
+
+router.post(
+  '/issues/videos/presigned-url',
+  auth('createIssue'),
+  active,
+  uploadThumbnail,
+  verifyThumbnail,
+  IssueController.getUploadVideoLink
+);
+
 router.post(
   '/issues',
   auth('createIssue'),
