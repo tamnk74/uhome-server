@@ -28,7 +28,7 @@ import Attachment from '../../../models/attachment';
 export default class IssueService {
   static async getUploadVideoLink() {
     const name = `${uuidv4()}.mp4`;
-    const path = `/attachments/${name}`;
+    const path = `attachments/${name}`;
     const [s3PreSingedLink, attachment] = await Promise.all([
       Uploader.preSignedUrl({
         path,
