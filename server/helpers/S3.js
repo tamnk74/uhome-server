@@ -40,7 +40,8 @@ export default class S3 {
     const command = new PutObjectCommand({
       Bucket: fileSystemConfig[this.driver].bucket_name,
       Key: path,
-      Body: '',
+      ContentType: 'video/mp4',
+      ACL: 'public-read',
     });
 
     const signedUrl = await getSignedUrl(this.s3Client, command, {
