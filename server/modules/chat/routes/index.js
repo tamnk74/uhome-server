@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import multer from 'multer';
+import { verifyThumbnail } from 'modules/issues/middlewares';
 import ChatController from '../controllers/chat';
 import { auth, validator, active } from '../../../middlewares';
 import {
@@ -49,11 +51,20 @@ router.get(
   ChatController.requestCommand
 );
 
-router.get(
-  '/chat/:channelId/videos',
+const storage = multer.memoryStorage({
+  destination(req, file, callback) {
+    callback(null, '');
+  },
+});
+const uploadThumbnail = multer({ storage }).single('thumbnail');
+
+router.post(
+  '/chat/:channelId/videos/presigned-url',
   auth('actionOnChat'),
   active,
   verifyChannel,
+  uploadThumbnail,
+  verifyThumbnail,
   ChatController.getUploadVideoLink
 );
 

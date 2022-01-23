@@ -8,6 +8,7 @@ export default class AuthController {
     try {
       const result = await IssueService.getUploadVideoLink({
         user: req.user,
+        thumbnail: req.thumbnail,
       });
 
       return res.status(200).json(objectToSnake(result));
