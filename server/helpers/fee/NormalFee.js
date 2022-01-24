@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import _, { sum } from 'lodash';
 import isBetween from 'dayjs/plugin/isBetween';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
@@ -8,6 +9,29 @@ dayjs.extend(isBetween);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const buildFactor = (configuration, isHoliday) => {
+  const factors = [1];
+
+  if (isHoliday) {
+    factors.push(_.get(configuration, 'holiday', 0));
+  }
+
+  return factors;
+};
+
+const getWorkingTimeSlots = (workingTimes = [], holidays = [], configuration) => {
+  return workingTimes.map((item) => {
+    const startTime = dayjs(item.startTime);
+    const endTime = dayjs(item.endTime);
+    const isHoliday = Fee.isInHoliday(startTime, endTime, holidays);
+
+    return {
+      totalTime: endTime.diff(startTime, 'hour', true),
+      factors: buildFactor(configuration, isHoliday),
+    };
+  });
+};
+
 export default class NormalFee extends Fee {
   constructor(workingTimes = [], totalTime = 0, numOfWorker = 1) {
     super();
@@ -16,31 +40,20 @@ export default class NormalFee extends Fee {
     this.numOfWorker = numOfWorker;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  getBasicCost(classFee) {
-    const actualTimes = this.getActualWorkingTimes();
-    let total = 0;
+  getBasicCost(configuration, classFee, holidays) {
+    const workingTimeSlots = getWorkingTimeSlots(this.workingTimes, holidays, configuration);
+    const totals = workingTimeSlots.map((item) => {
+      const timeSlotCost = (classFee.normalCost / 8) * (item.totalTime > 8 ? 8 : item.totalTime);
+      const factor = sum(item.factors);
 
-    for (let index = 0; index < actualTimes.length; index++) {
-      const element = actualTimes[index];
-      total += (classFee.normalCost / 8) * (element > 8 ? 8 : element);
-    }
-
-    return total * this.numOfWorker;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getActualWorkingTimes() {
-    return this.workingTimes.map((item) => {
-      const startTime = dayjs(item.startTime);
-      const endTime = dayjs(item.endTime);
-
-      return endTime.diff(startTime, 'hour', true);
+      return timeSlotCost * factor;
     });
+
+    return this.numOfWorker * sum(totals);
   }
 
-  getCost(configuration, classFee, teamConfiguration) {
-    const basicCost = this.getBasicCost(classFee);
+  getCost(configuration, classFee, teamConfiguration, holidays) {
+    const basicCost = this.getBasicCost(configuration, classFee, holidays);
 
     return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);
   }

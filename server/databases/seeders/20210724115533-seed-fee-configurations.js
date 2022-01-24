@@ -8,7 +8,7 @@ module.exports = {
       distance: 0.1,
       nightTime: 0.5,
       urgentTime: 1,
-      holiday: 1.5,
+      holiday: 0.5,
       experienceFee: 0.95,
     };
 
