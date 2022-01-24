@@ -14,10 +14,10 @@ export default class FeeFactory {
   static getCost(
     type,
     { configuration, classFee, teamConfiguration },
-    { workingTimes, totalTime, numOfWorker }
+    { workingTimes, totalTime, numOfWorker, holidays }
   ) {
     const instance = FeeFactory.getInstance(type, workingTimes, totalTime, numOfWorker);
 
-    return instance.getCost(configuration, classFee, teamConfiguration);
+    return instance.getCost(configuration, classFee, teamConfiguration, holidays);
   }
 }

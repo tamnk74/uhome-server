@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import dayjs from 'dayjs';
 
 export default class Fee {
   // eslint-disable-next-line class-methods-use-this
@@ -62,4 +63,16 @@ export default class Fee {
       },
     };
   }
+
+  static isInHoliday = (starTime, endTime, holidays) => {
+    for (let index = 0; index < holidays.length; index++) {
+      const holiday = holidays[index];
+      const holidayFrom = dayjs(holiday.from);
+      if (starTime.isBefore(holiday.to, 'minute') && holidayFrom.isBefore(endTime, 'minute')) {
+        return true;
+      }
+    }
+
+    return false;
+  };
 }
