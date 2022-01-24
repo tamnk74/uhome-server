@@ -1,15 +1,8 @@
-import ApiError from '../../../errors/ApiError';
+import errorFactory from 'errors/ErrorFactory';
 
 export const verifyThumbnail = (req, res, next) => {
   if (!req.file) {
-    return next(
-      new ApiError({
-        message: 'thumbnail is requied',
-        code: 'FILE-0003',
-        status: 400,
-        detail: 'thumbnail is requied',
-      })
-    );
+    return next(errorFactory.getError('FILE-0003'));
   }
 
   if (
@@ -17,14 +10,7 @@ export const verifyThumbnail = (req, res, next) => {
       req.file.mimetype
     )
   ) {
-    return next(
-      new ApiError({
-        message: 'thumbnail must be a file',
-        code: 'FILE-0004',
-        status: 400,
-        detail: 'thumbnail must be a file',
-      })
-    );
+    return next(errorFactory.getError('FILE-0004'));
   }
 
   req.thumbnail = req.file;
