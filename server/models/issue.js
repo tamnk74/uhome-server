@@ -168,6 +168,7 @@ Issue.buildRelation = (categoryIds = [], duplicating = true) => {
         'mimeType',
         'createdAt',
         'updatedAt',
+        'thumbnail',
         'issueId',
         'path',
         Attachment.buildUrlAttribuiteSelect(),
