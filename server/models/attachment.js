@@ -21,6 +21,13 @@ class Attachment extends BaseModel {
       'thumbnail_path',
     ];
   }
+
+  static getThumbnailPath() {
+    return [
+      Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}/', 'thumbnail')`),
+      'thumbnail_path',
+    ];
+  }
 }
 
 Attachment.init(
