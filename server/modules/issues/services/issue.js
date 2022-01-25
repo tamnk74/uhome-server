@@ -157,7 +157,7 @@ export default class IssueService {
       },
       order: [
         ['updated_at', 'DESC'],
-        [Attachment, 'updated_at', 'DESC'],
+        [Attachment, 'created_at', 'DESC'],
       ],
       limit,
       offset,
