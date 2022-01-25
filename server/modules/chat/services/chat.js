@@ -493,7 +493,7 @@ export default class ChatService {
         where: {
           id: attachmentIds || [],
         },
-        attributes: ['id', Attachment.buildUrlAttribuiteSelect(), Attachment.getThumbnailAttr()],
+        attributes: ['id', Attachment.buildUrlAttribuiteSelect(), 'thumbnailPath'],
         raw: true,
       }),
       ChatMember.getSupporterIds(chatChannel.id),
@@ -768,7 +768,7 @@ export default class ChatService {
         where: {
           id: attachmentIds || [],
         },
-        attributes: ['id', Attachment.buildUrlAttribuiteSelect(), Attachment.getThumbnailAttr()],
+        attributes: ['id', Attachment.buildUrlAttribuiteSelect(), 'thumbnailPath'],
         raw: true,
       }),
       ChatMember.getSupporterIds(chatChannel.id),
@@ -976,12 +976,7 @@ export default class ChatService {
         where: {
           id: attachmentIds || [],
         },
-        attributes: [
-          'id',
-          Attachment.buildUrlAttribuiteSelect(),
-          Attachment.getThumbnailAttr(),
-          'mime_type',
-        ],
+        attributes: ['id', Attachment.buildUrlAttribuiteSelect(), 'thumbnailPath', 'mime_type'],
         raw: true,
       }),
       issue.addAttachments(attachmentIds),

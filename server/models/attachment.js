@@ -12,22 +12,6 @@ class Attachment extends BaseModel {
   static buildUrlAttribuiteSelect() {
     return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}/', path)`), 'url'];
   }
-
-  static getThumbnailAttr() {
-    return [
-      Sequelize.literal(
-        `CONCAT('${fileSystemConfig.clout_front}/', \`attachments\`.\`thumbnail\`)`
-      ),
-      'thumbnail_path',
-    ];
-  }
-
-  static getThumbnailPath() {
-    return [
-      Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}/', 'thumbnail')`),
-      'thumbnail_path',
-    ];
-  }
 }
 
 Attachment.init(
@@ -43,6 +27,15 @@ Attachment.init(
     thumbnail: {
       type: Sequelize.STRING,
       allowNull: true,
+    },
+    thumbnailPath: {
+      type: Sequelize.DataTypes.VIRTUAL,
+      get() {
+        return `${fileSystemConfig.clout_front}/${this.thumbnail}`;
+      },
+      set() {
+        throw new Error('Do not try to set the `fullName` value!');
+      },
     },
     issueId: {
       type: Sequelize.UUID,

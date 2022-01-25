@@ -171,7 +171,7 @@ Issue.buildRelation = (categoryIds = [], duplicating = true) => {
         'thumbnail',
         'issueId',
         'path',
-        Attachment.getThumbnailAttr(),
+        'thumbnailPath',
         Attachment.buildUrlAttribuiteSelect(),
       ],
       duplicating,
