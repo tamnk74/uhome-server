@@ -155,7 +155,10 @@ export default class IssueService {
           [Sequelize.literal(`(${isRequestedSQL})`), 'isRequested'],
         ],
       },
-      order: [['updated_at', 'DESC']],
+      order: [
+        ['updated_at', 'DESC'],
+        [Attachment, 'updated_at', 'DESC'],
+      ],
       limit,
       offset,
     });
