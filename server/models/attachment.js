@@ -31,10 +31,12 @@ Attachment.init(
     thumbnailPath: {
       type: Sequelize.DataTypes.VIRTUAL,
       get() {
-        return `${fileSystemConfig.clout_front}/${this.thumbnail}`;
+        return this.thumbnail
+          ? `${fileSystemConfig.clout_front}/${this.thumbnail}`
+          : this.thumbnail;
       },
       set() {
-        throw new Error('Do not try to set the `fullName` value!');
+        throw new Error('Do not try to set the `thumbnailPath` value!');
       },
     },
     issueId: {
