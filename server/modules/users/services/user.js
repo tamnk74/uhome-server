@@ -130,7 +130,7 @@ export default class Userervice {
                 'updatedAt',
                 'issueId',
                 'path',
-                Attachment.getThumbnailAttr(),
+                Attachment.getThumbnailPath(),
                 Attachment.buildUrlAttribuiteSelect(),
               ],
             },
