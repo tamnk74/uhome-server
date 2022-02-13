@@ -25,6 +25,7 @@ import TeamFeeConfiguration from '../../../models/teamFeeConfiguration';
 import EventScope from '../../../models/eventScope';
 import Attachment from '../../../models/attachment';
 import Holiday from '../../../models/holiday';
+import { googleMap } from '../../../helpers';
 
 export default class IssueService {
   static async getUploadVideoLink({ thumbnail }) {
@@ -164,11 +165,21 @@ export default class IssueService {
     });
   }
 
-  static async requestSupporting(user, issue, { message }) {
+  static async requestSupporting(user, issue, { message, lat, lon }) {
     if (issue.status !== issueStatus.OPEN) {
       throw new Error('ISSUE-0002');
     }
 
+    const distance = await googleMap.getDistance(
+      {
+        lat,
+        lng: lon,
+      },
+      {
+        lat: get(issue, 'lat'),
+        lng: get(issue, 'lon'),
+      }
+    );
     const requestSupporting = await RequestSupporting.findOrCreate({
       where: {
         userId: user.id,
@@ -177,6 +188,9 @@ export default class IssueService {
       defaults: {
         id: uuidv4(),
         message,
+        distance,
+        lat,
+        lon,
       },
     });
 
@@ -184,11 +198,14 @@ export default class IssueService {
       requestId: requestSupporting[0].id,
       userId: issue.createdBy,
     });
+
     return requestSupporting;
   }
 
   static async getRequestSupporting(query) {
     const { limit, offset, id } = query;
+    const feeConfigure = await FeeConfiguration.findOne();
+
     return User.findAndCountAll({
       include: [
         {
@@ -198,6 +215,10 @@ export default class IssueService {
           where: {
             issueId: id,
           },
+          attributes: [
+            ...RequestSupporting.getAttributes(),
+            [Sequelize.literal(`distance * ${get(feeConfigure, 'distance', 0)}`), 'distanceFee'],
+          ],
         },
         {
           model: UserProfile,

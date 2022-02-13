@@ -3,7 +3,11 @@ import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 
-class RequestSupporting extends BaseModel {}
+class RequestSupporting extends BaseModel {
+  static getAttributes() {
+    return ['id', 'userId', 'issueId', 'message', 'lat', 'lon', 'distance'];
+  }
+}
 
 RequestSupporting.init(
   {
@@ -24,6 +28,23 @@ RequestSupporting.init(
     message: {
       type: Sequelize.DataTypes.STRING,
       allowNull: true,
+    },
+    lat: {
+      type: Sequelize.DataTypes.FLOAT,
+      allowNull: true,
+    },
+    lon: {
+      type: Sequelize.DataTypes.FLOAT,
+      allowNull: true,
+    },
+    distance: {
+      type: Sequelize.DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0,
+    },
+    distanceFee: {
+      type: Sequelize.DataTypes.VIRTUAL,
+      defaultValue: 0,
     },
     createdAt: {
       type: Sequelize.DATE,

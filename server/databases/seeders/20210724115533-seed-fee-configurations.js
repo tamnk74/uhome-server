@@ -5,7 +5,7 @@ module.exports = {
     const data = {
       workerFee: 0.1,
       customerFee: 0,
-      distance: 0.1,
+      distance: 2000,
       nightTime: 0.5,
       urgentTime: 1,
       holiday: 0.5,

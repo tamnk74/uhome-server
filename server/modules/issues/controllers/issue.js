@@ -93,8 +93,13 @@ export default class AuthController {
       pagination.setTotal(requestSupports.count);
       return res.status(200).json({
         meta: pagination.getMeta(),
-        data: requestSupports.rows.map((item) =>
-          objectToSnake(
+        data: requestSupports.rows.map((item) => {
+          const requestSupporting = get(item, 'requestSupportings.[0]');
+          item.setDataValue('distance', get(requestSupporting, 'distance', 0));
+          const distanceFee = Math.ceil(get(requestSupporting, 'distanceFee', 0) / 1000) * 1000;
+          item.setDataValue('distanceFee', distanceFee);
+
+          return objectToSnake(
             omit(item.toJSON(), [
               'verify_code',
               'password',
@@ -103,8 +108,8 @@ export default class AuthController {
               'deletedAt',
               'requestSupportings',
             ])
-          )
-        ),
+          );
+        }),
       });
     } catch (e) {
       return next(e);
