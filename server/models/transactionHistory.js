@@ -87,7 +87,7 @@ TransactionHistory.init(
 TransactionHistory.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
-TransactionHistory.baseAttibutes = ['id', 'amount', 'type', 'method', 'currency', 'extra'];
+TransactionHistory.baseAttributes = ['id', 'amount', 'type', 'method', 'currency', 'extra'];
 TransactionHistory.belongsTo(User);
 TransactionHistory.belongsTo(Issue);
 TransactionHistory.belongsTo(User, { as: 'actor', foreignKey: 'actor_id' });

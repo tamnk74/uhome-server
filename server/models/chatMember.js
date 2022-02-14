@@ -64,7 +64,7 @@ ChatMember.init(
   }
 );
 
-ChatMember.baseAttibutes = ['id', 'friendlyName'];
+ChatMember.baseAttributes = ['id', 'friendlyName'];
 ChatMember.belongsTo(ChatChannel, { foreignKey: 'channelId', as: 'chatChannel' });
 
 ChatMember.beforeCreate((member) => {

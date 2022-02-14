@@ -47,7 +47,7 @@ export default class Userervice {
             'issueId',
             'path',
             'thumbnailPath',
-            Attachment.buildUrlAttribuiteSelect(),
+            Attachment.buildUrlAttributeSelect(),
           ],
         },
         {
@@ -74,7 +74,7 @@ export default class Userervice {
         ['msgAt', 'DESC'],
         ['updatedAt', 'DESC'],
       ],
-      attributes: Issue.baseAttibutes,
+      attributes: Issue.baseAttributes,
       limit,
       offset,
     });
@@ -131,7 +131,7 @@ export default class Userervice {
                 'issueId',
                 'path',
                 'thumbnailPath',
-                Attachment.buildUrlAttribuiteSelect(),
+                Attachment.buildUrlAttributeSelect(),
               ],
             },
             {
