@@ -49,6 +49,6 @@ FeeCategory.init(
 FeeCategory.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
-FeeCategory.baseAttibutes = ['id', 'min', 'max'];
+FeeCategory.baseAttributes = ['id', 'min', 'max'];
 
 module.exports = FeeCategory;

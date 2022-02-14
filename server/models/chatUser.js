@@ -56,7 +56,7 @@ ChatUser.init(
   }
 );
 
-ChatUser.baseAttibutes = ['id', 'friendlyName'];
+ChatUser.baseAttributes = ['id', 'friendlyName'];
 ChatUser.beforeCreate((user) => {
   user.id = uuidv4();
 });
