@@ -50,7 +50,7 @@ ChatChannel.init(
   }
 );
 
-ChatChannel.baseAttibutes = ['id', 'friendlyName'];
+ChatChannel.baseAttributes = ['id', 'friendlyName'];
 ChatChannel.belongsTo(Issue);
 
 ChatChannel.beforeCreate((channel) => {

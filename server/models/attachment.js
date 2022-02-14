@@ -9,7 +9,7 @@ class Attachment extends BaseModel {
     return ['name'];
   }
 
-  static buildUrlAttribuiteSelect() {
+  static buildUrlAttributeSelect() {
     return [Sequelize.literal(`CONCAT('${fileSystemConfig.clout_front}/', path)`), 'url'];
   }
 }
@@ -74,7 +74,7 @@ Attachment.init(
   }
 );
 
-Attachment.baseAttibutes = ['name', 'path', 'size', 'mime_type'];
+Attachment.baseAttributes = ['name', 'path', 'size', 'mimeType'];
 
 Attachment.beforeCreate((instance) => {
   instance.id = uuid.v4();

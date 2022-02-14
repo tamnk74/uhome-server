@@ -122,7 +122,7 @@ Event.prototype.getDiscountValue = function getDiscountValue(total) {
   return 0;
 };
 
-Event.baseAttibutes = [
+Event.baseAttributes = [
   'id',
   'type',
   'code',

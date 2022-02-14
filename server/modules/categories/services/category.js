@@ -6,7 +6,7 @@ export default class CategoryService {
     const options = Category.buildOptionQuery(query);
     return Category.findAndCountAll({
       ...options,
-      attributes: Category.baseAttibutes,
+      attributes: Category.baseAttributes,
       limit,
       offset,
     });

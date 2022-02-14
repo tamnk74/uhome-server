@@ -32,7 +32,7 @@ Version.prototype.getResponse = function getResponse() {
   };
 };
 
-Version.baseAttibutes = ['id', 'type', 'value'];
+Version.baseAttributes = ['id', 'type', 'value'];
 
 Version.beforeCreate((instance) => {
   instance.id = uuid.v4();

@@ -58,7 +58,7 @@ FeeConfiguration.init(
 FeeConfiguration.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
-FeeConfiguration.baseAttibutes = [
+FeeConfiguration.baseAttributes = [
   'id',
   'workerFee',
   'customerFee',
