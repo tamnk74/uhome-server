@@ -300,15 +300,24 @@ export default class IssueService {
         },
       }),
     ]);
-    const teamConfiguration = await TeamFeeConfiguration.findOne({
-      where: {
-        categoryId: feeCategory.categoryId,
-        minWorker: {
-          [Op.lte]: numOfWorker,
+
+    const [teamConfiguration, requestSupporting] = await Promise.all([
+      TeamFeeConfiguration.findOne({
+        where: {
+          categoryId: feeCategory.categoryId,
+          minWorker: {
+            [Op.lte]: numOfWorker,
+          },
         },
-      },
-      order: [['minWorker', 'DESC']],
-    });
+        order: [['minWorker', 'DESC']],
+      }),
+      RequestSupporting.findOne({
+        where: {
+          issueId: issue.id,
+          userId: user.id,
+        },
+      }),
+    ]);
 
     const cost = FeeFactory.getCost(
       type,
@@ -325,6 +334,10 @@ export default class IssueService {
       }
     );
 
+    const distance = get(requestSupporting, 'distance', 0);
+    const configDistanceFee = get(feeConfiguration, 'distance', 0);
+    const distanceFee = Math.ceil((distance * configDistanceFee) / 1000) * 1000;
+
     set(data, 'worker', cost.worker);
     set(data, 'customer', cost.customer);
     const discount = saleEvent ? saleEvent.getDiscount(cost.worker.cost, cost.customer.cost) : null;
@@ -332,6 +345,8 @@ export default class IssueService {
     set(data, 'customer.discount', get(discount, 'customer', 0));
     set(data, 'issue.status', issue.status);
     set(data, 'workingTimes', IssueService.convertEstimateTimeToUTC(workingTimes));
+    set(data, 'worker.distanceFee', distanceFee);
+    set(data, 'customer.distanceFee', -distanceFee);
 
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
@@ -339,6 +354,7 @@ export default class IssueService {
       issue,
       data
     );
+
     await IssueService.updateEstimationMessage(
       command.SUBMIT_ESTIMATION_TIME,
       channel,
