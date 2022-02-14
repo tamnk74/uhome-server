@@ -59,9 +59,9 @@ const getIssueCost = async (receiveIssue, estimationMessage) => {
   const estimationMessageData = get(estimationMessage, 'data', {});
   const worker = get(estimationMessageData, 'worker', {});
   const customer = get(estimationMessageData, 'customer', {});
-  const totalCost = customer.cost + totalMaterialCost;
+  const totalCost = customer.cost + totalMaterialCost + get(worker, 'distanceFee', 0);
   const totalCustomerPay = totalCost - customer.discount - customer.fee;
-  const totalWorkerReceive = worker.cost + totalMaterialCost;
+  const totalWorkerReceive = worker.cost + totalMaterialCost + get(worker, 'distanceFee', 0);
   const amountIntoWalletWorker = totalWorkerReceive - totalCustomerPay - worker.fee;
 
   set(worker, 'amountIntoWallet', amountIntoWalletWorker);
