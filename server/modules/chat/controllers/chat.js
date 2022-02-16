@@ -212,4 +212,26 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async survey(req, res, next) {
+    try {
+      const { user, chatChannel, body: data } = req;
+      await ChatService.survey({ user, chatChannel, data });
+
+      return res.status(204).send();
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async approveSurvey(req, res, next) {
+    try {
+      const { user, chatChannel, body: data } = req;
+      await ChatService.approveSurvey({ user, chatChannel, data });
+
+      return res.status(204).send();
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
