@@ -13,6 +13,8 @@ import {
   joinChatSchema,
   uploadVideoSchema,
   addPromotionSchema,
+  surveySchema,
+  approveSurveySchema,
 } from '../schema';
 import {
   verifyChannel,
@@ -157,6 +159,24 @@ router.post(
   active,
   validator(joinChatSchema),
   ChatController.joinChatHistory
+);
+
+router.post(
+  '/chat/:channelId/surveys',
+  auth('joinChat'),
+  active,
+  validator(surveySchema),
+  verifyChannel,
+  ChatController.survey
+);
+
+router.post(
+  '/chat/:channelId/approval-surveys',
+  auth('joinChat'),
+  active,
+  validator(approveSurveySchema),
+  verifyChannel,
+  ChatController.approveSurvey
 );
 
 export default router;

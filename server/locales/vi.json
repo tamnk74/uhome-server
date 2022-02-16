@@ -20,7 +20,9 @@
     "update_progresss": "Tôi gửi một số hình ảnh",
     "completed": "Hoàn thành công việc",
     "request_confirm_payment": "Yêu cầu xác nhận thanh toán",
-    "confirmed_payment": "Đã thanh toán tiền. Công việc hoàn tất"
+    "confirmed_payment": "Đã thanh toán tiền. Công việc hoàn tất",
+    "request_survey": "Tôi cần kiểm tra trực tiếp",
+    "approval_survey": "Tôi đồng ý cho bạn đến kiểm tra trực tiếp"
   },
   "otp": {
     "branch": "U-HOME",
@@ -50,6 +52,8 @@
     "added_promotion": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
     "completed": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
     "request_confirm_payment": "Bạn có một yêu cầu xác nhận thanh toán công việc",
-    "confirmed_payment": "Công việc {{title}} đã cập nhật. Hãy kiểm tra."
+    "confirmed_payment": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
+    "request_survey": "Công việc {{title}} đã cập nhật. Hãy kiểm tra.",
+    "approval_survey": "Công việc {{title}} đã cập nhật. Hãy kiểm tra."
   }
 }

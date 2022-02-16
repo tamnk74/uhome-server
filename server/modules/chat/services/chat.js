@@ -21,7 +21,7 @@ import {
   unitTime,
 } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
-import { notificationQueue } from '../../../helpers/Queue';
+import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
 import Event from '../../../models/event';
 import Attachment from '../../../models/attachment';
@@ -34,6 +34,7 @@ import EstimationMessage from '../../../models/estimationMessage';
 import Uploader from '../../../helpers/Uploader';
 import RequestSupporting from '../../../models/requestSupporting';
 import Acceptance from '../../../models/acceptance';
+import Survey from '../../../models/survey';
 
 const getIssueCost = async (receiveIssue, estimationMessage) => {
   const { issueId } = receiveIssue;
@@ -1230,5 +1231,55 @@ export default class ChatService {
     authorChat.setDataValue('member', member.toChatActor());
 
     return authorChat;
+  }
+
+  static async survey({ user, chatChannel, data }) {
+    const [message, surveys] = await Promise.all([
+      this.sendMessage(command.REQUEST_SURVEY, chatChannel, user, null, data),
+      Survey.findAll({
+        channelId: chatChannel.id,
+        status: issueStatus.OPEN,
+      }),
+    ]);
+
+    surveys.forEach((item) => {
+      chatMessageQueue.add('update_message', {
+        sid: item.messageSid,
+        attributes: {
+          is_expired: true,
+        },
+        channelSid: chatChannel.channelSid,
+      });
+    });
+
+    await Survey.updateOrCreate(
+      {
+        userId: user.id,
+        channelId: chatChannel.id,
+      },
+      {
+        messageSid: message.sid,
+        channelId: chatChannel.id,
+        status: issueStatus.OPEN,
+        data,
+      }
+    );
+  }
+
+  static async approveSurvey({ user, chatChannel, data }) {
+    const { messageId } = data;
+    const survey = await Survey.findOne({
+      messageId,
+    });
+
+    await this.sendMessage(
+      command.APPROVAL_REQUEST_SURVEY,
+      chatChannel,
+      user,
+      messageId,
+      get(survey, 'data', {})
+    );
+
+    await survey.update({ status: issueStatus.APPROVAL });
   }
 }

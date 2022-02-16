@@ -19,6 +19,8 @@ export const command = Object.freeze({
   COMPLETED: 'COMPLETED',
   REQUEST_CONFIRM_PAYMENT: 'REQUEST_CONFIRM_PAYMENT',
   CONFIRMED_PAYMENT: 'CONFIRMED_PAYMENT',
+  REQUEST_SURVEY: 'REQUEST_SURVEY',
+  APPROVAL_REQUEST_SURVEY: 'APPROVAL_REQUEST_SURVEY',
 });
 
 export const commandMessage = Object.freeze({
@@ -42,6 +44,8 @@ export const commandMessage = Object.freeze({
   COMPLETED: 'chat.completed',
   REQUEST_CONFIRM_PAYMENT: 'chat.request_confirm_payment',
   CONFIRMED_PAYMENT: 'chat.confirmed_payment',
+  REQUEST_SURVEY: 'chat.request_survey',
+  APPROVAL_REQUEST_SURVEY: 'chat.approval_survey',
 });
 
 export const commandRequests = [
@@ -54,6 +58,7 @@ export const commandRequests = [
   command.CONTINUE_CHATTING,
   command.REQUEST_ADD_MORE_INFORMATION,
   command.REQUEST_CONFIRM_PAYMENT,
+  command.REQUEST_SURVEY,
 ];
 
 export const notificationMessage = Object.freeze({
@@ -77,6 +82,8 @@ export const notificationMessage = Object.freeze({
   COMPLETED: 'notification.completed',
   REQUEST_CONFIRM_PAYMENT: 'notification.request_confirm_payment',
   CONFIRMED_PAYMENT: 'notification.confirmed_payment',
+  REQUEST_SURVEY: 'notification.request_survey',
+  APPROVAL_REQUEST_SURVEY: 'notification.approval_survey',
 });
 
 export const estimationMessageStatus = Object.freeze({
