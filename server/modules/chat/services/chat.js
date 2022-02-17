@@ -1003,14 +1003,14 @@ export default class ChatService {
 
     const promotions = attachments.map((item) => ({
       path: item.url,
-      mimeType: item.mime_type,
+      mimeType: item.mimeType,
     }));
 
     const messageAttributes = {
       promotions,
     };
 
-    await this.sendMessage(command.ADDED_PROMOTION, chatChannel, user, null, messageAttributes);
+    this.sendMessage(command.ADDED_PROMOTION, chatChannel, user, null, messageAttributes);
   }
 
   /**
