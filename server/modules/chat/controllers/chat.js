@@ -97,9 +97,9 @@ export default class ChatController {
     }
   }
 
-  static async trakingProgress(req, res, next) {
+  static async trackingProgress(req, res, next) {
     try {
-      const receiveIssue = await ChatService.trakingProgress({
+      const receiveIssue = await ChatService.trackingProgress({
         chatChannel: req.chatChannel,
         user: req.user,
         data: req.body,
