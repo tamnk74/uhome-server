@@ -485,7 +485,7 @@ export default class ChatService {
     return receiveIssue;
   }
 
-  static async trakingProgress({ chatChannel, user, data }) {
+  static async trackingProgress({ chatChannel, user, data }) {
     const { attachmentIds, content = '', messageSid } = data;
 
     const { issue } = chatChannel;
@@ -494,14 +494,7 @@ export default class ChatService {
         where: {
           id: attachmentIds || [],
         },
-        attributes: [
-          'id',
-          Attachment.buildUrlAttributeSelect(),
-          'thumbnailPath',
-          'mimeType',
-          'name',
-        ],
-        raw: true,
+        attributes: ['id', 'path', 'url', 'thumbnailPath', 'mimeType', 'name', 'thumbnail'],
       }),
       ChatMember.getSupporterIds(chatChannel.id),
       issue.addAttachments(attachmentIds),
@@ -509,7 +502,9 @@ export default class ChatService {
 
     const messageAttributes = {
       content,
-      attachments,
+      attachments: attachments.map((item) =>
+        pick(item, ['id', 'url', 'thumbnailPath', 'mimeType', 'name'])
+      ),
       issue: {
         status: issue.status,
       },
@@ -775,14 +770,7 @@ export default class ChatService {
         where: {
           id: attachmentIds || [],
         },
-        attributes: [
-          'id',
-          Attachment.buildUrlAttributeSelect(),
-          'thumbnailPath',
-          'mimeType',
-          'name',
-        ],
-        raw: true,
+        attributes: ['id', 'path', 'url', 'thumbnail', 'thumbnailPath', 'mimeType', 'name'],
       }),
       ChatMember.getSupporterIds(chatChannel.id),
       issue.addAttachments(attachmentIds),
@@ -790,7 +778,9 @@ export default class ChatService {
 
     const messageAttributes = {
       content,
-      attachments,
+      attachments: attachments.map((item) =>
+        pick(item, ['id', 'url', 'thumbnailPath', 'mimeType', 'name'])
+      ),
       issue: {
         status: chatChannel.issue.status,
       },
@@ -989,14 +979,7 @@ export default class ChatService {
         where: {
           id: attachmentIds || [],
         },
-        attributes: [
-          'id',
-          Attachment.buildUrlAttributeSelect(),
-          'thumbnailPath',
-          'mimeType',
-          'name',
-        ],
-        raw: true,
+        attributes: ['id', 'url', 'thumbnail', 'thumbnailPath', 'mimeType', 'name', 'path'],
       }),
       issue.addAttachments(attachmentIds),
     ]);
@@ -1005,13 +988,14 @@ export default class ChatService {
       path: item.url,
       mimeType: item.mimeType,
       thumbnailPath: item.thumbnailPath,
+      name: item.name,
     }));
 
     const messageAttributes = {
       promotions,
     };
 
-    this.sendMessage(command.ADDED_PROMOTION, chatChannel, user, null, messageAttributes);
+    await this.sendMessage(command.ADDED_PROMOTION, chatChannel, user, null, messageAttributes);
   }
 
   /**

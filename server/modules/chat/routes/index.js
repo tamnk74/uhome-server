@@ -103,7 +103,7 @@ router.post(
   active,
   validator(trackingSchema),
   verifyChannel,
-  ChatController.trakingProgress
+  ChatController.trackingProgress
 );
 
 router.post(

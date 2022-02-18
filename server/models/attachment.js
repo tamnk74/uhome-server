@@ -39,6 +39,15 @@ Attachment.init(
         throw new Error('Do not try to set the `thumbnailPath` value!');
       },
     },
+    url: {
+      type: Sequelize.DataTypes.VIRTUAL,
+      get() {
+        return this.path ? `${fileSystemConfig.clout_front}/${this.path}` : this.path;
+      },
+      set() {
+        throw new Error('Do not try to set the `url` value!');
+      },
+    },
     issueId: {
       type: Sequelize.UUID,
       references: { model: 'Issue', key: 'id' },
@@ -54,11 +63,11 @@ Attachment.init(
     },
     createdAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     deletedAt: {
       type: Sequelize.DATE,
