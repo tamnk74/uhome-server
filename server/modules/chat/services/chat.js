@@ -1004,6 +1004,7 @@ export default class ChatService {
     const promotions = attachments.map((item) => ({
       path: item.url,
       mimeType: item.mimeType,
+      thumbnailPath: item.thumbnailPath,
     }));
 
     const messageAttributes = {
