@@ -12,7 +12,7 @@ module.exports = {
       queryInterface.addColumn('receive_issues', 'customer_fee', {
         type: Sequelize.DECIMAL(10, 2),
         after: 'status',
-        defautValue: 0,
+        defaultValue: 0,
       }),
       queryInterface.renameColumn('receive_issues', 'cost', 'worker_fee'),
     ]);

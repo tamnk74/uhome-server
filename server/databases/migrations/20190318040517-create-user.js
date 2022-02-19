@@ -37,7 +37,7 @@ module.exports = {
       role: {
         type: Sequelize.ENUM('ADMIN', 'USER'),
         allowNull: false,
-        defautValue: 'USER',
+        defaultValue: 'USER',
       },
       status: {
         type: Sequelize.INTEGER,
@@ -46,11 +46,11 @@ module.exports = {
       },
       created_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       updated_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       deleted_at: {
         type: Sequelize.DATE,

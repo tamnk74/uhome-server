@@ -23,11 +23,11 @@ module.exports = {
       },
       created_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       updated_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       deleted_at: {
         type: Sequelize.DATE,
