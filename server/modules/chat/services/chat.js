@@ -495,6 +495,7 @@ export default class ChatService {
           id: attachmentIds || [],
         },
         attributes: ['id', 'path', 'url', 'thumbnailPath', 'mimeType', 'name', 'thumbnail'],
+        order: [['createdAt', 'ASC']],
       }),
       ChatMember.getSupporterIds(chatChannel.id),
       issue.addAttachments(attachmentIds),
@@ -771,6 +772,7 @@ export default class ChatService {
           id: attachmentIds || [],
         },
         attributes: ['id', 'path', 'url', 'thumbnail', 'thumbnailPath', 'mimeType', 'name'],
+        order: [['createdAt', 'ASC']],
       }),
       ChatMember.getSupporterIds(chatChannel.id),
       issue.addAttachments(attachmentIds),
@@ -980,6 +982,7 @@ export default class ChatService {
           id: attachmentIds || [],
         },
         attributes: ['id', 'url', 'thumbnail', 'thumbnailPath', 'mimeType', 'name', 'path'],
+        order: [['createdAt', 'ASC']],
       }),
       issue.addAttachments(attachmentIds),
     ]);
