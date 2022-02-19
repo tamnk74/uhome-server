@@ -27,23 +27,23 @@ module.exports = {
       },
       from: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       to: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       status: {
         type: Sequelize.DataTypes.TINYINT,
-        defautValue: 0,
+        defaultValue: 0,
       },
       created_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       updated_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       deleted_at: {
         type: Sequelize.DATE,

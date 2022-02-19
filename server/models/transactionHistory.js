@@ -48,7 +48,7 @@ TransactionHistory.init(
     currency: {
       type: Sequelize.ENUM('VND', 'USD'),
       allowNull: false,
-      defautValue: 'VND',
+      defaultValue: 'VND',
     },
     extra: {
       type: Sequelize.DataTypes.JSON,

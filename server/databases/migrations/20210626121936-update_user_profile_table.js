@@ -3,7 +3,7 @@ module.exports = {
     return queryInterface.addColumn('user_profiles', 'account_balance', {
       type: Sequelize.DataTypes.DECIMAL(12, 2),
       allowNull: false,
-      defautValue: 0,
+      defaultValue: 0,
     });
   },
 

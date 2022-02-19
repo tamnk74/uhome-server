@@ -3,7 +3,7 @@ module.exports = {
     await queryInterface.addColumn('events', 'limit', Sequelize.DataTypes.DECIMAL(12, 2), {
       allowNull: false,
       after: 'image',
-      defautValue: -1,
+      defaultValue: -1,
     });
     await queryInterface.renameColumn('user_events', 'status', 'limit');
   },

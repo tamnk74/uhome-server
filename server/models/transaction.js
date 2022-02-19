@@ -16,12 +16,12 @@ Transaction.init(
     type: {
       type: Sequelize.ENUM('INBOUND', 'OUTBOUND'),
       allowNull: false,
-      defautValue: 'INBOUND',
+      defaultValue: 'INBOUND',
     },
     method: {
       type: Sequelize.ENUM('system', 'momo'),
       allowNull: false,
-      defautValue: 'system',
+      defaultValue: 'system',
     },
     transid: {
       type: Sequelize.DataTypes.STRING(36),
@@ -35,25 +35,25 @@ Transaction.init(
     fee: {
       type: Sequelize.DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defautValue: 0,
+      defaultValue: 0,
     },
     currency: {
       type: Sequelize.ENUM('VND', 'USD'),
       allowNull: false,
-      defautValue: 'VND',
+      defaultValue: 'VND',
     },
     extra: {
       type: Sequelize.DataTypes.JSON,
       allowNull: false,
-      defautValue: '{}',
+      defaultValue: '{}',
     },
     createdAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     deletedAt: {
       type: Sequelize.DATE,

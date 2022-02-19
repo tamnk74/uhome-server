@@ -34,20 +34,20 @@ Payment.init(
     currency: {
       type: Sequelize.ENUM('VND', 'USD'),
       allowNull: false,
-      defautValue: 'VND',
+      defaultValue: 'VND',
     },
     status: {
       type: Sequelize.ENUM('OPEN', 'PAID'),
       allowNull: false,
-      defautValue: 'OPEN',
+      defaultValue: 'OPEN',
     },
     createdAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     deletedAt: {
       type: Sequelize.DATE,
