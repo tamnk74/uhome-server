@@ -48,20 +48,20 @@ module.exports = {
       currency: {
         type: Sequelize.ENUM('VND', 'USD'),
         allowNull: false,
-        defautValue: 'VND',
+        defaultValue: 'VND',
       },
       status: {
         type: Sequelize.ENUM('OPEN', 'PAID'),
         allowNull: false,
-        defautValue: 'OPEN',
+        defaultValue: 'OPEN',
       },
       created_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       updated_at: {
         type: Sequelize.DATE,
-        defautValue: Sequelize.NOW,
+        defaultValue: Sequelize.NOW,
       },
       deleted_at: {
         type: Sequelize.DATE,

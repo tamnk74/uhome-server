@@ -5,19 +5,19 @@ module.exports = {
         type: Sequelize.DataTypes.DECIMAL(12, 2),
         allowNull: false,
         after: 'customer_fee',
-        defautValue: 0,
+        defaultValue: 0,
       }),
       queryInterface.addColumn('transaction_histories', 'discount', {
         type: Sequelize.DataTypes.DECIMAL(12, 2),
         allowNull: false,
         after: 'amount',
-        defautValue: 0,
+        defaultValue: 0,
       }),
       queryInterface.addColumn('transaction_histories', 'total', {
         type: Sequelize.DataTypes.DECIMAL(12, 2),
         allowNull: false,
         after: 'amount',
-        defautValue: 0,
+        defaultValue: 0,
       }),
     ]),
 

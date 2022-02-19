@@ -17,7 +17,7 @@ UserEvent.init(
     },
     limit: {
       type: Sequelize.DataTypes.TINYINT,
-      defautValue: 0,
+      defaultValue: 0,
     },
     createdAt: {
       defaultValue: Sequelize.NOW,
