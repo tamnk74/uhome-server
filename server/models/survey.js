@@ -12,6 +12,10 @@ Survey.init(
       type: Sequelize.DataTypes.UUID,
       allowNull: false,
     },
+    issueId: {
+      type: Sequelize.DataTypes.UUID,
+      allowNull: false,
+    },
     messageSid: {
       type: Sequelize.STRING,
       allowNull: false,

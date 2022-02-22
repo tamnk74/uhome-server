@@ -60,9 +60,11 @@ const getIssueCost = async (receiveIssue, estimationMessage) => {
   const estimationMessageData = get(estimationMessage, 'data', {});
   const worker = get(estimationMessageData, 'worker', {});
   const customer = get(estimationMessageData, 'customer', {});
-  const totalCost = customer.cost + totalMaterialCost + get(worker, 'distanceFee', 0);
+  const totalCost =
+    customer.cost + totalMaterialCost + get(worker, 'distanceFee', 0) + get(worker, 'surveyFee', 0);
   const totalCustomerPay = totalCost - customer.discount - customer.fee;
-  const totalWorkerReceive = worker.cost + totalMaterialCost + get(worker, 'distanceFee', 0);
+  const totalWorkerReceive =
+    worker.cost + totalMaterialCost + get(worker, 'distanceFee', 0) + get(worker, 'surveyFee', 0);
   const amountIntoWalletWorker = totalWorkerReceive - totalCustomerPay - worker.fee;
 
   set(worker, 'amountIntoWallet', amountIntoWalletWorker);
@@ -1222,6 +1224,7 @@ export default class ChatService {
   }
 
   static async survey({ user, chatChannel, data }) {
+    const { issue } = chatChannel;
     const [message, surveys] = await Promise.all([
       this.sendMessage(command.REQUEST_SURVEY, chatChannel, user, null, data),
       Survey.findAll({
@@ -1250,6 +1253,7 @@ export default class ChatService {
         channelId: chatChannel.id,
         status: issueStatus.OPEN,
         data,
+        issueId: issue.id,
       }
     );
   }

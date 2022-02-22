@@ -20,4 +20,10 @@ export default class FeeFactory {
 
     return instance.getCost(configuration, classFee, teamConfiguration, holidays);
   }
+
+  static getSurveyCost(type, surveyTime, { configuration, classFee }) {
+    const instance = FeeFactory.getInstance(type);
+
+    return instance.getSurveyCost({ configuration, classFee, surveyTime });
+  }
 }
