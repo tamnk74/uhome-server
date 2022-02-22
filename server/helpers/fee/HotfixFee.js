@@ -171,4 +171,11 @@ export default class HotfixFee extends Fee {
 
     return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  getSurveyCost({ configuration, classFee, surveyTime = 0 }) {
+    const cost = getTimeSlotCost(configuration, classFee, surveyTime);
+
+    return Math.ceil(cost / 1000) * 1000;
+  }
 }

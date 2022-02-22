@@ -57,4 +57,11 @@ export default class NormalFee extends Fee {
 
     return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  getSurveyCost({ classFee, surveyTime = 0 }) {
+    const cost = (classFee.normalCost / 8) * (surveyTime > 8 ? 8 : surveyTime);
+
+    return Math.ceil(cost / 1000) * 1000;
+  }
 }
