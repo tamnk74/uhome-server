@@ -17,6 +17,14 @@ module.exports = {
           key: 'id',
         },
       },
+      issue_id: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: false,
+        references: {
+          model: 'issues',
+          key: 'id',
+        },
+      },
       user_id: {
         type: Sequelize.DataTypes.UUID,
         references: {

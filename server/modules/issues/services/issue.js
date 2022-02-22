@@ -26,6 +26,7 @@ import EventScope from '../../../models/eventScope';
 import Attachment from '../../../models/attachment';
 import Holiday from '../../../models/holiday';
 import { googleMap } from '../../../helpers';
+import Survey from '../../../models/survey';
 
 export default class IssueService {
   static async getUploadVideoLink({ thumbnail }) {
@@ -301,7 +302,7 @@ export default class IssueService {
       }),
     ]);
 
-    const [teamConfiguration, requestSupporting] = await Promise.all([
+    const [teamConfiguration, requestSupporting, survey] = await Promise.all([
       TeamFeeConfiguration.findOne({
         where: {
           categoryId: feeCategory.categoryId,
@@ -317,22 +318,35 @@ export default class IssueService {
           userId: user.id,
         },
       }),
+      Survey.findOne({
+        where: {
+          issueId: issue.id,
+          userId: user.id,
+          status: issueStatus.APPROVAL,
+        },
+      }),
     ]);
 
-    const cost = FeeFactory.getCost(
-      type,
-      {
-        teamConfiguration,
+    const [cost, surveyFee] = await Promise.all([
+      FeeFactory.getCost(
+        type,
+        {
+          teamConfiguration,
+          classFee: feeCategory,
+          configuration: feeConfiguration,
+        },
+        {
+          workingTimes,
+          totalTime,
+          numOfWorker,
+          holidays,
+        }
+      ),
+      FeeFactory.getSurveyCost(type, get(survey, 'data.totalTime', 0) / 60, {
         classFee: feeCategory,
         configuration: feeConfiguration,
-      },
-      {
-        workingTimes,
-        totalTime,
-        numOfWorker,
-        holidays,
-      }
-    );
+      }),
+    ]);
 
     const distance = get(requestSupporting, 'distance', 0);
     const configDistanceFee = get(feeConfiguration, 'distance', 0);
@@ -346,7 +360,9 @@ export default class IssueService {
     set(data, 'issue.status', issue.status);
     set(data, 'workingTimes', IssueService.convertEstimateTimeToUTC(workingTimes));
     set(data, 'worker.distanceFee', distanceFee);
-    set(data, 'customer.distanceFee', -distanceFee);
+    set(data, 'customer.distanceFee', 0 - distanceFee);
+    set(data, 'customer.surveyFee', 0 - surveyFee);
+    set(data, 'worker.surveyFee', surveyFee);
 
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
