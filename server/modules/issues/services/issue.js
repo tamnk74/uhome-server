@@ -360,8 +360,8 @@ export default class IssueService {
     set(data, 'issue.status', issue.status);
     set(data, 'workingTimes', IssueService.convertEstimateTimeToUTC(workingTimes));
     set(data, 'worker.distanceFee', distanceFee);
-    set(data, 'customer.distanceFee', 0 - distanceFee);
-    set(data, 'customer.surveyFee', 0 - surveyFee);
+    set(data, 'customer.distanceFee', distanceFee);
+    set(data, 'customer.surveyFee', surveyFee);
     set(data, 'worker.surveyFee', surveyFee);
 
     const { message, channel } = await this.sendMessage(
