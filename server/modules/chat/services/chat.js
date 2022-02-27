@@ -1259,16 +1259,16 @@ export default class ChatService {
   }
 
   static async approveSurvey({ user, chatChannel, data }) {
-    const { messageId } = data;
+    const { messageSid } = data;
     const survey = await Survey.findOne({
-      messageId,
+      messageSid,
     });
 
     await this.sendMessage(
       command.APPROVAL_REQUEST_SURVEY,
       chatChannel,
       user,
-      messageId,
+      messageSid,
       get(survey, 'data', {})
     );
 
