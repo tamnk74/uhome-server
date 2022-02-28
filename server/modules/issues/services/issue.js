@@ -327,26 +327,20 @@ export default class IssueService {
       }),
     ]);
 
-    const [cost, surveyFee] = await Promise.all([
-      FeeFactory.getCost(
-        type,
-        {
-          teamConfiguration,
-          classFee: feeCategory,
-          configuration: feeConfiguration,
-        },
-        {
-          workingTimes,
-          totalTime,
-          numOfWorker,
-          holidays,
-        }
-      ),
-      FeeFactory.getSurveyCost(type, get(survey, 'data.totalTime', 0) / 60, {
+    const cost = FeeFactory.getCost(
+      type,
+      {
+        teamConfiguration,
         classFee: feeCategory,
         configuration: feeConfiguration,
-      }),
-    ]);
+      },
+      {
+        workingTimes,
+        totalTime,
+        numOfWorker,
+        holidays,
+      }
+    );
 
     const distance = get(requestSupporting, 'distance', 0);
     const configDistanceFee = get(feeConfiguration, 'distance', 0);
@@ -361,8 +355,8 @@ export default class IssueService {
     set(data, 'workingTimes', IssueService.convertEstimateTimeToUTC(workingTimes));
     set(data, 'worker.distanceFee', distanceFee);
     set(data, 'customer.distanceFee', distanceFee);
-    set(data, 'customer.surveyFee', surveyFee);
-    set(data, 'worker.surveyFee', surveyFee);
+    set(data, 'customer.surveyFee', get(survey, 'data.surveyFee', 0));
+    set(data, 'worker.surveyFee', get(survey, 'data.surveyFee', 0));
 
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,

@@ -19,6 +19,7 @@ import {
   eventStatuses,
   estimationMessageStatus,
   unitTime,
+  issueType,
 } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';
@@ -35,8 +36,12 @@ import Uploader from '../../../helpers/Uploader';
 import RequestSupporting from '../../../models/requestSupporting';
 import Acceptance from '../../../models/acceptance';
 import Survey from '../../../models/survey';
+import FeeConfiguration from '../../../models/feeConfiguration';
+import FeeCategory from '../../../models/feeCategory';
+import FeeFactory from '../../../helpers/fee/FeeFactory';
+import CategoryIssue from '../../../models/categoryIssue';
 
-const getIssueCost = async (receiveIssue, estimationMessage) => {
+const getIssueCost = async (receiveIssue, estimationMessage, survey) => {
   const { issueId } = receiveIssue;
 
   const materials = await IssueMaterial.findAll({
@@ -69,6 +74,8 @@ const getIssueCost = async (receiveIssue, estimationMessage) => {
 
   set(worker, 'amountIntoWallet', amountIntoWalletWorker);
   set(customer, 'amountIntoWallet', 0);
+  set(worker, 'surveyFee', get(survey, 'data.surveyFee', 0));
+  set(customer, 'surveyFee', get(survey, 'data.surveyFee', 0));
 
   return {
     ...estimationMessageData,
@@ -1098,7 +1105,7 @@ export default class ChatService {
     const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
     const { issue } = chatChannel;
 
-    const [receiveIssue, waitingEstimationMessage, estimationMessage] = await Promise.all([
+    const [receiveIssue, waitingEstimationMessage, estimationMessage, survey] = await Promise.all([
       ReceiveIssue.findBySupporterIds(issue.id, supporterIds),
       EstimationMessage.findByWaitingStatus(chatChannel.id),
       EstimationMessage.findByChannelIdAndStatusAndType(
@@ -1106,6 +1113,17 @@ export default class ChatService {
         estimationMessageStatus.APPROVED,
         command.SUBMIT_ESTIMATION_TIME
       ),
+      EstimationMessage.findByChannelIdAndStatusAndType(
+        chatChannel.id,
+        estimationMessageStatus.APPROVED,
+        command.SUBMIT_ESTIMATION_TIME
+      ),
+      Survey.findOne({
+        where: {
+          channelId: chatChannel.id,
+          status: issueStatus.APPROVAL,
+        },
+      }),
     ]);
 
     if (isNil(receiveIssue) || isEmpty(estimationMessage)) {
@@ -1121,7 +1139,7 @@ export default class ChatService {
     });
 
     const [data] = await Promise.all([
-      getIssueCost(receiveIssue, estimationMessage),
+      getIssueCost(receiveIssue, estimationMessage, survey),
       receiveIssue.save(),
       Issue.update(
         {
@@ -1225,11 +1243,24 @@ export default class ChatService {
 
   static async survey({ user, chatChannel, data }) {
     const { issue } = chatChannel;
-    const [message, surveys] = await Promise.all([
-      this.sendMessage(command.REQUEST_SURVEY, chatChannel, user, null, data),
+    const categories = await CategoryIssue.findAll({
+      where: {
+        issueId: issue.id,
+      },
+    });
+    const categoriesId = categories.map((item) => item.categoryId);
+
+    const [surveys, feeConfiguration, feeCategory] = await Promise.all([
       Survey.findAll({
         channelId: chatChannel.id,
         status: issueStatus.OPEN,
+      }),
+      FeeConfiguration.findOne({}),
+      FeeCategory.findOne({
+        where: {
+          categoryId: categoriesId,
+        },
+        order: [['max', 'DESC']],
       }),
     ]);
 
@@ -1242,6 +1273,15 @@ export default class ChatService {
         channelSid: chatChannel.channelSid,
       });
     });
+
+    const surveyCost = FeeFactory.getSurveyCost(issueType.HOTFIX, get(data, 'totalTime', 0) / 60, {
+      classFee: feeCategory,
+      configuration: feeConfiguration,
+    });
+
+    set(data, 'surveyFee', surveyCost);
+
+    const message = await this.sendMessage(command.REQUEST_SURVEY, chatChannel, user, null, data);
 
     await Survey.updateOrCreate(
       {
