@@ -1,6 +1,6 @@
 import { Sequelize, Op } from 'sequelize';
 import dayjs from 'dayjs';
-import { get, sumBy, set, pick } from 'lodash';
+import { get, sumBy, set, pick, min } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import Uploader from 'helpers/Uploader';
 import Issue from '../../../models/issue';
@@ -171,16 +171,28 @@ export default class IssueService {
       throw new Error('ISSUE-0002');
     }
 
-    const distance = await googleMap.getDistance(
-      {
-        lat,
-        lng: lon,
-      },
-      {
-        lat: get(issue, 'lat'),
-        lng: get(issue, 'lon'),
-      }
-    );
+    const [distance, feeConfigure] = await Promise.all([
+      googleMap.getDistance(
+        {
+          lat,
+          lng: lon,
+        },
+        {
+          lat: get(issue, 'lat'),
+          lng: get(issue, 'lon'),
+        }
+      ),
+      FeeConfiguration.findOne(),
+    ]);
+
+    const distanceFee =
+      distance <= get(feeConfigure, 'minDistance', 0)
+        ? 0
+        : min([
+            distance * get(feeConfigure, 'distance', 0),
+            get(feeConfigure, 'maxDistanceFee', 0),
+          ]);
+
     const requestSupporting = await RequestSupporting.findOrCreate({
       where: {
         userId: user.id,
@@ -192,6 +204,7 @@ export default class IssueService {
         distance,
         lat,
         lon,
+        distanceFee: Math.ceil(distanceFee / 1000) * 1000,
       },
     });
 
@@ -205,7 +218,6 @@ export default class IssueService {
 
   static async getRequestSupporting(query) {
     const { limit, offset, id } = query;
-    const feeConfigure = await FeeConfiguration.findOne();
 
     return User.findAndCountAll({
       include: [
@@ -216,10 +228,7 @@ export default class IssueService {
           where: {
             issueId: id,
           },
-          attributes: [
-            ...RequestSupporting.getAttributes(),
-            [Sequelize.literal(`distance * ${get(feeConfigure, 'distance', 0)}`), 'distanceFee'],
-          ],
+          attributes: RequestSupporting.getAttributes(),
         },
         {
           model: UserProfile,

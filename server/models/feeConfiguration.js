@@ -35,6 +35,14 @@ FeeConfiguration.init(
       type: Sequelize.FLOAT,
       defaultValue: 0,
     },
+    maxDistanceFee: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0,
+    },
+    minDistance: {
+      type: Sequelize.INTEGER,
+      defaultValue: 0,
+    },
     createdAt: {
       defaultValue: Sequelize.NOW,
       type: Sequelize.DATE,
