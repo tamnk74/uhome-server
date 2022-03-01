@@ -14,6 +14,11 @@ module.exports = {
         after: 'message',
         defaultValue: 0,
       }),
+      queryInterface.addColumn('request_supportings', 'distance_fee', {
+        type: Sequelize.DataTypes.FLOAT,
+        after: 'message',
+        defaultValue: 0,
+      }),
     ]),
 
   down: (queryInterface) =>
@@ -21,5 +26,6 @@ module.exports = {
       queryInterface.removeColumn('request_supportings', 'lat'),
       queryInterface.removeColumn('request_supportings', 'lon'),
       queryInterface.removeColumn('request_supportings', 'distance'),
+      queryInterface.removeColumn('request_supportings', 'distance_fee'),
     ]),
 };

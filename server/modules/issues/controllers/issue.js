@@ -96,8 +96,7 @@ export default class AuthController {
         data: requestSupports.rows.map((item) => {
           const requestSupporting = get(item, 'requestSupportings.[0]');
           item.setDataValue('distance', get(requestSupporting, 'distance', 0));
-          const distanceFee = Math.ceil(get(requestSupporting, 'distanceFee', 0) / 1000) * 1000;
-          item.setDataValue('distanceFee', distanceFee);
+          item.setDataValue('distanceFee', get(requestSupporting, 'distanceFee', 0));
 
           return objectToSnake(
             omit(item.toJSON(), [

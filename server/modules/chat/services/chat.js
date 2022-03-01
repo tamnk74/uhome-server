@@ -1113,11 +1113,6 @@ export default class ChatService {
         estimationMessageStatus.APPROVED,
         command.SUBMIT_ESTIMATION_TIME
       ),
-      EstimationMessage.findByChannelIdAndStatusAndType(
-        chatChannel.id,
-        estimationMessageStatus.APPROVED,
-        command.SUBMIT_ESTIMATION_TIME
-      ),
       Survey.findOne({
         where: {
           channelId: chatChannel.id,
@@ -1301,8 +1296,14 @@ export default class ChatService {
   static async approveSurvey({ user, chatChannel, data }) {
     const { messageSid } = data;
     const survey = await Survey.findOne({
-      messageSid,
+      where: {
+        messageSid,
+      },
     });
+
+    if (!survey) {
+      throw new Error('SURVEY-0404');
+    }
 
     await this.sendMessage(
       command.APPROVAL_REQUEST_SURVEY,

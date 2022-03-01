@@ -5,7 +5,7 @@ import sequelize from '../databases/database';
 
 class RequestSupporting extends BaseModel {
   static getAttributes() {
-    return ['id', 'userId', 'issueId', 'message', 'lat', 'lon', 'distance'];
+    return ['id', 'userId', 'issueId', 'message', 'lat', 'lon', 'distance', 'distanceFee'];
   }
 }
 
@@ -43,7 +43,7 @@ RequestSupporting.init(
       defaultValue: 0,
     },
     distanceFee: {
-      type: Sequelize.DataTypes.VIRTUAL,
+      type: Sequelize.DataTypes.FLOAT,
       defaultValue: 0,
     },
     createdAt: {

@@ -10,6 +10,8 @@ module.exports = {
       urgentTime: 1,
       holiday: 0.5,
       experienceFee: 0.95,
+      maxDistanceFee: 50000,
+      minDistance: 1,
     };
 
     const feeConfiguration = await FeeConfiguration.findOne();
