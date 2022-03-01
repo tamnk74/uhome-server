@@ -22,5 +22,11 @@
     "error": "Bad Request",
     "title": "Action is not allow",
     "detail": "Action is not allow"
+  },
+  "SURVEY-0404": {
+    "status": 404,
+    "error": "Bad Request",
+    "title": "Survey not found",
+    "detail": "Survey not found"
   }
 }
