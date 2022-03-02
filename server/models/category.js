@@ -48,7 +48,7 @@ Category.init(
   }
 );
 
-Category.baseAttributes = ['id', 'name', 'description', 'thumbnail'];
+Category.baseAttributes = ['id', 'name', 'description', 'thumbnail', 'code'];
 
 Category.beforeCreate((instance) => {
   instance.id = uuid.v4();
