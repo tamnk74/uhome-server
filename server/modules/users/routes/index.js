@@ -116,4 +116,6 @@ router.route('/users/:id/send-otp').put(basicAuth, UserController.sendOTP);
 
 router.route('/auth/apple').post(validator(loginAppleSchema), AuthController.appleLogin);
 
+router.route('/me/latest-issue-statuses').get(auth(), active, UserController.getLatestIssueStatus);
+
 export default router;
