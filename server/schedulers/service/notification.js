@@ -5,7 +5,13 @@ import Notification from '../../models/notification';
 import Fcm from '../../helpers/Fcm';
 import Subscription from '../../models/subscription';
 import User from '../../models/user';
-import { notificationType, userRoles, notificationMessage, roles } from '../../constants';
+import {
+  notificationType,
+  userRoles,
+  notificationMessage,
+  roles,
+  issueStatus,
+} from '../../constants';
 import Issue from '../../models/issue';
 import sequelize from '../../databases/database';
 import RequestSupporting from '../../models/requestSupporting';
@@ -13,6 +19,7 @@ import { objectToSnake } from '../../helpers/Util';
 import ChatChannel from '../../models/chatChannel';
 import ChatMember from '../../models/chatMember';
 import { sentryConfig } from '../../config';
+import LatestIssueStatus from '../../models/latestIssueStatus';
 
 export default class NotificationService {
   static async pushNewIssueNotification(job, done) {
@@ -121,6 +128,11 @@ export default class NotificationService {
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
         Notification.bulkCreate(dataInssert),
+        LatestIssueStatus.create({
+          userId: issue.createdBy,
+          issueId: issue.id,
+          status: issueStatus.OPEN,
+        }),
       ]);
       done();
     } catch (error) {
@@ -174,7 +186,14 @@ export default class NotificationService {
           ...notification,
           status: true,
         }),
+        LatestIssueStatus.upsert({
+          id: uuid(),
+          issueId: issue.id,
+          userId: issue.createdBy,
+          status: issueStatus.REQUESTING_SUPPORT,
+        }),
       ]);
+
       done();
     } catch (error) {
       sentryConfig.Sentry.captureException(error);

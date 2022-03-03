@@ -19,6 +19,7 @@ import TransactionHistory from '../../../models/transactionHistory';
 import { sendOTP } from '../../../helpers/SmsOTP';
 import RedisService from '../../../helpers/Redis';
 import AuthService from './auth';
+import LatestIssueStatus from '../../../models/latestIssueStatus';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -406,5 +407,14 @@ export default class Userervice {
     const { phoneNumber } = user;
 
     await sendOTP(id, phoneNumber);
+  }
+
+  static async getLatestIssueStatus(user) {
+    return LatestIssueStatus.findOne({
+      where: {
+        userId: user.id,
+      },
+      order: [['updatedAt', 'DESC']],
+    });
   }
 }

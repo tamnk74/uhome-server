@@ -198,4 +198,14 @@ export default class UserController {
       return next(e);
     }
   }
+
+  static async getLatestIssueStatus(req, res, next) {
+    try {
+      const { user } = req;
+      const latestStatus = await UserService.getLatestIssueStatus(user);
+      return res.status(200).json(objectToSnake(latestStatus || {}));
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
