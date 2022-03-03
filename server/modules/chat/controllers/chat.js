@@ -155,6 +155,7 @@ export default class ChatController {
       const channelSid = get(data, 'ChannelSid', get(data, 'ConversationSid', ''));
       const clientIdentity = get(data, 'ClientIdentity');
       const message = get(data, 'Body');
+
       await ChatService.handleWebhook({ channelSid, clientIdentity, message });
 
       return res.status(200).json({});

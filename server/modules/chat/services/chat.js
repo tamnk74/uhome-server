@@ -40,6 +40,7 @@ import FeeConfiguration from '../../../models/feeConfiguration';
 import FeeCategory from '../../../models/feeCategory';
 import FeeFactory from '../../../helpers/fee/FeeFactory';
 import CategoryIssue from '../../../models/categoryIssue';
+import LatestIssueStatus from '../../../models/latestIssueStatus';
 
 const getIssueCost = async (receiveIssue, estimationMessage, survey) => {
   const { issueId } = receiveIssue;
@@ -163,6 +164,13 @@ export default class ChatService {
     if (isNewGroup) {
       await this.sendWelcomeMessage(chatChannel, workerChat, worker);
     }
+
+    await LatestIssueStatus.upsert({
+      id: uuid(),
+      issueId: issue.id,
+      userId: issue.createdBy,
+      status: issueStatus.CHATTING,
+    });
 
     return authorChat;
   }
@@ -592,6 +600,11 @@ export default class ChatService {
             content: comment,
           })
         : null,
+      LatestIssueStatus.findOrCreate({
+        issueId: issue.id,
+        userId: issue.createdBy,
+        status: issueStatus.DONE,
+      }),
     ]);
 
     const event = issue.eventId
@@ -957,6 +970,12 @@ export default class ChatService {
         where: {
           channelSid,
         },
+        include: [
+          {
+            model: Issue,
+            require: true,
+          },
+        ],
       }),
       ChatMember.findOne({
         where: {
@@ -966,13 +985,23 @@ export default class ChatService {
       }),
     ]);
 
-    if (chatChannel) {
-      await Issue.update(
-        {
-          msgAt: new Date(),
-        },
-        { where: { id: chatChannel.issueId } }
-      );
+    const { issue } = chatChannel;
+
+    if (issue) {
+      await Promise.all([
+        Issue.update(
+          {
+            msgAt: new Date(),
+          },
+          { where: { id: issue.id } }
+        ),
+        LatestIssueStatus.upsert({
+          id: uuid(),
+          issueId: issue.id,
+          userId: issue.createdBy,
+          status: issueStatus.CHATTING,
+        }),
+      ]);
     }
 
     notificationQueue.add('chat_notification', {
