@@ -19,6 +19,7 @@ import TransactionHistory from '../../../models/transactionHistory';
 import { sendOTP } from '../../../helpers/SmsOTP';
 import RedisService from '../../../helpers/Redis';
 import AuthService from './auth';
+import LatestIssueStatus from '../../../models/latestIssueStatus';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -41,11 +42,13 @@ export default class Userervice {
             'id',
             'size',
             'mimeType',
+            'thumbnail',
             'createdAt',
             'updatedAt',
             'issueId',
             'path',
-            Attachment.buildUrlAttribuiteSelect(),
+            'thumbnailPath',
+            Attachment.buildUrlAttributeSelect(),
           ],
         },
         {
@@ -72,7 +75,7 @@ export default class Userervice {
         ['msgAt', 'DESC'],
         ['updatedAt', 'DESC'],
       ],
-      attributes: Issue.baseAttibutes,
+      attributes: Issue.baseAttributes,
       limit,
       offset,
     });
@@ -123,11 +126,13 @@ export default class Userervice {
                 'id',
                 'size',
                 'mimeType',
+                'thumbnail',
                 'createdAt',
                 'updatedAt',
                 'issueId',
                 'path',
-                Attachment.buildUrlAttribuiteSelect(),
+                'thumbnailPath',
+                Attachment.buildUrlAttributeSelect(),
               ],
             },
             {
@@ -402,5 +407,14 @@ export default class Userervice {
     const { phoneNumber } = user;
 
     await sendOTP(id, phoneNumber);
+  }
+
+  static async getLatestIssueStatus(user) {
+    return LatestIssueStatus.findOne({
+      where: {
+        userId: user.id,
+      },
+      order: [['updatedAt', 'DESC']],
+    });
   }
 }

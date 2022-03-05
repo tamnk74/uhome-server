@@ -35,6 +35,14 @@ FeeConfiguration.init(
       type: Sequelize.FLOAT,
       defaultValue: 0,
     },
+    maxDistanceFee: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0,
+    },
+    minDistance: {
+      type: Sequelize.INTEGER,
+      defaultValue: 0,
+    },
     createdAt: {
       defaultValue: Sequelize.NOW,
       type: Sequelize.DATE,
@@ -58,7 +66,7 @@ FeeConfiguration.init(
 FeeConfiguration.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
-FeeConfiguration.baseAttibutes = [
+FeeConfiguration.baseAttributes = [
   'id',
   'workerFee',
   'customerFee',

@@ -36,11 +36,11 @@ Event.init(
     },
     from: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     to: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     valueType: {
       type: Sequelize.ENUM(...Object.values(calculateType)),
@@ -69,7 +69,7 @@ Event.init(
     },
     status: {
       type: Sequelize.TINYINT,
-      defautValue: 0,
+      defaultValue: 0,
     },
     createdAt: {
       defaultValue: Sequelize.NOW,
@@ -122,7 +122,7 @@ Event.prototype.getDiscountValue = function getDiscountValue(total) {
   return 0;
 };
 
-Event.baseAttibutes = [
+Event.baseAttributes = [
   'id',
   'type',
   'code',

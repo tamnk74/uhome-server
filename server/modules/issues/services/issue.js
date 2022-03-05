@@ -1,7 +1,8 @@
 import { Sequelize, Op } from 'sequelize';
 import dayjs from 'dayjs';
-import { get, sumBy, set, pick } from 'lodash';
+import { get, sumBy, set, pick, min } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import Uploader from 'helpers/Uploader';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';
@@ -22,9 +23,39 @@ import EstimationMessage from '../../../models/estimationMessage';
 import FeeFactory from '../../../helpers/fee/FeeFactory';
 import TeamFeeConfiguration from '../../../models/teamFeeConfiguration';
 import EventScope from '../../../models/eventScope';
+import Attachment from '../../../models/attachment';
 import Holiday from '../../../models/holiday';
+import { googleMap } from '../../../helpers';
+import Survey from '../../../models/survey';
 
 export default class IssueService {
+  static async getUploadVideoLink({ thumbnail }) {
+    const name = `${uuidv4()}`;
+    const path = `attachments/${name}.mp4`;
+    const thumbnailPath = `attachments/thumbnails/${name}.png`;
+    const [s3PreSingedLink, attachment] = await Promise.all([
+      Uploader.preSignedUrl({
+        path,
+      }),
+      Attachment.create({
+        path,
+        thumbnail: thumbnailPath,
+        name,
+        mimeType: 'video/mp4',
+      }),
+      Uploader.upload(thumbnail, {
+        path: thumbnailPath,
+        'x-amz-meta-mimeType': thumbnail.mimetype,
+        'x-amz-meta-size': thumbnail.size.toString(),
+      }),
+    ]);
+
+    return {
+      attachment,
+      link: s3PreSingedLink,
+    };
+  }
+
   static async create(user, data, userEvent) {
     const issue = await Issue.addIssue(data);
     if (userEvent) {
@@ -126,16 +157,41 @@ export default class IssueService {
           [Sequelize.literal(`(${isRequestedSQL})`), 'isRequested'],
         ],
       },
-      order: [['updated_at', 'DESC']],
+      order: [
+        ['updated_at', 'DESC'],
+        [Attachment, 'created_at', 'DESC'],
+      ],
       limit,
       offset,
     });
   }
 
-  static async requestSupporting(user, issue, { message }) {
+  static async requestSupporting(user, issue, { message, lat, lon }) {
     if (issue.status !== issueStatus.OPEN) {
       throw new Error('ISSUE-0002');
     }
+
+    const [distance, feeConfigure] = await Promise.all([
+      googleMap.getDistance(
+        {
+          lat,
+          lng: lon,
+        },
+        {
+          lat: get(issue, 'lat'),
+          lng: get(issue, 'lon'),
+        }
+      ),
+      FeeConfiguration.findOne(),
+    ]);
+
+    const distanceFee =
+      distance <= get(feeConfigure, 'minDistance', 0)
+        ? 0
+        : min([
+            distance * get(feeConfigure, 'distance', 0),
+            get(feeConfigure, 'maxDistanceFee', 0),
+          ]);
 
     const requestSupporting = await RequestSupporting.findOrCreate({
       where: {
@@ -145,6 +201,10 @@ export default class IssueService {
       defaults: {
         id: uuidv4(),
         message,
+        distance,
+        lat,
+        lon,
+        distanceFee: Math.ceil(distanceFee / 1000) * 1000,
       },
     });
 
@@ -152,11 +212,13 @@ export default class IssueService {
       requestId: requestSupporting[0].id,
       userId: issue.createdBy,
     });
+
     return requestSupporting;
   }
 
   static async getRequestSupporting(query) {
     const { limit, offset, id } = query;
+
     return User.findAndCountAll({
       include: [
         {
@@ -166,6 +228,7 @@ export default class IssueService {
           where: {
             issueId: id,
           },
+          attributes: RequestSupporting.getAttributes(),
         },
         {
           model: UserProfile,
@@ -247,15 +310,31 @@ export default class IssueService {
         },
       }),
     ]);
-    const teamConfiguration = await TeamFeeConfiguration.findOne({
-      where: {
-        categoryId: feeCategory.categoryId,
-        minWorker: {
-          [Op.lte]: numOfWorker,
+
+    const [teamConfiguration, requestSupporting, survey] = await Promise.all([
+      TeamFeeConfiguration.findOne({
+        where: {
+          categoryId: feeCategory.categoryId,
+          minWorker: {
+            [Op.lte]: numOfWorker,
+          },
         },
-      },
-      order: [['minWorker', 'DESC']],
-    });
+        order: [['minWorker', 'DESC']],
+      }),
+      RequestSupporting.findOne({
+        where: {
+          issueId: issue.id,
+          userId: user.id,
+        },
+      }),
+      Survey.findOne({
+        where: {
+          issueId: issue.id,
+          userId: user.id,
+          status: issueStatus.APPROVAL,
+        },
+      }),
+    ]);
 
     const cost = FeeFactory.getCost(
       type,
@@ -272,6 +351,10 @@ export default class IssueService {
       }
     );
 
+    const distance = get(requestSupporting, 'distance', 0);
+    const configDistanceFee = get(feeConfiguration, 'distance', 0);
+    const distanceFee = Math.ceil((distance * configDistanceFee) / 1000) * 1000;
+
     set(data, 'worker', cost.worker);
     set(data, 'customer', cost.customer);
     const discount = saleEvent ? saleEvent.getDiscount(cost.worker.cost, cost.customer.cost) : null;
@@ -279,6 +362,10 @@ export default class IssueService {
     set(data, 'customer.discount', get(discount, 'customer', 0));
     set(data, 'issue.status', issue.status);
     set(data, 'workingTimes', IssueService.convertEstimateTimeToUTC(workingTimes));
+    set(data, 'worker.distanceFee', distanceFee);
+    set(data, 'customer.distanceFee', distanceFee);
+    set(data, 'customer.surveyFee', get(survey, 'data.surveyFee', 0));
+    set(data, 'worker.surveyFee', get(survey, 'data.surveyFee', 0));
 
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
@@ -286,6 +373,7 @@ export default class IssueService {
       issue,
       data
     );
+
     await IssueService.updateEstimationMessage(
       command.SUBMIT_ESTIMATION_TIME,
       channel,

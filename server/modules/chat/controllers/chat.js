@@ -43,6 +43,34 @@ export default class ChatController {
     }
   }
 
+  static async getUploadVideoLink(req, res, next) {
+    try {
+      const result = await ChatService.getUploadVideoLink({
+        chatChannel: req.chatChannel,
+        user: req.user,
+        thumbnail: req.thumbnail,
+      });
+
+      return res.status(200).json(objectToSnake(result));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async sendUploadVideoMessage(req, res, next) {
+    try {
+      const rs = await ChatService.sendUploadVideoMessage({
+        chatChannel: req.chatChannel,
+        user: req.user,
+        link: req.body.link,
+      });
+
+      return res.status(200).json(rs);
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async approveEstimateTime(req, res, next) {
     try {
       const receiveIssue = await ChatService.approveEstimateTime({
@@ -69,9 +97,9 @@ export default class ChatController {
     }
   }
 
-  static async trakingProgress(req, res, next) {
+  static async trackingProgress(req, res, next) {
     try {
-      const receiveIssue = await ChatService.trakingProgress({
+      const receiveIssue = await ChatService.trackingProgress({
         chatChannel: req.chatChannel,
         user: req.user,
         data: req.body,
@@ -127,6 +155,7 @@ export default class ChatController {
       const channelSid = get(data, 'ChannelSid', get(data, 'ConversationSid', ''));
       const clientIdentity = get(data, 'ClientIdentity');
       const message = get(data, 'Body');
+
       await ChatService.handleWebhook({ channelSid, clientIdentity, message });
 
       return res.status(200).json({});
@@ -137,9 +166,10 @@ export default class ChatController {
 
   static async addPromotion(req, res, next) {
     try {
-      const { files, user, chatChannel } = req;
+      const { user, chatChannel } = req;
+      const attachmentIds = get(req, 'body.attachmentIds', []);
 
-      await ChatService.addPromotion({ user, files, chatChannel });
+      await ChatService.addPromotion({ user, chatChannel, attachmentIds });
 
       return res.status(200).json({});
     } catch (e) {
@@ -179,6 +209,28 @@ export default class ChatController {
       const author = await ChatService.joinChatHistory(user, issueId);
 
       return res.status(200).send(objectToSnake(author.toJSON()));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async survey(req, res, next) {
+    try {
+      const { user, chatChannel, body: data } = req;
+      await ChatService.survey({ user, chatChannel, data });
+
+      return res.status(204).send();
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async approveSurvey(req, res, next) {
+    try {
+      const { user, chatChannel, body: data } = req;
+      await ChatService.approveSurvey({ user, chatChannel, data });
+
+      return res.status(204).send();
     } catch (e) {
       return next(e);
     }

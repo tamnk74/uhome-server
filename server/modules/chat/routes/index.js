@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
+import { verifyThumbnail } from 'modules/issues/middlewares';
 import ChatController from '../controllers/chat';
 import { auth, validator, active } from '../../../middlewares';
 import {
@@ -10,6 +11,10 @@ import {
   acceptanceIssueSchema,
   continueChattingchema,
   joinChatSchema,
+  uploadVideoSchema,
+  addPromotionSchema,
+  surveySchema,
+  approveSurveySchema,
 } from '../schema';
 import {
   verifyChannel,
@@ -20,13 +25,6 @@ import {
 } from '../middlewares';
 
 const router = Router();
-
-const storage = multer.memoryStorage({
-  destination(req, file, callback) {
-    callback(null, '');
-  },
-});
-const multipleUpload = multer({ storage }).array('files');
 
 router.post(
   '/chat/chat-groups',
@@ -55,6 +53,32 @@ router.get(
   ChatController.requestCommand
 );
 
+const storage = multer.memoryStorage({
+  destination(req, file, callback) {
+    callback(null, '');
+  },
+});
+const uploadThumbnail = multer({ storage }).single('thumbnail');
+
+router.post(
+  '/chat/:channelId/videos/presigned-url',
+  auth('actionOnChat'),
+  active,
+  verifyChannel,
+  uploadThumbnail,
+  verifyThumbnail,
+  ChatController.getUploadVideoLink
+);
+
+router.post(
+  '/chat/:channelId/videos',
+  auth('actionOnChat'),
+  active,
+  validator(uploadVideoSchema),
+  verifyChannel,
+  ChatController.sendUploadVideoMessage
+);
+
 router.post(
   '/chat/:channelId/approval-time',
   auth('approveEstimationCost'),
@@ -79,7 +103,7 @@ router.post(
   active,
   validator(trackingSchema),
   verifyChannel,
-  ChatController.trakingProgress
+  ChatController.trackingProgress
 );
 
 router.post(
@@ -115,8 +139,8 @@ router.post(
   '/chat/:channelId/promotions',
   auth(),
   active,
+  validator(addPromotionSchema),
   verifyChannel,
-  multipleUpload,
   ChatController.addPromotion
 );
 
@@ -135,6 +159,24 @@ router.post(
   active,
   validator(joinChatSchema),
   ChatController.joinChatHistory
+);
+
+router.post(
+  '/chat/:channelId/surveys',
+  auth('joinChat'),
+  active,
+  validator(surveySchema),
+  verifyChannel,
+  ChatController.survey
+);
+
+router.post(
+  '/chat/:channelId/approval-surveys',
+  auth('joinChat'),
+  active,
+  validator(approveSurveySchema),
+  verifyChannel,
+  ChatController.approveSurvey
 );
 
 export default router;

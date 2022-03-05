@@ -1,4 +1,6 @@
 import AWS from 'aws-sdk';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { fileSystemConfig } from '../config';
 
 export default class S3 {
@@ -20,6 +22,7 @@ export default class S3 {
     });
 
     this.client = new AWS.S3();
+    this.s3Client = new S3Client({ region: fileSystemConfig[driver].region_name });
   }
 
   async upload(file, metadata) {
@@ -31,5 +34,20 @@ export default class S3 {
     };
 
     return this.client.putObject(params).promise();
+  }
+
+  async preSignedUrl({ path, ttl }) {
+    const command = new PutObjectCommand({
+      Bucket: fileSystemConfig[this.driver].bucket_name,
+      Key: path,
+      ContentType: 'video/mp4',
+      ACL: 'public-read',
+    });
+
+    const signedUrl = await getSignedUrl(this.s3Client, command, {
+      expiresIn: ttl,
+    });
+
+    return signedUrl;
   }
 }

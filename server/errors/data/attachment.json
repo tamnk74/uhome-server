@@ -2,5 +2,13 @@
   "ATTA-0001": {
     "status": 400,
     "detail": "Request contains invalid attachments"
+  },
+  "FILE-0003": {
+    "status": 400,
+    "detail": "Thumbnail file is required"
+  },
+  "FILE-0004": {
+    "status": 400,
+    "detail": "Thumbnail must be an image"
   }
 }

@@ -26,7 +26,7 @@ export class EventService {
     return Event.findAndCountAll({
       ...options,
       include: Event.buildRelation(),
-      attributes: Event.baseAttibutes,
+      attributes: Event.baseAttributes,
       limit,
       offset,
     });
@@ -35,7 +35,7 @@ export class EventService {
   static async getMyEvents(user, params) {
     return Event.findAndCountAll({
       include: Event.buildRelation(),
-      attributes: Event.baseAttibutes,
+      attributes: Event.baseAttributes,
       where: Event.whereCondition(user, params),
       order: [
         ['to', 'ASC'],

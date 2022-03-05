@@ -5,7 +5,7 @@ module.exports = {
         type: Sequelize.DataTypes.DECIMAL(12, 2),
         allowNull: false,
         after: 'customer_fee',
-        defautValue: 0,
+        defaultValue: 0,
       }),
     ]),
 

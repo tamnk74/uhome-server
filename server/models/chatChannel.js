@@ -30,11 +30,11 @@ ChatChannel.init(
     },
     createdAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     deletedAt: {
       type: Sequelize.DATE,
@@ -50,7 +50,7 @@ ChatChannel.init(
   }
 );
 
-ChatChannel.baseAttibutes = ['id', 'friendlyName'];
+ChatChannel.baseAttributes = ['id', 'friendlyName'];
 ChatChannel.belongsTo(Issue);
 
 ChatChannel.beforeCreate((channel) => {

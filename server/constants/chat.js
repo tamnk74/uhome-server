@@ -2,6 +2,7 @@ export const command = Object.freeze({
   REQUEST_UPDATE_PROGRESS: 'REQUEST_UPDATE_PROGRESS',
   REQUEST_CANCEL: 'REQUEST_CANCEL',
   REQUEST_SEND_MEDIA: 'REQUEST_SEND_MEDIA',
+  REQUEST_UPLOAD_VIDEO: 'REQUEST_UPLOAD_VIDEO',
   REQUEST_ESTIMATION_TIME: 'REQUEST_ESTIMATION_TIME',
   SUBMIT_ESTIMATION_TIME: 'SUBMIT_ESTIMATION_TIME',
   APPROVAL_ESTIMATION_TIME: 'APPROVAL_ESTIMATION_TIME',
@@ -18,12 +19,15 @@ export const command = Object.freeze({
   COMPLETED: 'COMPLETED',
   REQUEST_CONFIRM_PAYMENT: 'REQUEST_CONFIRM_PAYMENT',
   CONFIRMED_PAYMENT: 'CONFIRMED_PAYMENT',
+  REQUEST_SURVEY: 'REQUEST_SURVEY',
+  APPROVAL_REQUEST_SURVEY: 'APPROVAL_REQUEST_SURVEY',
 });
 
 export const commandMessage = Object.freeze({
   REQUEST_UPDATE_PROGRESS: 'chat.update_progress',
   REQUEST_CANCEL: 'chat.cancel',
   REQUEST_SEND_MEDIA: 'chat.send_media',
+  NEW_VIDEO: 'chat.new_video',
   REQUEST_ESTIMATION_TIME: 'chat.estimate_time',
   SUBMIT_ESTIMATION_TIME: 'chat.submit_estimate_time',
   APPROVAL_ESTIMATION_TIME: 'chat.approval_estimate_time',
@@ -40,6 +44,8 @@ export const commandMessage = Object.freeze({
   COMPLETED: 'chat.completed',
   REQUEST_CONFIRM_PAYMENT: 'chat.request_confirm_payment',
   CONFIRMED_PAYMENT: 'chat.confirmed_payment',
+  REQUEST_SURVEY: 'chat.request_survey',
+  APPROVAL_REQUEST_SURVEY: 'chat.approval_survey',
 });
 
 export const commandRequests = [
@@ -48,9 +54,11 @@ export const commandRequests = [
   command.REQUEST_ESTIMATION_TIME,
   command.REQUEST_CANCEL,
   command.REQUEST_SEND_MEDIA,
+  command.REQUEST_UPLOAD_VIDEO,
   command.CONTINUE_CHATTING,
   command.REQUEST_ADD_MORE_INFORMATION,
   command.REQUEST_CONFIRM_PAYMENT,
+  command.REQUEST_SURVEY,
 ];
 
 export const notificationMessage = Object.freeze({
@@ -74,6 +82,8 @@ export const notificationMessage = Object.freeze({
   COMPLETED: 'notification.completed',
   REQUEST_CONFIRM_PAYMENT: 'notification.request_confirm_payment',
   CONFIRMED_PAYMENT: 'notification.confirmed_payment',
+  REQUEST_SURVEY: 'notification.request_survey',
+  APPROVAL_REQUEST_SURVEY: 'notification.approval_survey',
 });
 
 export const estimationMessageStatus = Object.freeze({

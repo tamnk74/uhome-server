@@ -48,7 +48,7 @@ TransactionHistory.init(
     currency: {
       type: Sequelize.ENUM('VND', 'USD'),
       allowNull: false,
-      defautValue: 'VND',
+      defaultValue: 'VND',
     },
     extra: {
       type: Sequelize.DataTypes.JSON,
@@ -87,7 +87,7 @@ TransactionHistory.init(
 TransactionHistory.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
-TransactionHistory.baseAttibutes = ['id', 'amount', 'type', 'method', 'currency', 'extra'];
+TransactionHistory.baseAttributes = ['id', 'amount', 'type', 'method', 'currency', 'extra'];
 TransactionHistory.belongsTo(User);
 TransactionHistory.belongsTo(Issue);
 TransactionHistory.belongsTo(User, { as: 'actor', foreignKey: 'actor_id' });

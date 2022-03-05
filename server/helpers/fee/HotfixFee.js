@@ -144,7 +144,6 @@ export default class HotfixFee extends Fee {
 
   getBasicCost(configuration, classFee, starTime, endTime, holidays) {
     const workingTimeSlots = getWorkingTimeSlots(configuration, starTime, endTime, holidays);
-    console.log(workingTimeSlots);
     const basicTimeSlotCost = getBasicTimeSlotCost(configuration, classFee, workingTimeSlots);
 
     return this.numOfWorker * basicTimeSlotCost;
@@ -171,5 +170,12 @@ export default class HotfixFee extends Fee {
     const basicCost = this.getBasicCost(configuration, classFee, startTime, endTime, holidays);
 
     return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getSurveyCost({ configuration, classFee, surveyTime = 0 }) {
+    const cost = getTimeSlotCost(configuration, classFee, surveyTime);
+
+    return Math.ceil(cost / 1000) * 1000;
   }
 }

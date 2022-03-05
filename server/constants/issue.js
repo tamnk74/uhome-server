@@ -7,6 +7,8 @@ export const issueStatus = Object.freeze({
   WAITING_PAYMENT: 'WAITING_PAYMENT',
   DONE: 'DONE',
   CANCELLED: 'CANCELLED',
+  APPROVAL: 'APPROVAL',
+  REQUESTING_SUPPORT: 'REQUESTING_SUPPORT',
 });
 
 export const workingTime = Object.freeze({

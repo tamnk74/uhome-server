@@ -67,15 +67,15 @@ Issue.init(
     },
     msgAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     createdAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     deletedAt: {
       type: Sequelize.DATE,
@@ -168,9 +168,11 @@ Issue.buildRelation = (categoryIds = [], duplicating = true) => {
         'mimeType',
         'createdAt',
         'updatedAt',
+        'thumbnail',
         'issueId',
         'path',
-        Attachment.buildUrlAttribuiteSelect(),
+        'thumbnailPath',
+        Attachment.buildUrlAttributeSelect(),
       ],
       duplicating,
     },

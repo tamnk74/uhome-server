@@ -19,9 +19,10 @@ import {
   eventStatuses,
   estimationMessageStatus,
   unitTime,
+  issueType,
 } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
-import { notificationQueue } from '../../../helpers/Queue';
+import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';
 import Issue from '../../../models/issue';
 import Event from '../../../models/event';
 import Attachment from '../../../models/attachment';
@@ -32,26 +33,16 @@ import TransactionHistory from '../../../models/transactionHistory';
 import sequelize from '../../../databases/database';
 import EstimationMessage from '../../../models/estimationMessage';
 import Uploader from '../../../helpers/Uploader';
-import { fileSystemConfig } from '../../../config';
 import RequestSupporting from '../../../models/requestSupporting';
 import Acceptance from '../../../models/acceptance';
+import Survey from '../../../models/survey';
+import FeeConfiguration from '../../../models/feeConfiguration';
+import FeeCategory from '../../../models/feeCategory';
+import FeeFactory from '../../../helpers/fee/FeeFactory';
+import CategoryIssue from '../../../models/categoryIssue';
+import LatestIssueStatus from '../../../models/latestIssueStatus';
 
-const uploadPromotion = async (file) => {
-  const id = uuidv4();
-  const fileName = `${id}-${file.originalname}`;
-  // eslint-disable-next-line no-use-before-define
-  const path = `${ChatService.filePath}/${fileName}`;
-
-  await Uploader.upload(file, {
-    path,
-    'x-amz-meta-mimeType': file.mimetype,
-    'x-amz-meta-size': file.size.toString(),
-  });
-
-  return { path: `${fileSystemConfig.clout_front}/${path}` };
-};
-
-const getIssueCost = async (receiveIssue, estimationMessage) => {
+const getIssueCost = async (receiveIssue, estimationMessage, survey) => {
   const { issueId } = receiveIssue;
 
   const materials = await IssueMaterial.findAll({
@@ -75,13 +66,17 @@ const getIssueCost = async (receiveIssue, estimationMessage) => {
   const estimationMessageData = get(estimationMessage, 'data', {});
   const worker = get(estimationMessageData, 'worker', {});
   const customer = get(estimationMessageData, 'customer', {});
-  const totalCost = customer.cost + totalMaterialCost;
+  const totalCost =
+    customer.cost + totalMaterialCost + get(worker, 'distanceFee', 0) + get(worker, 'surveyFee', 0);
   const totalCustomerPay = totalCost - customer.discount - customer.fee;
-  const totalWorkerReceive = worker.cost + totalMaterialCost;
+  const totalWorkerReceive =
+    worker.cost + totalMaterialCost + get(worker, 'distanceFee', 0) + get(worker, 'surveyFee', 0);
   const amountIntoWalletWorker = totalWorkerReceive - totalCustomerPay - worker.fee;
 
   set(worker, 'amountIntoWallet', amountIntoWalletWorker);
   set(customer, 'amountIntoWallet', 0);
+  set(worker, 'surveyFee', get(survey, 'data.surveyFee', 0));
+  set(customer, 'surveyFee', get(survey, 'data.surveyFee', 0));
 
   return {
     ...estimationMessageData,
@@ -169,6 +164,13 @@ export default class ChatService {
     if (isNewGroup) {
       await this.sendWelcomeMessage(chatChannel, workerChat, worker);
     }
+
+    await LatestIssueStatus.upsert({
+      id: uuid(),
+      issueId: issue.id,
+      userId: issue.createdBy,
+      status: issueStatus.CHATTING,
+    });
 
     return authorChat;
   }
@@ -270,6 +272,39 @@ export default class ChatService {
     }
 
     return ReceiveIssue.findBySupporterIds(issue.id, supporterIds);
+  }
+
+  static async getUploadVideoLink({ chatChannel, thumbnail }) {
+    const name = `${uuidv4()}`;
+    const path = `chat/${chatChannel.id}/videos/${name}.mp4`;
+    const thumbnailPath = `chat/${chatChannel.id}/videos/thumbnails/${name}.png`;
+    const [s3PreSingedLink, attachment] = await Promise.all([
+      Uploader.preSignedUrl({
+        path,
+      }),
+      Attachment.create({
+        path,
+        thumbnail: thumbnailPath,
+        name,
+        mimeType: 'video/mp4',
+      }),
+      Uploader.upload(thumbnail, {
+        path: thumbnailPath,
+        'x-amz-meta-mimeType': thumbnail.mimetype,
+        'x-amz-meta-size': thumbnail.size.toString(),
+      }),
+    ]);
+
+    return {
+      attachment,
+      link: s3PreSingedLink,
+    };
+  }
+
+  static async sendUploadVideoMessage({ chatChannel, user, link }) {
+    return ChatService.sendMessage('NEW_VIDEO', chatChannel, user, null, {
+      link,
+    });
   }
 
   static async sendMessage(commandName, chatChannel, user, messageId = null, data = {}) {
@@ -467,7 +502,7 @@ export default class ChatService {
     return receiveIssue;
   }
 
-  static async trakingProgress({ chatChannel, user, data }) {
+  static async trackingProgress({ chatChannel, user, data }) {
     const { attachmentIds, content = '', messageSid } = data;
 
     const { issue } = chatChannel;
@@ -476,8 +511,8 @@ export default class ChatService {
         where: {
           id: attachmentIds || [],
         },
-        attributes: ['id', Attachment.buildUrlAttribuiteSelect()],
-        raw: true,
+        attributes: ['id', 'path', 'url', 'thumbnailPath', 'mimeType', 'name', 'thumbnail'],
+        order: [['createdAt', 'ASC']],
       }),
       ChatMember.getSupporterIds(chatChannel.id),
       issue.addAttachments(attachmentIds),
@@ -485,7 +520,9 @@ export default class ChatService {
 
     const messageAttributes = {
       content,
-      attachments,
+      attachments: attachments.map((item) =>
+        pick(item, ['id', 'url', 'thumbnailPath', 'mimeType', 'name'])
+      ),
       issue: {
         status: issue.status,
       },
@@ -563,6 +600,11 @@ export default class ChatService {
             content: comment,
           })
         : null,
+      LatestIssueStatus.findOrCreate({
+        issueId: issue.id,
+        userId: issue.createdBy,
+        status: issueStatus.DONE,
+      }),
     ]);
 
     const event = issue.eventId
@@ -751,8 +793,8 @@ export default class ChatService {
         where: {
           id: attachmentIds || [],
         },
-        attributes: ['id', Attachment.buildUrlAttribuiteSelect()],
-        raw: true,
+        attributes: ['id', 'path', 'url', 'thumbnail', 'thumbnailPath', 'mimeType', 'name'],
+        order: [['createdAt', 'ASC']],
       }),
       ChatMember.getSupporterIds(chatChannel.id),
       issue.addAttachments(attachmentIds),
@@ -760,7 +802,9 @@ export default class ChatService {
 
     const messageAttributes = {
       content,
-      attachments,
+      attachments: attachments.map((item) =>
+        pick(item, ['id', 'url', 'thumbnailPath', 'mimeType', 'name'])
+      ),
       issue: {
         status: chatChannel.issue.status,
       },
@@ -926,6 +970,12 @@ export default class ChatService {
         where: {
           channelSid,
         },
+        include: [
+          {
+            model: Issue,
+            require: true,
+          },
+        ],
       }),
       ChatMember.findOne({
         where: {
@@ -935,13 +985,23 @@ export default class ChatService {
       }),
     ]);
 
-    if (chatChannel) {
-      await Issue.update(
-        {
-          msgAt: new Date(),
-        },
-        { where: { id: chatChannel.issueId } }
-      );
+    const { issue } = chatChannel;
+
+    if (issue) {
+      await Promise.all([
+        Issue.update(
+          {
+            msgAt: new Date(),
+          },
+          { where: { id: issue.id } }
+        ),
+        LatestIssueStatus.upsert({
+          id: uuid(),
+          issueId: issue.id,
+          userId: issue.createdBy,
+          status: issueStatus.CHATTING,
+        }),
+      ]);
     }
 
     notificationQueue.add('chat_notification', {
@@ -952,10 +1012,26 @@ export default class ChatService {
     });
   }
 
-  static async addPromotion({ user, files = [], chatChannel }) {
-    const promises = files.map((file) => uploadPromotion(file));
+  static async addPromotion({ user, chatChannel, attachmentIds }) {
+    const { issue } = chatChannel;
+    const [attachments] = await Promise.all([
+      Attachment.findAll({
+        where: {
+          id: attachmentIds || [],
+        },
+        attributes: ['id', 'url', 'thumbnail', 'thumbnailPath', 'mimeType', 'name', 'path'],
+        order: [['createdAt', 'ASC']],
+      }),
+      issue.addAttachments(attachmentIds),
+    ]);
 
-    const promotions = await Promise.all(promises);
+    const promotions = attachments.map((item) => ({
+      path: item.url,
+      mimeType: item.mimeType,
+      thumbnailPath: item.thumbnailPath,
+      name: item.name,
+    }));
+
     const messageAttributes = {
       promotions,
     };
@@ -1058,7 +1134,7 @@ export default class ChatService {
     const supporterIds = await ChatMember.getSupporterIds(chatChannel.id);
     const { issue } = chatChannel;
 
-    const [receiveIssue, waitingEstimationMessage, estimationMessage] = await Promise.all([
+    const [receiveIssue, waitingEstimationMessage, estimationMessage, survey] = await Promise.all([
       ReceiveIssue.findBySupporterIds(issue.id, supporterIds),
       EstimationMessage.findByWaitingStatus(chatChannel.id),
       EstimationMessage.findByChannelIdAndStatusAndType(
@@ -1066,6 +1142,12 @@ export default class ChatService {
         estimationMessageStatus.APPROVED,
         command.SUBMIT_ESTIMATION_TIME
       ),
+      Survey.findOne({
+        where: {
+          channelId: chatChannel.id,
+          status: issueStatus.APPROVAL,
+        },
+      }),
     ]);
 
     if (isNil(receiveIssue) || isEmpty(estimationMessage)) {
@@ -1081,7 +1163,7 @@ export default class ChatService {
     });
 
     const [data] = await Promise.all([
-      getIssueCost(receiveIssue, estimationMessage),
+      getIssueCost(receiveIssue, estimationMessage, survey),
       receiveIssue.save(),
       Issue.update(
         {
@@ -1181,5 +1263,85 @@ export default class ChatService {
     authorChat.setDataValue('member', member.toChatActor());
 
     return authorChat;
+  }
+
+  static async survey({ user, chatChannel, data }) {
+    const { issue } = chatChannel;
+    const categories = await CategoryIssue.findAll({
+      where: {
+        issueId: issue.id,
+      },
+    });
+    const categoriesId = categories.map((item) => item.categoryId);
+
+    const [surveys, feeConfiguration, feeCategory] = await Promise.all([
+      Survey.findAll({
+        channelId: chatChannel.id,
+        status: issueStatus.OPEN,
+      }),
+      FeeConfiguration.findOne({}),
+      FeeCategory.findOne({
+        where: {
+          categoryId: categoriesId,
+        },
+        order: [['max', 'DESC']],
+      }),
+    ]);
+
+    surveys.forEach((item) => {
+      chatMessageQueue.add('update_message', {
+        sid: item.messageSid,
+        attributes: {
+          is_expired: true,
+        },
+        channelSid: chatChannel.channelSid,
+      });
+    });
+
+    const surveyCost = FeeFactory.getSurveyCost(issueType.HOTFIX, get(data, 'totalTime', 0) / 60, {
+      classFee: feeCategory,
+      configuration: feeConfiguration,
+    });
+
+    set(data, 'surveyFee', surveyCost);
+
+    const message = await this.sendMessage(command.REQUEST_SURVEY, chatChannel, user, null, data);
+
+    await Survey.updateOrCreate(
+      {
+        userId: user.id,
+        channelId: chatChannel.id,
+      },
+      {
+        messageSid: message.sid,
+        channelId: chatChannel.id,
+        status: issueStatus.OPEN,
+        data,
+        issueId: issue.id,
+      }
+    );
+  }
+
+  static async approveSurvey({ user, chatChannel, data }) {
+    const { messageSid } = data;
+    const survey = await Survey.findOne({
+      where: {
+        messageSid,
+      },
+    });
+
+    if (!survey) {
+      throw new Error('SURVEY-0404');
+    }
+
+    await this.sendMessage(
+      command.APPROVAL_REQUEST_SURVEY,
+      chatChannel,
+      user,
+      messageSid,
+      get(survey, 'data', {})
+    );
+
+    await survey.update({ status: issueStatus.APPROVAL });
   }
 }

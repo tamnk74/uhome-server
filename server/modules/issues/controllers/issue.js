@@ -4,6 +4,19 @@ import { objectToCamel, objectToSnake } from '../../../helpers/Util';
 import Pagination from '../../../helpers/Pagination';
 
 export default class AuthController {
+  static async getUploadVideoLink(req, res, next) {
+    try {
+      const result = await IssueService.getUploadVideoLink({
+        user: req.user,
+        thumbnail: req.thumbnail,
+      });
+
+      return res.status(200).json(objectToSnake(result));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async create(req, res, next) {
     try {
       const issue = await IssueService.create(req.user, {
@@ -80,8 +93,12 @@ export default class AuthController {
       pagination.setTotal(requestSupports.count);
       return res.status(200).json({
         meta: pagination.getMeta(),
-        data: requestSupports.rows.map((item) =>
-          objectToSnake(
+        data: requestSupports.rows.map((item) => {
+          const requestSupporting = get(item, 'requestSupportings.[0]');
+          item.setDataValue('distance', get(requestSupporting, 'distance', 0));
+          item.setDataValue('distanceFee', get(requestSupporting, 'distanceFee', 0));
+
+          return objectToSnake(
             omit(item.toJSON(), [
               'verify_code',
               'password',
@@ -90,8 +107,8 @@ export default class AuthController {
               'deletedAt',
               'requestSupportings',
             ])
-          )
-        ),
+          );
+        }),
       });
     } catch (e) {
       return next(e);

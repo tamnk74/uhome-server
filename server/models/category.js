@@ -28,11 +28,11 @@ Category.init(
     },
     createdAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     updatedAt: {
       type: Sequelize.DATE,
-      defautValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW,
     },
     deletedAt: {
       type: Sequelize.DATE,
@@ -48,7 +48,7 @@ Category.init(
   }
 );
 
-Category.baseAttibutes = ['id', 'name', 'description', 'thumbnail'];
+Category.baseAttributes = ['id', 'name', 'description', 'thumbnail', 'code'];
 
 Category.beforeCreate((instance) => {
   instance.id = uuid.v4();
