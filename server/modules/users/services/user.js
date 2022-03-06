@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Sequelize, Op } from 'sequelize';
+import { get } from 'lodash';
 import { fileSystemConfig } from '../../../config';
 import Issue from '../../../models/issue';
 import Category from '../../../models/category';
@@ -410,7 +411,7 @@ export default class Userervice {
   }
 
   static async getLatestIssueStatus(user) {
-    return LatestIssueStatus.findOne({
+    const latestStatus = await LatestIssueStatus.findOne({
       attributes: [
         [Sequelize.literal('latest_issue_statuses.issue_id'), 'id'],
         'status',
@@ -422,5 +423,40 @@ export default class Userervice {
       },
       order: [['updatedAt', 'DESC']],
     });
+
+    if (!latestStatus) {
+      return {};
+    }
+
+    const issue = await Issue.findByPk(latestStatus.issueId, {
+      include: [
+        {
+          model: User,
+          as: 'creator',
+          attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
+        },
+        {
+          model: ReceiveIssue,
+          required: false,
+          as: 'supporting',
+          attributes: ['id', 'userId', 'issueId'],
+          include: [
+            {
+              model: User,
+              required: false,
+              attributes: ['id', 'name', 'avatar'],
+            },
+          ],
+        },
+      ],
+    });
+
+    return {
+      id: get(issue, 'id'),
+      status: get(latestStatus, 'status'),
+      issueId: get(issue, 'id'),
+      creator: get(issue, 'creator'),
+      supporting: get(issue, 'supporting'),
+    };
   }
 }
