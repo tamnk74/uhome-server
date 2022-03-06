@@ -64,6 +64,9 @@ export default class NotificationService {
               },
             ],
             role: userRoles.WORKER,
+            deviceId: {
+              [Op.ne]: null,
+            },
           },
           include: [
             {
@@ -92,6 +95,11 @@ export default class NotificationService {
               },
             },
           ],
+          where: {
+            deviceId: {
+              [Op.ne]: null,
+            },
+          },
         }),
       ]);
 
@@ -160,6 +168,9 @@ export default class NotificationService {
         Subscription.findAll({
           where: {
             userId,
+            deviceId: {
+              [Op.ne]: null,
+            },
           },
         }),
       ]);
@@ -208,6 +219,9 @@ export default class NotificationService {
         Subscription.findAll({
           where: {
             userId,
+            deviceId: {
+              [Op.ne]: null,
+            },
           },
         }),
         User.findByPk(actorId),
@@ -249,6 +263,9 @@ export default class NotificationService {
         Subscription.findAll({
           where: {
             userId,
+            deviceId: {
+              [Op.ne]: null,
+            },
           },
         }),
         User.findByPk(actorId),
@@ -316,6 +333,9 @@ export default class NotificationService {
       const subscriptions = await Subscription.findAll({
         where: {
           userId: receiveIds,
+          deviceId: {
+            [Op.ne]: null,
+          },
         },
       });
       const tokens = subscriptions.map((item) => item.token);
@@ -347,6 +367,9 @@ export default class NotificationService {
       const subscriptions = await Subscription.findAll({
         where: {
           userId: [actorId],
+          deviceId: {
+            [Op.ne]: null,
+          },
         },
       });
       const tokens = subscriptions.map((item) => item.token);
