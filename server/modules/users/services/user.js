@@ -457,6 +457,7 @@ export default class Userervice {
       issueId: get(issue, 'id'),
       creator: get(issue, 'creator'),
       supporting: get(issue, 'supporting'),
+      updatedAt: get(latestStatus, 'updatedAt'),
     };
   }
 }
