@@ -411,6 +411,12 @@ export default class Userervice {
 
   static async getLatestIssueStatus(user) {
     return LatestIssueStatus.findOne({
+      attributes: [
+        [Sequelize.literal('latest_issue_statuses.issue_id'), 'id'],
+        'status',
+        'updatedAt',
+        'issueId',
+      ],
       where: {
         userId: user.id,
       },
