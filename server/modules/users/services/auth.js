@@ -339,10 +339,10 @@ export default class AuthService {
     );
   }
 
-  static async logout(user, token) {
+  static async logout(user, token, deviceId) {
     await Subscription.destroy({
       where: {
-        userId: user.id,
+        deviceId,
       },
     });
     return RedisService.removeAccessToken(user.id, token);

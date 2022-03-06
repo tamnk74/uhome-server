@@ -24,6 +24,7 @@ import {
   updatePasswordSchema,
   updatePhoneNumberSchema,
   loginAppleSchema,
+  logoutSchema,
 } from '../schema';
 
 import { verifyPhoneNumber, verifyUser } from '../middlewares';
@@ -38,7 +39,7 @@ const storage = multer.memoryStorage({
 const upload = multer({ storage }).single('file');
 
 router.route('/login').post(validator(loginSchema), AuthController.login);
-router.route('/logout').post(auth(), AuthController.logout);
+router.route('/logout').post(auth(), validator(logoutSchema), AuthController.logout);
 router.route('/auth/facebook').post(validator(loginFbSchema), AuthController.loginFb);
 router.route('/auth/zalo').post(validator(loginZaloSchema), AuthController.loginZalo);
 router.route('/register').post(basicAuth, validator(registerSchema), AuthController.register);

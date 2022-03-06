@@ -21,6 +21,10 @@ Subscription.init(
       type: Sequelize.STRING(255),
       allowNull: false,
     },
+    deviceId: {
+      type: Sequelize.STRING(127),
+      allowNull: false,
+    },
     createdAt: {
       defaultValue: Sequelize.NOW,
       type: Sequelize.DATE,
