@@ -45,7 +45,7 @@ export default class AuthController {
   static async logout(req, res, next) {
     try {
       const token = req.headers.authorization.slice(7);
-      await AuthService.logout(req.user, token);
+      await AuthService.logout(req.user, token, get(req, 'body.deviceId'));
 
       return res.status(204).json({});
     } catch (e) {

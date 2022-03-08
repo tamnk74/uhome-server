@@ -274,10 +274,10 @@ export default class Userervice {
     return User.updateSkills(userId, payload);
   }
 
-  static async subscribe({ userId, token, role }) {
+  static async subscribe({ userId, token, deviceId, role }) {
     await Subscription.destroy({
       where: {
-        token,
+        deviceId,
       },
     });
 
@@ -285,14 +285,15 @@ export default class Userervice {
       userId,
       token,
       role,
+      deviceId,
     });
 
     return Fcm.subscribeNewIssue(token);
   }
 
-  static async unsubscribe({ userId, token }) {
+  static async unsubscribe({ token, deviceId }) {
     await Subscription.destroy({
-      where: { userId, token },
+      where: { deviceId },
     });
     return Fcm.unsubscribeNewIssue(token);
   }
