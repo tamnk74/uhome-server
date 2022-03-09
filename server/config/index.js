@@ -36,3 +36,5 @@ export const maximumReuestOtpPerHour = parseInt(process.env.MAXIMUM_REQUEST_OTP_
 export const googleAPIConfig = {
   key: process.env.GOOGLE_API_KEY || '',
 };
+
+export const pushNotificationRound = parseInt(process.env.PUSH_NOTIFICATION_ROUND, 10) || 5;
