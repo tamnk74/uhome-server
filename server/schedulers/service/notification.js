@@ -18,8 +18,9 @@ import RequestSupporting from '../../models/requestSupporting';
 import { objectToSnake } from '../../helpers/Util';
 import ChatChannel from '../../models/chatChannel';
 import ChatMember from '../../models/chatMember';
-import { sentryConfig } from '../../config';
+import { sentryConfig, pushNotificationRound } from '../../config';
 import LatestIssueStatus from '../../models/latestIssueStatus';
+import NotificationRound from '../../models/notificationRound';
 
 export default class NotificationService {
   static async pushNewIssueNotification(job, done) {
@@ -142,10 +143,10 @@ export default class NotificationService {
           status: issueStatus.OPEN,
         }),
       ]);
-      done();
+      return done();
     } catch (error) {
       sentryConfig.Sentry.captureException(error);
-      done(error);
+      return done(error);
     }
   }
 
@@ -176,7 +177,12 @@ export default class NotificationService {
       ]);
       const { issue } = supporting;
       const actor = supporting.user;
-      const tokens = subscriptions.map((item) => item.token);
+      const tokens = _.compact(subscriptions.map((item) => item.token));
+
+      if (_.isEmpty(tokens)) {
+        return done();
+      }
+
       const notification = {
         title: Notification.getTitle('notification.request_support', { title: issue.title }),
         body: Notification.getTitle('notification.request_support', { title: issue.title }),
@@ -205,10 +211,10 @@ export default class NotificationService {
         }),
       ]);
 
-      done();
+      return done();
     } catch (error) {
       sentryConfig.Sentry.captureException(error);
-      done(error);
+      return done(error);
     }
   }
 
@@ -226,7 +232,12 @@ export default class NotificationService {
         }),
         User.findByPk(actorId),
       ]);
-      const tokens = subscriptions.map((item) => item.token);
+      const tokens = _.compact(subscriptions.map((item) => item.token));
+
+      if (_.isEmpty(tokens)) {
+        return done();
+      }
+
       const notification = {
         title: Notification.getTitle('notification.cancel', { title: issue.title }),
         body: Notification.getTitle('notification.cancel', { title: issue.title }),
@@ -249,10 +260,10 @@ export default class NotificationService {
           status: true,
         }),
       ]);
-      done();
+      return done();
     } catch (error) {
       sentryConfig.Sentry.captureException(error);
-      done(error);
+      return done(error);
     }
   }
 
@@ -270,7 +281,12 @@ export default class NotificationService {
         }),
         User.findByPk(actorId),
       ]);
-      const tokens = subscriptions.map((item) => item.token);
+      const tokens = _.compact(subscriptions.map((item) => item.token));
+
+      if (_.isEmpty(tokens)) {
+        return done();
+      }
+
       const notification = {
         title: Notification.getTitle('notification.cancel', { title: issue.title }),
         body: Notification.getTitle('notification.cancel', { title: issue.title }),
@@ -293,10 +309,10 @@ export default class NotificationService {
           status: true,
         }),
       ]);
-      done();
+      return done();
     } catch (error) {
       sentryConfig.Sentry.captureException(error);
-      done(error);
+      return done(error);
     }
   }
 
@@ -328,17 +344,45 @@ export default class NotificationService {
       }
 
       const { issue } = chatChannel;
-      const receiveIds = chatMembers.map((item) => item.userId);
-
-      const subscriptions = await Subscription.findAll({
+      const memberIds = chatMembers.map((item) => item.userId);
+      const receives = await NotificationRound.findAll({
         where: {
-          userId: receiveIds,
-          deviceId: {
-            [Op.ne]: null,
-          },
+          userId: memberIds,
+          channelId: chatChannel.id,
+          [Op.and]: [
+            Sequelize.where(Sequelize.literal(`mod(round, ${pushNotificationRound})`), '=', 0),
+          ],
         },
       });
-      const tokens = subscriptions.map((item) => item.token);
+
+      const receiveIds = receives.map((item) => item.userId);
+      const subscriptions = await Promise.all([
+        Subscription.findAll({
+          where: {
+            userId: receiveIds,
+            deviceId: {
+              [Op.ne]: null,
+            },
+          },
+        }),
+        NotificationRound.update(
+          {
+            round: Sequelize.literal(`round + 1`),
+          },
+          {
+            where: {
+              userId: memberIds,
+              channelId: chatChannel.id,
+            },
+          }
+        ),
+      ]);
+      const tokens = _.compact(subscriptions.map((item) => item.token));
+
+      if (_.isEmpty(tokens)) {
+        return done();
+      }
+
       const notification = {
         title: Notification.getTitle(_.get(notificationMessage, commandName, commandName), {
           title: issue.title,
@@ -352,8 +396,8 @@ export default class NotificationService {
         issue: JSON.stringify(objectToSnake(issue)),
         channel: JSON.stringify(objectToSnake(chatChannel.toJSON())),
       };
+      await Fcm.sendNotification(tokens, data, notification);
 
-      await Promise.all([tokens.length ? Fcm.sendNotification(tokens, data, notification) : null]);
       return done();
     } catch (error) {
       sentryConfig.Sentry.captureException(error);
@@ -372,7 +416,12 @@ export default class NotificationService {
           },
         },
       });
-      const tokens = subscriptions.map((item) => item.token);
+      const tokens = _.compact(subscriptions.map((item) => item.token));
+
+      if (_.isEmpty(tokens)) {
+        return done();
+      }
+
       const notification = {
         title: 'You just got a bonus!',
         body: {
@@ -387,11 +436,12 @@ export default class NotificationService {
         transaction: JSON.stringify(transaction),
       };
 
-      await Promise.all([tokens.length ? Fcm.sendNotification(tokens, data, notification) : null]);
+      await Fcm.sendNotification(tokens, data, notification);
+
       return done();
     } catch (error) {
       sentryConfig.Sentry.captureException(error);
-      done(error);
+      return done(error);
     }
   }
 }
