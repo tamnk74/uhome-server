@@ -21,22 +21,24 @@ import ChatMember from '../../models/chatMember';
 import { sentryConfig, pushNotificationRound } from '../../config';
 import LatestIssueStatus from '../../models/latestIssueStatus';
 import NotificationRound from '../../models/notificationRound';
+import CategoryIssue from '../../models/categoryIssue';
 
 export default class NotificationService {
   static async pushNewIssueNotification(job, done) {
     try {
       const { id } = job.data;
-      const filterIssueSql = sequelize.dialect.QueryGenerator.selectQuery('category_issues', {
-        attributes: ['category_id'],
+      const categoryIssues = await CategoryIssue.findAll({
         where: {
-          issue_id: id,
+          issueId: id,
         },
-      }).slice(0, -1);
+      });
+      const categoryIds = categoryIssues.map((item) => item.categoryId);
+
       const filteredCategorySql = sequelize.dialect.QueryGenerator.selectQuery('user_category', {
         attributes: ['user_id'],
         where: {
           category_id: {
-            [Sequelize.Op.in]: Sequelize.literal(`(${filterIssueSql})`),
+            [Sequelize.Op.in]: categoryIds,
           },
         },
       }).slice(0, -1);
@@ -104,7 +106,7 @@ export default class NotificationService {
         }),
       ]);
 
-      const dataInssert = [];
+      const dataInsert = [];
       const tokens = [];
       const actor = issue.creator;
       const notification = {
@@ -119,7 +121,7 @@ export default class NotificationService {
 
       subscriptions.forEach((item) => {
         tokens.push(item.token);
-        dataInssert.push({
+        dataInsert.push({
           id: uuid(),
           actorId: issue.createdBy,
           recipientId: item.userId,
@@ -136,7 +138,7 @@ export default class NotificationService {
 
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
-        Notification.bulkCreate(dataInssert),
+        Notification.bulkCreate(dataInsert),
         LatestIssueStatus.create({
           userId: issue.createdBy,
           issueId: issue.id,
