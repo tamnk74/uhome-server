@@ -15,9 +15,9 @@ UserEvent.init(
       type: Sequelize.UUID,
       allowNull: false,
     },
-    limit: {
-      type: Sequelize.DataTypes.TINYINT,
-      defaultValue: 0,
+    issueId: {
+      type: Sequelize.UUID,
+      allowNull: true,
     },
     createdAt: {
       defaultValue: Sequelize.NOW,

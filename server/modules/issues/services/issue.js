@@ -13,6 +13,7 @@ import ReceiveIssue from '../../../models/receiveIssue';
 import sequelize from '../../../databases/database';
 import ChatChannel from '../../../models/chatChannel';
 import ChatMember from '../../../models/chatMember';
+import UserEvent from '../../../models/userEvent';
 import Event from '../../../models/event';
 import { twilioClient } from '../../../helpers/Twilio';
 import { objectToSnake } from '../../../helpers/Util';
@@ -56,13 +57,13 @@ export default class IssueService {
     };
   }
 
-  static async create(user, data, userEvent) {
+  static async create(user, data) {
     const issue = await Issue.addIssue(data);
-    if (userEvent) {
-      await userEvent.update({
-        limit: userEvent.limit - 1,
-      });
-    }
+    await UserEvent.create({
+      userId: user.id,
+      eventId: data.saleEvent.id,
+      issueId: issue.id,
+    });
     notificationQueue.add('new_issue', { id: issue.id });
     return this.getDetail(user, issue.id);
   }

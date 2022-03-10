@@ -22,7 +22,7 @@ export default class AuthController {
       const issue = await IssueService.create(req.user, {
         ...req.body,
         createdBy: req.user.id,
-        userEvent: req.userEvent,
+        saleEvent: req.saleEvent,
       });
       return res.status(201).json(objectToSnake(issue.toJSON()));
     } catch (e) {
