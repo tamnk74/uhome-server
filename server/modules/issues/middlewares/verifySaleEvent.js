@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import { saleEventTypes } from '../../../constants';
 import Event from '../../../models/event';
 import UserEvent from '../../../models/userEvent';
@@ -21,21 +22,18 @@ export const verifySaleEvent = async (req, res, next) => {
         throw errorFactory.getError('EVSL-0003');
       }
 
-      if (+saleEvent.limit > 0) {
-        const [userEvent] = await UserEvent.findOrCreate({
+      if (+saleEvent.limit !== -1) {
+        const usedEventsQty = await UserEvent.count({
           where: {
             userId: req.user.id,
             eventId: saleEvent.id,
-          },
-          defaults: {
-            userId: req.user.id,
-            eventId: saleEvent.id,
-            limit: saleEvent.limit,
+            issueId: {
+              [Op.ne]: null,
+            },
           },
         });
-        req.userEvent = userEvent;
 
-        if (userEvent.limit === 0) {
+        if (usedEventsQty >= +saleEvent.limit) {
           throw errorFactory.getError('EVSL-0004');
         }
       }

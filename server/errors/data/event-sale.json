@@ -16,5 +16,11 @@
     "error": "Invalid sale event",
     "title": "This sale event is not suitable for your issue",
     "detail": "This sale event is not suitable for your issue"
+  },
+  "EVSL-0004": {
+    "status": 400,
+    "error": "Invalid sale event",
+    "title": "This sale event is used by another issue",
+    "detail": "This sale event is used by another issue"
   }
 }
