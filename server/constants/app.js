@@ -49,3 +49,5 @@ export const calculateType = Object.freeze({
   FIXED: 'fixed',
   PERCENT: 'percent',
 });
+
+export const UPDATE_PROFILE_EVENT_CODE = 'UPDATE-PROFILE-EVENT-CODE';

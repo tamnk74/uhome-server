@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { verifyThumbnail } from 'modules/issues/middlewares';
+import { verifyThumbnail } from '@/modules/issues/middlewares';
 import ChatController from '../controllers/chat';
 import { auth, validator, active } from '../../../middlewares';
 import {

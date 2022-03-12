@@ -1,5 +1,5 @@
-import { issueStatus } from 'constants';
-import { paymentStatus } from 'constants/app';
+import { issueStatus } from '@/constants';
+import { paymentStatus } from '@/constants/app';
 import Issue from '../../../models/issue';
 import ReceiveIssue from '../../../models/receiveIssue';
 import Payment from '../../../models/payment';

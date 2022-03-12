@@ -1,18 +1,33 @@
 import { isNil, get } from 'lodash';
+import { Sequelize } from 'sequelize';
+import {
+  status as userStatus,
+  socialAccount,
+  eventStatuses,
+  UPDATE_PROFILE_EVENT_CODE,
+  transactionType,
+  currencies,
+  paymentMethod,
+} from '@/constants';
+import { notificationQueue } from '@/helpers/Queue';
 import errorFactory from '../../../errors/ErrorFactory';
 import User from '../../../models/user';
 import JWT from '../../../helpers/JWT';
 import Zalo from '../../../helpers/Zalo';
+import Event from '../../../models/event';
+import UserEvent from '../../../models/userEvent';
 import Facebook from '../../../helpers/Facebook';
 import Apple from '../../../helpers/Apple';
 import RedisService from '../../../helpers/Redis';
-import { status as userStatus, socialAccount } from '../../../constants';
 import { sendOTP } from '../../../helpers/SmsOTP';
 import UserProfile from '../../../models/userProfile';
 import Subscription from '../../../models/subscription';
 import IdentifyCard from '../../../models/identifyCard';
 import SocialAccount from '../../../models/socialAccount';
+import TransactionHistory from '../../../models/transactionHistory';
 import { fileSystemConfig } from '../../../config';
+
+const { v4: uuidv4 } = require('uuid');
 
 export default class AuthService {
   static async authenticate({ phoneNumber = '', password }) {
@@ -71,12 +86,81 @@ export default class AuthService {
     return user;
   }
 
-  static updateUser(userId, data) {
-    return User.update(data, {
+  static async updateUser(userId, data) {
+    await User.update(data, {
       where: {
         id: userId,
       },
     });
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: UserProfile,
+          as: 'profile',
+        },
+      ],
+    });
+    const saleEvent = await Event.findOne({
+      where: {
+        code: UPDATE_PROFILE_EVENT_CODE,
+        status: eventStatuses.ACTIVE,
+      },
+    });
+
+    const isFullyUpdated =
+      user.address &&
+      user.birthday &&
+      user.phoneNumber &&
+      user.profile.identityCard.after &&
+      user.profile.identityCard.before;
+    if (!isFullyUpdated || !saleEvent) {
+      return user;
+    }
+
+    const userEvent = await UserEvent.findOne({
+      where: {
+        userId,
+        eventId: saleEvent.id,
+      },
+    });
+    if (!userEvent) {
+      await UserEvent.create({
+        userId,
+        eventId: saleEvent.id,
+        issueId: null,
+      });
+      await UserProfile.update(
+        {
+          accountBalance: Sequelize.literal(`account_balance + ${saleEvent.value}`),
+        },
+        {
+          where: {
+            userId,
+          },
+        }
+      );
+
+      const transaction = await TransactionHistory.create({
+        id: uuidv4(),
+        userId,
+        amount: saleEvent.value,
+        total: saleEvent.value || 0,
+        discount: 0,
+        type: transactionType.BONUS,
+        currency: currencies.VND,
+        extra: {
+          user: user.toJSON(),
+        },
+        method: paymentMethod.CASH,
+      });
+
+      notificationQueue.add('receive_bonus', {
+        actorId: userId,
+        transaction: transaction.toJSON(),
+      });
+    }
+
+    return user;
   }
 
   static async authorize({ code, role }) {

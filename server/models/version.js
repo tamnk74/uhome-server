@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import uuid from 'uuid';
-import { appTypes } from 'constants';
+import { appTypes } from '@/constants';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 
