@@ -1,7 +1,6 @@
-import { Op } from 'sequelize';
 import { saleEventTypes } from '../../../constants';
 import Event from '../../../models/event';
-import UserEvent from '../../../models/userEvent';
+import Issue from '../../../models/issue';
 import errorFactory from '../../../errors/ErrorFactory';
 
 export const verifySaleEvent = async (req, res, next) => {
@@ -23,13 +22,10 @@ export const verifySaleEvent = async (req, res, next) => {
       }
 
       if (+saleEvent.limit !== -1) {
-        const usedEventsQty = await UserEvent.count({
+        const usedEventsQty = await Issue.count({
           where: {
-            userId: req.user.id,
+            createdBy: req.user.id,
             eventId: saleEvent.id,
-            issueId: {
-              [Op.ne]: null,
-            },
           },
         });
 

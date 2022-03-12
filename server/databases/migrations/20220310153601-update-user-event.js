@@ -17,7 +17,7 @@ module.exports = {
     await queryInterface.addColumn('user_events', 'limit', Sequelize.DataTypes.DECIMAL(12, 2), {
       allowNull: false,
       after: 'image',
-      defautValue: -1,
+      defaultValue: -1,
     });
   },
 };
