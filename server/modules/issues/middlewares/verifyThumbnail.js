@@ -1,4 +1,4 @@
-import errorFactory from 'errors/ErrorFactory';
+import errorFactory from '@/errors/ErrorFactory';
 
 export const verifyThumbnail = (req, res, next) => {
   if (!req.file) {
