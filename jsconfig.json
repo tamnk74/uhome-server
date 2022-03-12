@@ -2,19 +2,11 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es6",
-    "baseUrl": "./server",
+    "baseUrl": ".",
     "resolveJsonModule": true,
     "paths": {
-      "constants/*": ["./server/constants/*"],
-      "models/*": ["./server/models/*"],
-      "config/*": ["./server/config/*"],
-      "modules/*": ["./server/modules/*"],
-      "helpers/*": ["./server/helpers/*"],
-      "locales/*": ["./server/locales/*"],
-      "@": ["."],
+      "@/*": ["server/*"]
     }
   },
-  "include": [
-    "server/**/*"
-  ]
+  "include": ["server/**/*"]
 }

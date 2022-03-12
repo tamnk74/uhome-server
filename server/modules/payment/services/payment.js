@@ -1,13 +1,13 @@
 import axios from 'axios';
-import { paymentMethod, paymentType, currencies } from 'constants/app';
-import { momoConfig } from 'config';
-import { Momo, paymentLogger } from 'helpers';
-import Transaction from 'models/transaction';
-import UserProfile from 'models/userProfile';
-import UserEvent from 'models/userEvent';
-import Event from 'models/event';
-import TransactionHistory from 'models/transactionHistory';
-import sequelize from 'databases/database';
+import { paymentMethod, paymentType, currencies } from '@/constants/app';
+import { momoConfig } from '@/config';
+import { Momo, paymentLogger } from '@/helpers';
+import Transaction from '@/models/transaction';
+import UserProfile from '@/models/userProfile';
+import UserEvent from '@/models/userEvent';
+import Event from '@/models/event';
+import TransactionHistory from '@/models/transactionHistory';
+import sequelize from '@/databases/database';
 import uuid, { v4 as uuidv4 } from 'uuid';
 import { paymentStatus, eventStatuses, transactionType } from '../../../constants';
 
