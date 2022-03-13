@@ -10,6 +10,7 @@ import ApiError from './ApiError';
 import errorFactory from './ErrorFactory';
 
 export const handleError = (err, req, res, next) => {
+  console.error(err);
   let error = null;
   switch (err.constructor) {
     case BadRequestError:
@@ -38,8 +39,6 @@ export const handleError = (err, req, res, next) => {
     (error instanceof InternalServerError || status === httpStatus.INTERNAL_SERVER_ERROR)
   ) {
     sentryConfig.Sentry.captureException(err);
-  } else {
-    console.error(err);
   }
 
   return res.status(status).send(response);
