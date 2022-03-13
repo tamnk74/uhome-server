@@ -1310,7 +1310,7 @@ export default class ChatService {
       });
     });
 
-    const surveyCost = FeeFactory.getSurveyCost(issueType.HOTFIX, get(data, 'totalTime', 0) / 60, {
+    const surveyCost = FeeFactory.getSurveyCost(issueType.HOTFIX, get(data, 'totalTime', 0), {
       classFee: feeCategory,
       configuration: feeConfiguration,
     });
