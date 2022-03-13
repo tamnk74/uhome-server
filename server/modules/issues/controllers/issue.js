@@ -127,12 +127,12 @@ export default class AuthController {
 
   static async cancelSupporting(req, res, next) {
     try {
-      await IssueService.cancelSupporting({
+      const issue = await IssueService.cancelSupporting({
         user: req.user,
         receiveIssue: req.receiveIssue,
         data: req.body,
       });
-      return res.status(204).json({});
+      return res.status(200).json(issue);
     } catch (e) {
       return next(e);
     }

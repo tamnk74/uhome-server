@@ -612,7 +612,8 @@ export default class ChatService {
             content: comment,
           })
         : null,
-      LatestIssueStatus.findOrCreate({
+      LatestIssueStatus.upsert({
+        id: uuid(),
         issueId: issue.id,
         userId: issue.createdBy,
         status: issueStatus.DONE,
@@ -1310,7 +1311,7 @@ export default class ChatService {
       });
     });
 
-    const surveyCost = FeeFactory.getSurveyCost(issueType.HOTFIX, get(data, 'totalTime', 0) / 60, {
+    const surveyCost = FeeFactory.getSurveyCost(issueType.HOTFIX, get(data, 'totalTime', 0), {
       classFee: feeCategory,
       configuration: feeConfiguration,
     });

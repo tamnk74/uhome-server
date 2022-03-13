@@ -11,8 +11,8 @@ export const estimationSchema = Joi.object().keys({
     .required()
     .when('type', {
       is: issueType.HOTFIX,
-      then: Joi.number().integer().max(8),
-      otherwise: Joi.number().integer().min(0),
+      then: Joi.number().max(8),
+      otherwise: Joi.number().min(0),
     }),
   num_of_worker: Joi.number().integer().min(1).default(1),
   working_times: Joi.array().items(workerTimeItem).required(),
