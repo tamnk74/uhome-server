@@ -612,7 +612,8 @@ export default class ChatService {
             content: comment,
           })
         : null,
-      LatestIssueStatus.findOrCreate({
+      LatestIssueStatus.upsert({
+        id: uuid(),
         issueId: issue.id,
         userId: issue.createdBy,
         status: issueStatus.DONE,
