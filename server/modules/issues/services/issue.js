@@ -27,6 +27,7 @@ import Attachment from '../../../models/attachment';
 import Holiday from '../../../models/holiday';
 import { googleMap } from '../../../helpers';
 import Survey from '../../../models/survey';
+import Category from '../../../models/category';
 
 export default class IssueService {
   static async getUploadVideoLink({ thumbnail }) {
@@ -253,7 +254,7 @@ export default class IssueService {
    * @returns
    */
   static async cancelSupporting({ user, receiveIssue, data }) {
-    const cancelSupporting = await ReceiveIssue.cancel({
+    await ReceiveIssue.cancel({
       reason: data.reason,
       receiveIssue,
       userId: user.id,
@@ -265,8 +266,26 @@ export default class IssueService {
       actorId: user.id,
       userId: issue.createdBy,
     });
-    await this.sendMessage(command.CANCELED, user, issue, data);
-    return cancelSupporting;
+
+    const [issueUpdated] = await Promise.all([
+      Issue.findByPk(issue.id, {
+        include: [
+          {
+            model: Category,
+            required: true,
+            as: 'categories',
+          },
+          {
+            model: User,
+            as: 'creator',
+            attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
+          },
+        ],
+      }),
+      this.sendMessage(command.CANCELED, user, issue, data),
+    ]);
+
+    return issueUpdated;
   }
 
   /**
