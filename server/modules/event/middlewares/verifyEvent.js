@@ -26,7 +26,7 @@ export const verifyEvent = async (req, res, next) => {
     if (saleEvent.limit !== -1) {
       const userEventCount = await Issue.count({
         where: {
-          userId: req.user.id,
+          createdBy: req.user.id,
           eventId: saleEvent.id,
           status: eventStatuses.INACTIVE,
         },
