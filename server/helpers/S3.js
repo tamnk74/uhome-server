@@ -41,7 +41,6 @@ export default class S3 {
       Bucket: fileSystemConfig[this.driver].bucket_name,
       Key: path,
       ContentType: 'video/mp4',
-      ACL: 'public-read',
     });
 
     const signedUrl = await getSignedUrl(this.s3Client, command, {

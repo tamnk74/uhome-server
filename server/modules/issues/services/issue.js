@@ -2,7 +2,7 @@ import { Sequelize, Op } from 'sequelize';
 import dayjs from 'dayjs';
 import { get, sumBy, set, pick, min } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import Uploader from 'helpers/Uploader';
+import Uploader from '@/helpers/Uploader';
 import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';

@@ -35,14 +35,6 @@
     ]
   },
   "_moduleAliases": {
-    "modules": "./server/modules",
-    "constants": "./server/constants",
-    "errors": "./server/errors",
-    "config": "./server/config",
-    "helpers": "./server/helpers",
-    "models": "./server/models",
-    "databases": "./server/databases",
-    "server/": "./server/",
     "@": "./server"
   },
   "dependencies": {

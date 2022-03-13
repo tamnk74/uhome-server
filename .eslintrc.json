@@ -31,7 +31,7 @@
     "no-console": 0,
     "no-plusplus": 0,
     "import/prefer-default-export": 0,
-    "import/no-unresolved": [2, { "ignore": ["server/config", "server/helpers"] }],
+    "import/no-unresolved": [2, { "ignore": ["@/*"] }],
     "no-unused-expressions": 0,
     "no-unused-vars": [
       "error",
