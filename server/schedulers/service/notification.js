@@ -1,6 +1,7 @@
 import { Sequelize, Op } from 'sequelize';
 import uuid from 'uuid';
 import _ from 'lodash';
+import dayjs from 'dayjs';
 import Notification from '../../models/notification';
 import Fcm from '../../helpers/Fcm';
 import Subscription from '../../models/subscription';
@@ -18,93 +19,79 @@ import RequestSupporting from '../../models/requestSupporting';
 import { objectToSnake } from '../../helpers/Util';
 import ChatChannel from '../../models/chatChannel';
 import ChatMember from '../../models/chatMember';
-import { sentryConfig, pushNotificationRound } from '../../config';
+import { sentryConfig, pushNotificationRound, maximumNotificationOneRound } from '../../config';
 import LatestIssueStatus from '../../models/latestIssueStatus';
 import NotificationRound from '../../models/notificationRound';
+import Category from '../../models/category';
+import { notificationQueue } from '../../helpers/Queue';
 
 export default class NotificationService {
   static async pushNewIssueNotification(job, done) {
     try {
-      const { id } = job.data;
-      const filterIssueSql = sequelize.dialect.QueryGenerator.selectQuery('category_issues', {
-        attributes: ['category_id'],
-        where: {
-          issue_id: id,
-        },
-      }).slice(0, -1);
-      const filteredCategorySql = sequelize.dialect.QueryGenerator.selectQuery('user_category', {
-        attributes: ['user_id'],
-        where: {
-          category_id: {
-            [Sequelize.Op.in]: Sequelize.literal(`(${filterIssueSql})`),
+      const { id, isRepeated = false } = job.data;
+      const issue = await Issue.findByPk(id, {
+        include: [
+          {
+            model: User,
+            require: true,
+            as: 'creator',
           },
-        },
-      }).slice(0, -1);
+          {
+            model: Category,
+            require: true,
+            as: 'categories',
+          },
+        ],
+      });
+      const categories = _.get(issue, 'categories', []);
+      const categoryIds = categories.map((item) => item.id);
 
-      const filteredNotifySql = sequelize.dialect.QueryGenerator.selectQuery('notifications', {
-        attributes: ['recipient_id'],
-        where: {
-          issue_id: id,
-          type: notificationType.newIssue,
-        },
-      }).slice(0, -1);
+      const sql = `SELECT subscriptions.*, 
+        ST_DISTANCE_SPHERE(POINT(users.lon, users.lat), POINT(:issueLon, :issueLat)) AS distance
+        FROM subscriptions
+          INNER JOIN users ON users.id = subscriptions.user_id
+          INNER JOIN user_profiles ON user_profiles.user_id = users.id
+          INNER JOIN user_category ON user_category.user_id = users.id AND category_id IN (:categoryIds)
+          LEFT JOIN notifications ON notifications.recipient_id = users.id AND issue_id = :issueId AND type = :type
+        WHERE
+          subscriptions.role = :role AND notifications.id IS NULL and users.status = 1 and device_id IS NULL
+        ORDER BY user_profiles.reliability DESC , distance ASC
+        LIMIT :limit`;
 
-      const [subscriptions, issue, subscriptionsConsulting] = await Promise.all([
-        Subscription.findAll({
-          where: {
-            [Op.and]: [
-              {
-                userId: {
-                  [Sequelize.Op.notIn]: Sequelize.literal(`(${filteredNotifySql})`),
-                },
-              },
-              {
-                userId: {
-                  [Sequelize.Op.in]: Sequelize.literal(`(${filteredCategorySql})`),
-                },
-              },
-            ],
+      const [subscriptions, subscriptionsConsulting] = await Promise.all([
+        sequelize.query(sql, {
+          replacements: {
+            categoryIds,
+            issueLon: issue.lon,
+            issueLat: issue.lat,
+            issueId: id,
+            type: notificationType.newIssue,
+            limit: maximumNotificationOneRound,
             role: userRoles.WORKER,
-            deviceId: {
-              [Op.ne]: null,
-            },
           },
-          include: [
-            {
-              model: User,
-              require: true,
-            },
-          ],
-          limit: 25,
+          type: Sequelize.QueryTypes.SELECT,
         }),
-        Issue.findByPk(id, {
-          include: [
-            {
-              model: User,
-              require: true,
-              as: 'creator',
-            },
-          ],
-        }),
-        Subscription.findAll({
-          include: [
-            {
-              model: User,
-              require: true,
+        isRepeated
+          ? []
+          : Subscription.findAll({
+              include: [
+                {
+                  model: User,
+                  require: true,
+                  where: {
+                    role: roles.CONSULTING,
+                  },
+                },
+              ],
               where: {
-                role: roles.CONSULTING,
+                deviceId: {
+                  [Op.ne]: null,
+                },
               },
-            },
-          ],
-          where: {
-            deviceId: {
-              [Op.ne]: null,
-            },
-          },
-        }),
+            }),
       ]);
 
-      const dataInssert = [];
+      const dataInsert = [];
       const tokens = [];
       const actor = issue.creator;
       const notification = {
@@ -119,10 +106,10 @@ export default class NotificationService {
 
       subscriptions.forEach((item) => {
         tokens.push(item.token);
-        dataInssert.push({
+        dataInsert.push({
           id: uuid(),
           actorId: issue.createdBy,
-          recipientId: item.userId,
+          recipientId: item.user_id,
           type: notificationType.newIssue,
           issueId: id,
           ...notification,
@@ -136,7 +123,7 @@ export default class NotificationService {
 
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
-        Notification.bulkCreate(dataInssert),
+        Notification.bulkCreate(dataInsert),
         LatestIssueStatus.create({
           userId: issue.createdBy,
           issueId: issue.id,
@@ -443,5 +430,33 @@ export default class NotificationService {
       sentryConfig.Sentry.captureException(error);
       return done(error);
     }
+  }
+
+  static async scanIssueWaitToSupport() {
+    const now = dayjs().subtract(15, 'm');
+
+    const issues = await Issue.findAll({
+      include: [
+        {
+          model: RequestSupporting,
+          require: false,
+          as: 'requestSupportings',
+        },
+      ],
+      where: {
+        [Op.and]: [
+          {
+            createdAt: {
+              [Op.lte]: now,
+            },
+          },
+          sequelize.where(sequelize.col('requestSupportings.id'), 'IS', null),
+        ],
+      },
+      group: ['id'],
+    });
+    issues.forEach((issue) =>
+      notificationQueue.add('new_issue', { id: issue.id, isRepeated: true })
+    );
   }
 }
