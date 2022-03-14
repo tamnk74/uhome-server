@@ -612,11 +612,12 @@ export default class ChatService {
             content: comment,
           })
         : null,
-      LatestIssueStatus.upsert({
-        id: uuid(),
-        issueId: issue.id,
-        userId: issue.createdBy,
-        status: issueStatus.DONE,
+      LatestIssueStatus.destroy({
+        where: {
+          issueId: issue.id,
+          userId: issue.createdBy,
+        },
+        force: true,
       }),
     ]);
 

@@ -295,6 +295,13 @@ export default class NotificationService {
           ...notification,
           status: true,
         }),
+        LatestIssueStatus.destroy({
+          where: {
+            issueId: issue.id,
+            userId: issue.createdBy,
+          },
+          force: true,
+        }),
       ]);
       return done();
     } catch (error) {
