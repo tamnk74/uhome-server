@@ -71,6 +71,10 @@ Event.init(
       type: Sequelize.TINYINT,
       defaultValue: 0,
     },
+    allowAddCategory: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
     createdAt: {
       defaultValue: Sequelize.NOW,
       type: Sequelize.DATE,
@@ -136,6 +140,7 @@ Event.baseAttributes = [
   'status',
   'from',
   'to',
+  'allowAddCategory',
 ];
 Event.buildRelation = () => {
   return [
