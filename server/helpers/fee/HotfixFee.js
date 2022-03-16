@@ -87,14 +87,14 @@ const getTimeSlot = (configuration, type, starTime, endTime, isHoliday) => {
 
       starTime = tmpToTime;
 
-      return tmpToTime.diff(tmpStartTime, 'hour', true);
+      return tmpToTime.diff(tmpStartTime, 'minute', true) / 60;
     }
 
     return 0;
   });
 
   return {
-    totalTime: Math.ceil(sum(ranges).toFixed(1)),
+    totalTime: sum(ranges),
     factors: buildFactorByType(configuration, type, isHoliday),
   };
 };
