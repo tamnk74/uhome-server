@@ -944,14 +944,10 @@ export default class ChatService {
     const customerId = get(issue, 'createdBy');
     const host = get(issue, 'creator');
 
-    let chatChannel = await ChatChannel.findChannelGroup(issueId, [customerId, user.id]);
-
-    if (!chatChannel) {
-      chatChannel = await ChatChannel.findChannelGroup(issueId, [
-        customerId,
-        get(receiveIssue, 'userId', ''),
-      ]);
-    }
+    const chatChannel = await ChatChannel.findChannelGroup(issueId, [
+      customerId,
+      get(receiveIssue, 'userId', ''),
+    ]);
 
     if (isNil(chatChannel)) {
       throw new Error('CHAT-0404');
