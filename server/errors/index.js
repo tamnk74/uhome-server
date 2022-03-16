@@ -9,8 +9,7 @@ import UnauthorizedError from './UnauthorizedError';
 import ApiError from './ApiError';
 import errorFactory from './ErrorFactory';
 
-export const handleError = (err, req, res, next) => {
-  console.error(err);
+export const handleError = async (err, req, res, next) => {
   let error = null;
   switch (err.constructor) {
     case BadRequestError:
