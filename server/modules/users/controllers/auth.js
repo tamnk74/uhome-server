@@ -34,7 +34,7 @@ export default class AuthController {
 
   static async loginZalo(req, res, next) {
     try {
-      const authUser = await AuthService.handleZaloAuth(req.body.code);
+      const authUser = await AuthService.handleZaloAuth(req.body);
 
       return res.status(200).json(objectToSnake(authUser));
     } catch (e) {
