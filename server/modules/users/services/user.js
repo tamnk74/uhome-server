@@ -61,7 +61,7 @@ export default class Userervice {
             {
               model: User,
               required: false,
-              attributes: ['id', 'avatar'],
+              attributes: ['id', 'avatar', 'name'],
             },
           ],
         },
@@ -90,6 +90,7 @@ export default class Userervice {
 
       const { user = {} } = supporting;
       supporting.setDataValue('avatar', user.avatar);
+      supporting.setDataValue('name', user.name);
       supporting.setDataValue('user', undefined);
       issue.supporting = supporting;
 

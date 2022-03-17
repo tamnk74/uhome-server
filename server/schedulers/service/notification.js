@@ -61,7 +61,7 @@ export default class NotificationService {
       const [subscriptions, subscriptionsConsulting] = await Promise.all([
         sequelize.query(sql, {
           replacements: {
-            categoryIds,
+            categoryIds: categoryIds || [],
             issueLon: issue.lon,
             issueLat: issue.lat,
             issueId: id,
@@ -124,10 +124,10 @@ export default class NotificationService {
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
         Notification.bulkCreate(dataInsert),
-        LatestIssueStatus.create({
-          userId: issue.createdBy,
+        LatestIssueStatus.upsert({
+          id: uuid(),
           issueId: issue.id,
-          status: issueStatus.OPEN,
+          userId: issue.createdBy,
         }),
       ]);
       return done();

@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import day from 'dayjs';
-import { saleEventTypes, eventStatuses } from 'constants';
+import { saleEventTypes, eventStatuses } from '@/constants';
 import errorFactory from '@/errors/ErrorFactory';
 import Event from '../../../models/event';
 import UserEvent from '../../../models/userEvent';
