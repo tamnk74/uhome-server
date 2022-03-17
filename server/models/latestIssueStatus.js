@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
-import { issueStatus } from '@/constants';
+import { issueStatus } from '../constants';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 
