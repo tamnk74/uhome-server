@@ -46,6 +46,10 @@ export default class NotificationService {
       const categories = _.get(issue, 'categories', []);
       const categoryIds = categories.map((item) => item.id);
 
+      if (_.isEmpty(categoryIds)) {
+        return done();
+      }
+
       const sql = `SELECT subscriptions.*, 
         ST_DISTANCE_SPHERE(POINT(users.lon, users.lat), POINT(:issueLon, :issueLat)) AS distance
         FROM subscriptions
