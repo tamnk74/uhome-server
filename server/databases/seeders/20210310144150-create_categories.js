@@ -1,73 +1,61 @@
-const { Op } = require('sequelize');
+const { v4: uuidv4 } = require('uuid');
 const Category = require('../../models/category');
 
 const mappingData = [
   {
-    name: 'Sửa chữa hệ thống điện',
-    newName: 'Điện Lạnh( Điều hoà, Bình nóng lạnh,..)',
+    name: 'Điện lạnh (Điều hòa, Bình nóng lạnh,…)',
     code: 'DL',
   },
   {
-    name: 'Sửa chữa đồ điện tử',
-    newName: 'Điện Máy( TV, Quạt,...)',
+    name: 'Điện máy (TV, Quạt,…)',
     code: 'DM',
   },
   {
-    name: 'Sửa chữa hệ thống nước',
-    newName: 'Điện Nước',
+    name: 'Điện nước',
     code: 'DN',
   },
   {
-    name: 'Sửa chữa đồ gỗ, nội thất',
-    newName: 'Nội thất',
+    name: 'Nội thất',
     code: 'NT',
   },
   {
-    name: 'Sửa chữa nhà cửa',
-    newName: 'Xây - Tô - Vôi - Vữa',
+    name: 'Xây - Tô - Vôi - Vữa',
     code: 'XTVV',
   },
   {
-    name: 'Trần - Vách Ngăn (Thạch Cao, Alu, Cemboard,...)',
-    newName: 'Trần - Vách Ngăn (Thạch Cao, Alu, Cemboard,...)',
+    name: 'Trần - Vách ngăn (Thạch cao, Alu, Cemboard,…)',
     code: 'TVN',
   },
   {
     name: 'Cơ khí',
-    newName: 'Cơ khí',
     code: 'CK',
   },
   {
     name: 'Sơn nước',
-    newName: 'Sơn nước',
     code: 'SN',
   },
   {
-    name: 'Nhôm-kính',
-    newName: 'Nhôm-kính',
+    name: 'Nhôm - kính',
     code: 'NK',
   },
 ];
 
 const updateOrCreate = async (item) => {
-  const category = await Category.findOne({
+  const [category, created] = await Category.findOrCreate({
     where: {
-      name: {
-        [Op.or]: [item.name, item.newName],
-      },
+      code: item.code,
+    },
+    defaults: {
+      id: uuidv4(),
+      code: item.code,
+      name: item.name,
     },
   });
 
-  if (category) {
+  if (!created) {
     await category.update({
       code: item.code,
-      name: item.newName,
-    });
-  } else {
-    await Category.create({
-      code: item.code,
-      name: item.newName,
-      description: item.newName,
+      name: item.name,
     });
   }
 };
