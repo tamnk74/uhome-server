@@ -325,8 +325,8 @@ export default class AuthService {
     };
   }
 
-  static async handleZaloAuth(zaloCode) {
-    const zaloToken = await Zalo.getAccessToken(zaloCode);
+  static async handleZaloAuth({ code, codeVerifier }) {
+    const zaloToken = await Zalo.getAccessToken(code, codeVerifier);
     const zaloUser = await Zalo.getUser(zaloToken);
     let user = await User.findOne({
       include: [User.includeZaloAccount(zaloUser.id)],
@@ -337,7 +337,7 @@ export default class AuthService {
         {
           name: zaloUser.name,
           phoneNumber: null,
-          avatar: zaloUser.picture && zaloUser.picture.data.url,
+          avatar: get(zaloUser, 'picture.data.url'),
           password: zaloToken,
           status: userStatus.ACTIVE,
           socialAccounts: {
@@ -350,7 +350,13 @@ export default class AuthService {
           include: [User.includeZaloAccount(zaloUser.id)],
         }
       );
+    } else {
+      await user.update({
+        avatar: get(zaloUser, 'picture.data.url'),
+        name: zaloUser.name,
+      });
     }
+
     user.signedSocial = true;
     const [accessToken, refreshToken] = await Promise.all([
       JWT.generateToken(user.toPayload()),
