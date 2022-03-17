@@ -61,7 +61,7 @@ export default class NotificationService {
       const [subscriptions, subscriptionsConsulting] = await Promise.all([
         sequelize.query(sql, {
           replacements: {
-            categoryIds: categoryIds || [],
+            categoryIds: categoryIds || [''],
             issueLon: issue.lon,
             issueLat: issue.lat,
             issueId: id,
