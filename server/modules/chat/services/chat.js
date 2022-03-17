@@ -1,7 +1,6 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
 import Sequelize, { Op } from 'sequelize';
 import { get, isNil, pick, isEmpty, sumBy, set } from 'lodash';
-import { saleEventTypes, currencies } from 'constants';
 
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
@@ -20,6 +19,8 @@ import {
   estimationMessageStatus,
   unitTime,
   issueType,
+  saleEventTypes,
+  currencies,
 } from '../../../constants';
 import { objectToSnake } from '../../../helpers/Util';
 import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';
