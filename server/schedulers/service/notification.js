@@ -128,11 +128,6 @@ export default class NotificationService {
       await Promise.all([
         tokens.length ? Fcm.sendNotification(tokens, data, notification) : null,
         Notification.bulkCreate(dataInsert),
-        LatestIssueStatus.upsert({
-          id: uuid(),
-          issueId: issue.id,
-          userId: issue.createdBy,
-        }),
       ]);
       return done();
     } catch (error) {
