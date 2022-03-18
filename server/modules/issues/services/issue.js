@@ -28,6 +28,7 @@ import Holiday from '../../../models/holiday';
 import { googleMap } from '../../../helpers';
 import Survey from '../../../models/survey';
 import Category from '../../../models/category';
+import LatestIssueStatus from '../../../models/latestIssueStatus';
 
 export default class IssueService {
   static async getUploadVideoLink({ thumbnail }) {
@@ -59,6 +60,11 @@ export default class IssueService {
 
   static async create(user, data) {
     const issue = await Issue.addIssue(data);
+    await LatestIssueStatus.upsert({
+      id: uuidv4(),
+      issueId: issue.id,
+      userId: issue.createdBy,
+    });
     notificationQueue.add('new_issue', { id: issue.id });
     return this.getDetail(user, issue.id);
   }
