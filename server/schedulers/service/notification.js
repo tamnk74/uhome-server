@@ -294,12 +294,11 @@ export default class NotificationService {
           ...notification,
           status: true,
         }),
-        LatestIssueStatus.destroy({
-          where: {
-            issueId: issue.id,
-            userId: issue.createdBy,
-          },
-          force: true,
+        LatestIssueStatus.upsert({
+          id: uuid(),
+          issueId: issue.id,
+          userId: issue.createdBy,
+          status: issueStatus.OPEN,
         }),
       ]);
       return done();
