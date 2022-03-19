@@ -39,15 +39,9 @@ export default class OrcService {
 
       if (errorCode === '0') {
         const { data } = res;
-        let cardFront = find(data, (o) => {
-          return o.type === '9_id_card_front';
+        const cardFront = find(data, (o) => {
+          return o.type.includes('card_front');
         });
-
-        if (!cardFront) {
-          cardFront = find(data, (o) => {
-            return o.type === '12_id_card_front';
-          });
-        }
 
         const informationFront = get(cardFront, 'info', {});
 
@@ -60,7 +54,7 @@ export default class OrcService {
             userId,
             idNum: get(informationFront, 'id', '123456789012'),
             name: get(informationFront, 'name', '123456789012'),
-            dob: get(informationFront, 'dob'),
+            dob: get(informationFront, 'dob', dayjs().toISOString()),
             hometown: get(informationFront, 'hometown', '123456789012'),
             address: get(informationFront, 'address', '123456789012'),
             raw: res,
@@ -100,7 +94,7 @@ export default class OrcService {
         userId,
         idNum: get(identifyCard, 'idNum', '123456789012'),
         name: get(identifyCard, 'name', '123456789012'),
-        dob: dayjs(),
+        dob: dayjs().toISOString(),
         address: get(identifyCard, 'address', '123456789012'),
         hometown: get(identifyCard, 'hometown', '123456789012'),
         raw: res || error.message,
