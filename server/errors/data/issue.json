@@ -58,5 +58,11 @@
     "error": "Please update your location",
     "title": "Please update your location",
     "detail": "Please update your location"
+  },
+  "ISSUE-0403": {
+    "status": 403,
+    "error": "This action is not allow",
+    "title": "This action is not allow",
+    "detail": "This action is not allow"
   }
 }
