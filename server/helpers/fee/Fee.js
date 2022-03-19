@@ -6,14 +6,14 @@ export default class Fee {
   getWorkerFee(workerCost, configuration) {
     const fee = workerCost * configuration.workerFee;
 
-    return Math.ceil(fee / 1000) * 1000;
+    return Math.ceil(fee);
   }
 
   // eslint-disable-next-line class-methods-use-this
   getCustomerFee(customerCost, configuration) {
     const fee = customerCost * configuration.customerFee;
 
-    return Math.ceil(fee / 1000) * 1000;
+    return Math.ceil(fee);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -54,12 +54,12 @@ export default class Fee {
 
     return {
       worker: {
-        cost: Math.ceil(customerCost / 1000) * 1000,
-        fee: Math.ceil(workerFee / 1000) * 1000,
+        cost: Math.ceil(customerCost),
+        fee: Math.ceil(workerFee),
       },
       customer: {
-        cost: Math.ceil(customerCost / 1000) * 1000,
-        fee: Math.ceil(customerFee / 1000) * 1000,
+        cost: Math.ceil(customerCost),
+        fee: Math.ceil(customerFee),
       },
     };
   }

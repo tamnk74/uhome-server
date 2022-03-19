@@ -62,6 +62,6 @@ export default class NormalFee extends Fee {
   getSurveyCost({ classFee, surveyTime = 0 }) {
     const cost = (classFee.normalCost / 8) * (surveyTime > 8 ? 8 : surveyTime);
 
-    return Math.ceil(cost / 1000) * 1000;
+    return Math.ceil(cost);
   }
 }
