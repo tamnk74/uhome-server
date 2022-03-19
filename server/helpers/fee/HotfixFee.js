@@ -176,6 +176,6 @@ export default class HotfixFee extends Fee {
   getSurveyCost({ configuration, classFee, surveyTime = 0 }) {
     const cost = getTimeSlotCost(configuration, classFee, surveyTime);
 
-    return Math.ceil(cost / 1000) * 1000;
+    return Math.ceil(cost);
   }
 }
