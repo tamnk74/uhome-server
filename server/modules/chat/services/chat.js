@@ -1257,11 +1257,10 @@ export default class ChatService {
       throw new Error('ERR-0403');
     }
 
-    const memberId = user.id === receiveIssue.userId ? issue.createdBy : receiveIssue.userId;
-
-    const [chatChannel, member] = await Promise.all([
+    const [chatChannel, host, worker] = await Promise.all([
       ChatChannel.findChannelGroup(issueId, userIds),
-      User.findByPk(memberId),
+      User.findByPk(issue.createdBy),
+      User.findByPk(receiveIssue.userId),
     ]);
 
     if (isNil(chatChannel)) {
@@ -1271,7 +1270,9 @@ export default class ChatService {
     const authorChat = await this.addUserToChat(chatChannel, user);
     const twilioToken = await twilioClient.getAccessToken(authorChat.identity);
     authorChat.setDataValue('token', twilioToken);
-    authorChat.setDataValue('member', member.toChatActor());
+    authorChat.setDataValue('host', host.toChatActor());
+    authorChat.setDataValue('worker', worker.toChatActor());
+    authorChat.setDataValue('supporting', null);
 
     return authorChat;
   }
