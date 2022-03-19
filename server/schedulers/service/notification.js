@@ -170,8 +170,14 @@ export default class NotificationService {
       }
 
       const notification = {
-        title: Notification.getTitle('notification.request_support', { title: issue.title }),
-        body: Notification.getTitle('notification.request_support', { title: issue.title }),
+        title: Notification.getTitle('notification.request_support', {
+          name: actor.name,
+          title: issue.title,
+        }),
+        body: Notification.getTitle('notification.request_support', {
+          name: actor.name,
+          title: issue.title,
+        }),
       };
       const data = {
         type: notificationType.requestSupporting,

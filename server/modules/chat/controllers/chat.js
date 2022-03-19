@@ -8,7 +8,7 @@ export default class ChatController {
     try {
       const { user, issue } = req;
       const { role } = user;
-      if (role === roles.USER) {
+      if (role !== roles.CONSULTING) {
         const result = await ChatService.create(user, issue, objectToCamel(req.body));
         return res.status(201).json(objectToSnake(result.toJSON()));
       }
