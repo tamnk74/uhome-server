@@ -207,7 +207,7 @@ export default class Userervice {
     });
     const { user } = userProfile;
     let pathAvatar = user.avatar;
-    let idStatus = 0;
+    let idStatus = get(user, 'idCardStatus', 0);
     switch (type) {
       case fileType.AVATAR:
         pathAvatar = path;
