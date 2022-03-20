@@ -70,7 +70,7 @@ export default class IssueService {
   }
 
   static async remove(issue) {
-    if (get(issue, 'status') !== issue.OPEN) {
+    if (get(issue, 'status') !== issueStatus.OPEN) {
       throw new Error('ISSUE-0403');
     }
 
