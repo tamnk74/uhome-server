@@ -48,6 +48,7 @@ export default class OrcService {
         user.idCardStatus = isEmpty(informationFront)
           ? idCardStatus.FAIL_VERIFIED
           : idCardStatus.VERIFIED;
+        user.verifiedAt = new Date();
 
         await Promise.all([
           IdentifyCard.upsert({
