@@ -99,8 +99,8 @@ export default class NotificationService {
       const tokens = [];
       const actor = issue.creator;
       const notification = {
-        title: Notification.getTitle('notification.new_issue', { title: issue.title }),
-        body: Notification.getTitle('notification.new_issue', { title: issue.title }),
+        title: Notification.getTitle('notification.new_issue.title'),
+        body: Notification.getTitle('notification.new_issue.body', { title: issue.title }),
       };
       const data = {
         type: notificationType.newIssue,
@@ -170,11 +170,8 @@ export default class NotificationService {
       }
 
       const notification = {
-        title: Notification.getTitle('notification.request_support', {
-          name: actor.name,
-          title: issue.title,
-        }),
-        body: Notification.getTitle('notification.request_support', {
+        title: Notification.getTitle('notification.request_support.title'),
+        body: Notification.getTitle('notification.request_support.body', {
           name: actor.name,
           title: issue.title,
         }),
@@ -231,8 +228,8 @@ export default class NotificationService {
       }
 
       const notification = {
-        title: Notification.getTitle('notification.cancel', { title: issue.title }),
-        body: Notification.getTitle('notification.cancel', { title: issue.title }),
+        title: Notification.getTitle('notification.cancel.title'),
+        body: Notification.getTitle('notification.cancel.body', { title: issue.title }),
       };
       const data = {
         type: notificationType.cancelRequestSupport,
@@ -280,8 +277,8 @@ export default class NotificationService {
       }
 
       const notification = {
-        title: Notification.getTitle('notification.cancel', { title: issue.title }),
-        body: Notification.getTitle('notification.cancel', { title: issue.title }),
+        title: Notification.getTitle('notification.cancel.title'),
+        body: Notification.getTitle('notification.cancel.body', { title: issue.title }),
       };
       const data = {
         type: notificationType.cancelSupport,
@@ -316,7 +313,7 @@ export default class NotificationService {
 
   static async pushChatNotification(job, done) {
     try {
-      const { chatChannelId, actorId, commandName, message = '' } = job.data;
+      const { chatChannelId, actorId, commandName } = job.data;
       const [chatChannel, chatMembers, actor] = await Promise.all([
         ChatChannel.findByPk(chatChannelId, {
           include: [
@@ -382,10 +379,15 @@ export default class NotificationService {
       }
 
       const notification = {
-        title: Notification.getTitle(_.get(notificationMessage, commandName, commandName), {
-          title: issue.title,
-        }),
-        body: message,
+        title: Notification.getTitle(
+          `${_.get(notificationMessage, commandName, commandName)}.title`
+        ),
+        body: Notification.getTitle(
+          `${_.get(notificationMessage, commandName, commandName)}.body`,
+          {
+            title: issue.title,
+          }
+        ),
       };
 
       const data = {
