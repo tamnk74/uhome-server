@@ -1356,4 +1356,22 @@ export default class ChatService {
 
     await survey.update({ status: issueStatus.APPROVAL });
   }
+
+  static async init({ user }) {
+    let memberChat = await ChatMember.findOne({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    if (!memberChat) {
+      memberChat = await ChatUser.findOne();
+    }
+
+    const twilioToken = await twilioClient.getAccessToken(memberChat.identity);
+
+    return {
+      token: twilioToken,
+    };
+  }
 }

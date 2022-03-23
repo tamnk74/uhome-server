@@ -235,4 +235,15 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async init(req, res, next) {
+    try {
+      const { user } = req;
+      const data = await ChatService.init({ user });
+
+      return res.status(200).send(data);
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

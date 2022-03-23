@@ -179,4 +179,6 @@ router.post(
   ChatController.approveSurvey
 );
 
+router.get('/chat/initial', auth('joinChat'), active, ChatController.init);
+
 export default router;
