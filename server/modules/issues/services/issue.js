@@ -130,20 +130,30 @@ export default class IssueService {
       optionsCount,
       RequestSupporting
     ).slice(0, -1);
+    const whereRequested = {
+      issue_id: {
+        [Sequelize.Op.eq]: sequelize.col('issues.id'),
+      },
+      user_id: {
+        [Sequelize.Op.eq]: user.id,
+      },
+    };
     const optionsIsRequested = {
       attributes: [[Sequelize.fn('COUNT', Sequelize.col('issue_id')), 'isRequested']],
-      where: {
-        issue_id: {
-          [Sequelize.Op.eq]: sequelize.col('issues.id'),
-        },
-        user_id: {
-          [Sequelize.Op.eq]: user.id,
-        },
-      },
+      where: whereRequested,
     };
     const isRequestedSQL = sequelize.dialect.QueryGenerator.selectQuery(
       'request_supportings',
       optionsIsRequested,
+      RequestSupporting
+    ).slice(0, -1);
+
+    const distanceRequest = sequelize.dialect.QueryGenerator.selectQuery(
+      'request_supportings',
+      {
+        attributes: [[Sequelize.literal(`(ROUND(distance, 1))`), 'distanceRequest']],
+        where: whereRequested,
+      },
       RequestSupporting
     ).slice(0, -1);
 
@@ -161,6 +171,15 @@ export default class IssueService {
         include: [
           [Sequelize.literal(`(${countSQL})`), 'totalRequestSupporting'],
           [Sequelize.literal(`(${isRequestedSQL})`), 'isRequested'],
+          [Sequelize.literal(`(${distanceRequest})`), 'distanceRequest'],
+          [
+            Sequelize.literal(
+              `(ROUND(ST_DISTANCE_SPHERE(POINT(lon, lat), POINT(${user.lon || 0.0}, ${
+                user.lat || 0.0
+              })) / 1000, 1))`
+            ),
+            'distance',
+          ],
         ],
       },
       order: [
