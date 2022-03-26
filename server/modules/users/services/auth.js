@@ -400,7 +400,7 @@ export default class AuthService {
 
     const userVerifyCode = await RedisService.getVerifyCode(user.id);
 
-    if (userVerifyCode !== code && code !== '0000') {
+    if (userVerifyCode !== code) {
       throw new Error('USER-2002');
     }
 
