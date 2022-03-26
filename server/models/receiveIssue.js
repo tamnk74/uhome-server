@@ -8,6 +8,7 @@ import User from './user';
 import Issue from './issue';
 import IssueEstimation from './issueEstimation';
 import RequestSupporting from './requestSupporting';
+import Acceptance from './acceptance';
 
 class ReceiveIssue extends BaseModel {
   static get mapFilterFields() {
@@ -91,6 +92,9 @@ ReceiveIssue.beforeCreate((instant) => {
 });
 ReceiveIssue.belongsTo(User);
 User.hasMany(ReceiveIssue);
+
+Acceptance.belongsTo(ReceiveIssue);
+ReceiveIssue.hasMany(Acceptance, { as: 'acceptances' });
 
 ReceiveIssue.belongsTo(Issue);
 Issue.hasOne(ReceiveIssue, { as: 'supporting', foreignKey: 'issueId' });

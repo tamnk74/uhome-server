@@ -30,7 +30,7 @@ export const handleError = async (err, req, res, next) => {
   const response = {
     code: error.code,
     message: error.message,
-    errors: error.errors || [],
+    errors: error.errors || error.detail,
   };
 
   if (

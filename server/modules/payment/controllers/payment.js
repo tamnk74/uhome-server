@@ -13,6 +13,23 @@ export default class PaymentController {
     }
   }
 
+  static async checkout(req, res, next) {
+    try {
+      const { user, issue, receiveIssue, acceptance } = req;
+      const result = await PaymentService.checkout({
+        user,
+        data: req.body,
+        issue,
+        receiveIssue,
+        acceptance,
+      });
+
+      return res.status(201).json(objectToSnake(result));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
   static async payment(req, res, next) {
     try {
       const { user, issue } = req;

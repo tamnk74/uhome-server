@@ -6,10 +6,14 @@ import Transaction from '@/models/transaction';
 import UserProfile from '@/models/userProfile';
 import UserEvent from '@/models/userEvent';
 import Event from '@/models/event';
+import Issue from '@/models/issue';
+import ChatChannel from '@/models/chatChannel';
 import TransactionHistory from '@/models/transactionHistory';
 import sequelize from '@/databases/database';
 import uuid, { v4 as uuidv4 } from 'uuid';
-import { paymentStatus, eventStatuses, transactionType } from '../../../constants';
+import { command, issueStatus, paymentStatus, eventStatuses, transactionType } from '@/constants';
+import { get } from 'lodash';
+import ChatService from '@/modules/chat/services/chat';
 
 export class PaymentService {
   static async process(user, data) {
@@ -226,6 +230,157 @@ export class PaymentService {
         transaction,
       };
     });
+  }
+
+  static async checkout({ user, data, issue, receiveIssue, acceptance }) {
+    const paymentReq = {
+      partnerCode: momoConfig.partnerCode,
+      partnerRefId: receiveIssue.id,
+      partnerTransId: user.id,
+      amount: +data.amount,
+    };
+    const hashData = await Momo.encryptRSA(paymentReq);
+
+    const { data: payment } = await axios.post(momoConfig.requestPaymentUrl, {
+      partnerCode: paymentReq.partnerCode,
+      partnerRefId: paymentReq.partnerRefId,
+      customerNumber: data.phoneNumber,
+      appData: data.token,
+      description: 'Nạp tiền vào ví Uhome',
+      hash: hashData,
+      version: 2.0,
+      payType: 3,
+    });
+    if (+payment.status !== 0) {
+      paymentLogger.log({
+        level: 'error',
+        timestamp: new Date(),
+        data: {
+          paymentReq,
+          payment,
+        },
+      });
+      throw new Error('PAY-0001');
+    }
+    const acceptanceData = get(acceptance, 'data', {});
+
+    await sequelize
+      .transaction(async (t) => {
+        Issue.update(
+          {
+            status: issueStatus.DONE,
+          },
+          {
+            where: {
+              id: issue.id,
+            },
+            transaction: t,
+          }
+        );
+        receiveIssue.update(
+          {
+            status: issueStatus.DONE,
+            rating: get(acceptanceData, 'rate', 0),
+            time: get(acceptanceData, 'totalTime', 0),
+            customerFee: get(acceptanceData, 'totalAmount', 0),
+            workerFee: get(acceptanceData, 'totalAmount', 0),
+            discount: get(acceptanceData, 'customer.discount', 0),
+          },
+          { transaction: t }
+        );
+        await Transaction.create(
+          {
+            userId: user.id,
+            type: paymentType.INBOUND,
+            method: paymentMethod.MOMO,
+            transid: payment.transid,
+            amount: payment.amount,
+            fee: 0,
+            currency: currencies.VND,
+            extra: payment,
+          },
+          { transaction: t }
+        );
+        acceptance.update({
+          data: acceptanceData,
+          status: issueStatus.DONE,
+        });
+        await TransactionHistory.create(
+          {
+            id: uuidv4(),
+            userId: user.id,
+            amount: payment.amount,
+            issueId: null,
+            type: transactionType.DEPOSIT,
+            method: paymentMethod.MOMO,
+            currency: currencies.VND,
+            extra: {
+              ...payment,
+              customerNumber: data.phoneNumber,
+              payAt: new Date(),
+            },
+          },
+          {
+            transaction: t,
+          }
+        );
+        const confirmResult = await PaymentService.confirmPayin(paymentReq, payment, data);
+        paymentLogger.log({
+          level: 'info',
+          timestamp: new Date(),
+          data: {
+            paymentReq,
+            confirmResult,
+          },
+        });
+        const event = await Event.findOne({
+          where: {
+            code: 'LIEN-KET-MOMO',
+            status: eventStatuses.ACTIVE,
+          },
+          transaction: t,
+        });
+        if (event) {
+          await UserEvent.findOrCreate({
+            where: {
+              userId: user.id,
+              eventId: event.id,
+            },
+            defaults: {
+              id: uuidv4(),
+              userId: user.id,
+              eventId: event.id,
+              status: eventStatuses.INACTIVE,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            transaction: t,
+          });
+        }
+
+        return confirmResult.data;
+      })
+      .catch(async (error) => {
+        paymentLogger.log({
+          level: 'error',
+          timestamp: new Date(),
+          data: {
+            error,
+            paymentReq,
+          },
+        });
+        await PaymentService.cancelPayin(paymentReq, payment, data);
+        throw error;
+      });
+
+    const chatChannel = await ChatChannel.findByPk(acceptance.channelId);
+    await ChatService.sendMessage(
+      command.COMPLETED,
+      chatChannel,
+      user,
+      acceptance.messageSid,
+      acceptanceData
+    );
   }
 
   static confirmMomo(data) {
