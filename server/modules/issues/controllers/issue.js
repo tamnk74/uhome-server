@@ -62,6 +62,8 @@ export default class AuthController {
         meta: pagination.getMeta(),
         data: issues.rows.map((issue) => {
           const item = issue.toJSON();
+          item.distance = item.distanceRequest || item.distance;
+          delete item.distanceRequest;
           return objectToSnake(item);
         }),
       });
