@@ -50,6 +50,8 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
   user.sessionRole = sessionRole;
   user.role = storedUser.role;
   user.signedSocial = signedSocial;
+  user.lat = storedUser.lat;
+  user.lon = storedUser.lon;
   req.user = user;
   resolve();
 };
