@@ -672,7 +672,7 @@ export default class ChatService {
     const first5StarEvent = events.find((event) => event.code === 'FIRST-5-STAR');
     const next5StarEvent = events.find((event) => event.code === 'NEXT-5-5-STAR');
     const fiveStarQty = await ReceiveIssue.count({
-      where: { userId: receiveIssue.userId, issueId: issue.id },
+      where: { userId: receiveIssue.userId, issueId: issue.id, rating: 5 },
     });
     if (first5StarEvent && fiveStarQty === 1) {
       await UserProfile.update(
