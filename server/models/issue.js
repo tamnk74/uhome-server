@@ -211,4 +211,15 @@ Issue.getCancelledIssues = (userId) => {
   return filterIssueSql;
 };
 
+Issue.getIssueSkips = (userId) => {
+  const filterIssueSql = sequelize.dialect.QueryGenerator.selectQuery('issue_skips', {
+    attributes: ['issue_id'],
+    where: {
+      user_id: userId,
+    },
+  }).slice(0, -1);
+
+  return filterIssueSql;
+};
+
 module.exports = Issue;
