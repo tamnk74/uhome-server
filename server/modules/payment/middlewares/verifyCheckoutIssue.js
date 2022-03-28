@@ -26,7 +26,9 @@ export const verifyCheckoutIssue = async (req, res, next) => {
         },
       ],
     });
-
+    if (!receiveIssue) {
+      return next(errorFactory.getError('ISSUE-0403'));
+    }
     const {
       issue,
       acceptances: [acceptance],
@@ -37,7 +39,7 @@ export const verifyCheckoutIssue = async (req, res, next) => {
     }
 
     if (!acceptance || !acceptance.data || !acceptance.data.totalAmount) {
-      return next(errorFactory.getError('ISSU-0001'));
+      return next(errorFactory.getError('ISSUE-0403'));
     }
 
     // if (acceptance.data.totalAmount > req.body.amount) {
