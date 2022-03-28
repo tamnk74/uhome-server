@@ -178,4 +178,15 @@ export default class AuthController {
       return next(e);
     }
   }
+
+  static async skip(req, res, next) {
+    try {
+      const { issue, user } = req;
+      await IssueService.skip(user, issue);
+
+      return res.status(204).send();
+    } catch (e) {
+      return next(e);
+    }
+  }
 }
