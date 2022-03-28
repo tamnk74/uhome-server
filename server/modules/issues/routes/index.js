@@ -127,4 +127,6 @@ router.patch(
   IssueController.update
 );
 
+router.post('/issues/:issueId/skips', auth(), active, verifyIssue, IssueController.skip);
+
 export default router;
