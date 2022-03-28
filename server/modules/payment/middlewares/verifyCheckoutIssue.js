@@ -9,7 +9,7 @@ export const verifyCheckoutIssue = async (req, res, next) => {
     const receiveIssue = await ReceiveIssue.findOne({
       where: {
         issueId: req.params.issueId,
-        status: [issueStatus.IN_PROGRESS, issueStatus.WAITING_PAYMENT],
+        status: [issueStatus.IN_PROGRESS, issueStatus.WAITING_VERIFY, issueStatus.WAITING_PAYMENT],
       },
       include: [
         {
