@@ -29,6 +29,7 @@ import { googleMap } from '../../../helpers';
 import Survey from '../../../models/survey';
 import Category from '../../../models/category';
 import LatestIssueStatus from '../../../models/latestIssueStatus';
+import IssueSkip from '../../../models/issueSkip';
 
 export default class IssueService {
   static async getUploadVideoLink({ thumbnail }) {
@@ -115,6 +116,7 @@ export default class IssueService {
     options.where.id = {
       [Op.in]: Sequelize.literal(`(${Issue.getIssueOption(user.id)})`),
       [Op.notIn]: Sequelize.literal(`(${Issue.getCancelledIssues(user.id)})`),
+      [Op.notIn]: Sequelize.literal(`(${Issue.getIssueSkips(user.id)})`),
     };
 
     const optionsCount = {
@@ -630,5 +632,16 @@ export default class IssueService {
       startTime: dayjs(item.startTime).utc().toISOString(),
       endTime: dayjs(item.endTime).utc().toISOString(),
     }));
+  }
+
+  /**
+   * Skip issue
+   */
+  static skip(user, issue) {
+    return IssueSkip.upsert({
+      id: uuidv4(),
+      issueId: issue.id,
+      userId: user.id,
+    });
   }
 }
