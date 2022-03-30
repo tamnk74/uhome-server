@@ -105,7 +105,7 @@ export default class Userervice {
   static async getReceiveIssues(query) {
     const { limit, offset, userId } = query;
     const options = ReceiveIssue.buildOptionQuery(query);
-    options.where = [
+    options.where[Op.or] = [
       {
         userId,
       },
