@@ -40,3 +40,5 @@ export const googleAPIConfig = {
 export const pushNotificationRound = parseInt(process.env.PUSH_NOTIFICATION_ROUND, 10) || 5;
 export const maximumNotificationOneRound =
   parseInt(process.env.MAXIMUM_NOTIFICATION_ONE_ROUND, 10) || 3;
+
+export const minAccountBalance = parseInt(process.env.MIN_ACCOUNT_BALANCE, 10) || -100000;
