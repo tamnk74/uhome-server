@@ -105,11 +105,10 @@ export default class Userervice {
   static async getReceiveIssues(query) {
     const { limit, offset, userId } = query;
     const options = ReceiveIssue.buildOptionQuery(query);
-    options.where[Op.or] = [
+    options.where = [
       {
         userId,
       },
-      Sequelize.literal(`\`issue\`.\`created_by\` = '${userId}'`),
     ];
     options.order = [];
 
