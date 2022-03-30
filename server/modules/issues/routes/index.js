@@ -14,6 +14,7 @@ import {
   verifyPhoneNumber,
   verifyWorkerLocation,
   verifyThumbnail,
+  limitAccountBalance,
 } from '../middlewares';
 import {
   createIssueSchema,
@@ -73,6 +74,7 @@ router.post(
   verifyPhoneNumber,
   verifyIssue,
   verifyCategory,
+  limitAccountBalance,
   IssueController.requestSupporting
 );
 
