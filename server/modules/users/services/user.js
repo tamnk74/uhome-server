@@ -391,6 +391,7 @@ export default class Userervice {
       order: [['createdAt', 'DESC']],
       limit,
       offset,
+      distinct: 'id',
     });
 
     const rows = TransactionHistory.tranformResponseData(result.rows);
