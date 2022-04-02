@@ -7,6 +7,7 @@ import ChatRouter from '../modules/chat/routes';
 import PaymentRouter from '../modules/payment/routes';
 import EventRouter from '../modules/event/routes';
 import VersionRouter from '../modules/versions/routes';
+import BannerRouter from '../modules/event/routes/banner';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use('/', ChatRouter);
 router.use('/', PaymentRouter);
 router.use('/events', EventRouter);
 router.use('/', VersionRouter);
+router.use('/banners', BannerRouter);
 
 export default router;
