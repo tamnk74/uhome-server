@@ -182,8 +182,8 @@ Event.prototype.getDiscount = function getDiscount(workerCost = 0, customerCost 
   const customerEvent = _.find(eventScopes, (o) => o.scope === userRoles.CUSTOMER);
 
   return {
-    worker: _.isEmpty(workerEvent) ? 0 : this.getDiscountValue(workerCost),
-    customer: _.isEmpty(customerEvent) ? 0 : this.getDiscountValue(customerCost),
+    worker: _.isEmpty(workerEvent) ? 0 : Math.ceil(this.getDiscountValue(workerCost)),
+    customer: _.isEmpty(customerEvent) ? 0 : Math.ceil(this.getDiscountValue(customerCost)),
   };
 };
 
