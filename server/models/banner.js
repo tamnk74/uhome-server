@@ -50,7 +50,7 @@ Banner.beforeCreate((instance) => {
   instance.id = uuid.v4();
 });
 
-Banner.baseAttributes = ['id', 'status', 'image'];
+Banner.baseAttributes = ['id', 'status', 'image', 'createdAt'];
 Banner.belongsTo(Event);
 Banner.buildRelation = (sessionRole) => {
   return [
