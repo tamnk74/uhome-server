@@ -88,7 +88,7 @@ export class EventService {
   }
 
   static async getBanner(user, query) {
-    const { limit, offset } = query;
+    const { limit = 20, offset = 0 } = query;
     const options = Banner.buildOptionQuery(query);
     options.where.status = eventStatuses.ACTIVE;
 
@@ -96,8 +96,8 @@ export class EventService {
       ...options,
       include: Banner.buildRelation(user.sessionRole),
       attributes: Banner.baseAttributes,
-      limit,
-      offset,
+      limit: +limit,
+      offset: +offset,
     });
   }
 }
