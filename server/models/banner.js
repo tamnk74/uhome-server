@@ -6,6 +6,7 @@ import Event from './event';
 import { eventStatuses } from '../constants';
 import EventScope from './eventScope';
 import { fileSystemConfig } from '../config';
+import Category from './category';
 
 class Banner extends BaseModel {}
 
@@ -66,6 +67,11 @@ Banner.buildRelation = (sessionRole) => {
           where: {
             scope: sessionRole,
           },
+        },
+        {
+          model: Category,
+          as: 'categories',
+          attributes: Category.baseAttributes
         },
       ],
     },

@@ -30,11 +30,11 @@ RequestSupporting.init(
       allowNull: true,
     },
     lat: {
-      type: Sequelize.DataTypes.FLOAT,
+      type: Sequelize.DataTypes.DECIMAL(9, 6),
       allowNull: true,
     },
     lon: {
-      type: Sequelize.DataTypes.FLOAT,
+      type: Sequelize.DataTypes.DECIMAL(9, 6),
       allowNull: true,
     },
     distance: {
