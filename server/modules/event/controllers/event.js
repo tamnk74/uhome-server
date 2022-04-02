@@ -55,4 +55,23 @@ export default class EventController {
       return next(e);
     }
   }
+
+  static async getBanners(req, res, next) {
+    try {
+      const { user, query } = req;
+      const pagination = new Pagination(req);
+      const banners = await EventService.getBanner(user, query);
+      pagination.setTotal(banners.count);
+      return res.status(200).json({
+        meta: pagination.getMeta(),
+        data: banners.rows.map((banner) => {
+          const item = banner.toJSON();
+          delete item.Event.EventScopes;
+          return objectToSnake(item);
+        }),
+      });
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

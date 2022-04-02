@@ -5,6 +5,7 @@ import errorFactory from '@/errors/ErrorFactory';
 import Event from '../../../models/event';
 import UserEvent from '../../../models/userEvent';
 import Uploader from '../../../helpers/Uploader';
+import Banner from '../../../models/banner';
 
 export class EventService {
   static async getEvents(req) {
@@ -83,6 +84,20 @@ export class EventService {
       where: {
         id,
       },
+    });
+  }
+
+  static async getBanner(user, query) {
+    const { limit, offset } = query;
+    const options = Banner.buildOptionQuery(query);
+    options.where.status = eventStatuses.ACTIVE;
+
+    return Banner.findAndCountAll({
+      ...options,
+      include: Banner.buildRelation(user.sessionRole),
+      attributes: Banner.baseAttributes,
+      limit,
+      offset,
     });
   }
 }
