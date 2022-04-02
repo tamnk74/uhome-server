@@ -11,6 +11,7 @@ import errorFactory from './ErrorFactory';
 
 export const handleError = async (err, req, res, next) => {
   let error = null;
+
   switch (err.constructor) {
     case BadRequestError:
     case ValidationError:

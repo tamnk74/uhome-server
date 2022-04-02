@@ -109,7 +109,6 @@ export default class Userervice {
       {
         userId,
       },
-      Sequelize.literal(`\`issue\`.\`created_by\` = '${userId}'`),
     ];
     options.order = [];
 
@@ -392,6 +391,7 @@ export default class Userervice {
       order: [['createdAt', 'DESC']],
       limit,
       offset,
+      distinct: 'id',
     });
 
     const rows = TransactionHistory.tranformResponseData(result.rows);
