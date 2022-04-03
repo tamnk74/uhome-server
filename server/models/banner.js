@@ -71,7 +71,7 @@ Banner.buildRelation = (sessionRole) => {
         {
           model: Category,
           as: 'categories',
-          attributes: Category.baseAttributes
+          attributes: Category.baseAttributes,
         },
       ],
     },
