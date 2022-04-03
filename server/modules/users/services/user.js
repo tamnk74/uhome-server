@@ -344,7 +344,8 @@ export default class Userervice {
   }
 
   static async getTransactionHistories({ user, query }) {
-    const { limit, offset, from, to } = query;
+    const { limit, offset } = query;
+    let { from, to } = query;
     const options = TransactionHistory.buildOptionQuery(query);
     options.where.userId = user.id;
     options.include = [
@@ -375,12 +376,14 @@ export default class Userervice {
     ];
 
     if (from) {
+      from = from.trim().replace(' ', '+');
       options.where.createdAt = {
         [Op.gte]: from,
       };
     }
 
     if (to) {
+      to = to.trim().replace(' ', '+');
       options.where.createdAt = {
         ...get(options, 'where.createdAt', {}),
         [Op.lte]: to,
