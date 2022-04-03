@@ -1,6 +1,7 @@
 import uuid, { v4 as uuidv4 } from 'uuid';
 import Sequelize, { Op } from 'sequelize';
 import { get, isNil, pick, isEmpty, sumBy, set } from 'lodash';
+import dayjs from 'dayjs';
 
 import ChatMember from '../../../models/chatMember';
 import { twilioClient } from '../../../helpers/Twilio';
@@ -1316,6 +1317,7 @@ export default class ChatService {
     });
 
     set(data, 'surveyFee', surveyCost);
+    set(data, 'startTime', dayjs(data.startTime).utc().toISOString());
 
     const message = await this.sendMessage(command.REQUEST_SURVEY, chatChannel, user, null, data);
 
