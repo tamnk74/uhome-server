@@ -382,6 +382,7 @@ export default class Userervice {
 
     if (to) {
       options.where.createdAt = {
+        ...get(options, 'where.createdAt', {}),
         [Op.lte]: to,
       };
     }
