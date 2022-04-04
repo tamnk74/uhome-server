@@ -445,7 +445,7 @@ export default class Userervice {
           model: ReceiveIssue,
           required: false,
           as: 'supporting',
-          attributes: ['id', 'userId', 'issueId'],
+          attributes: [[Sequelize.literal('supporting.user_id'), 'id'], 'userId', 'issueId'],
           include: [
             {
               model: User,
