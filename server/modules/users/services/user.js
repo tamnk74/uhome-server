@@ -14,7 +14,7 @@ import { fileType } from '../../../constants/user';
 import Uploader from '../../../helpers/Uploader';
 import Subscription from '../../../models/subscription';
 import Fcm from '../../../helpers/Fcm';
-import { idCardStatus } from '../../../constants';
+import { idCardStatus, issueStatus } from '../../../constants';
 import IdentifyCard from '../../../models/identifyCard';
 import TransactionHistory from '../../../models/transactionHistory';
 import { sendOTP } from '../../../helpers/SmsOTP';
@@ -465,5 +465,71 @@ export default class Userervice {
       supporting: get(issue, 'supporting'),
       updatedAt: get(latestStatus, 'updatedAt'),
     };
+  }
+
+  static async getWorkingHistories(query) {
+    const { limit, offset, user } = query;
+    const options = ReceiveIssue.buildOptionQuery(query);
+    options.where[Op.or] = [
+      {
+        userId: user.id,
+      },
+      Sequelize.literal(`\`issue\`.\`created_by\` = '${user.id}'`),
+    ];
+    options.order = [];
+    return ReceiveIssue.findAndCountAll({
+      ...options,
+      include: [
+        {
+          model: Issue,
+          required: true,
+          include: [
+            {
+              model: Attachment,
+              required: false,
+              as: 'attachments',
+              attributes: [
+                'id',
+                'size',
+                'mimeType',
+                'thumbnail',
+                'createdAt',
+                'updatedAt',
+                'issueId',
+                'path',
+                'thumbnailPath',
+                Attachment.buildUrlAttributeSelect(),
+              ],
+            },
+            {
+              model: Category,
+              as: 'categories',
+            },
+            {
+              model: User,
+              as: 'creator',
+              attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
+            },
+          ],
+          where: {
+            status: issueStatus.DONE,
+          },
+        },
+        {
+          model: ReceiveIssueComment,
+          required: false,
+          include: [
+            {
+              model: User,
+              required: false,
+              attributes: ['id', 'name', 'avatar'],
+            },
+          ],
+        },
+      ],
+      order: [['updatedAt', 'DESC']],
+      limit,
+      offset,
+    });
   }
 }
