@@ -39,7 +39,6 @@ export default class UserController {
         data: issues.rows.map((issue) => objectToSnake(issue.toJSON())),
       });
     } catch (e) {
-      console.log(e);
       return next(e);
     }
   }
@@ -204,6 +203,26 @@ export default class UserController {
       const { user } = req;
       const latestStatus = await UserService.getLatestIssueStatus(user);
       return res.status(200).json(objectToSnake(latestStatus || {}));
+    } catch (e) {
+      return next(e);
+    }
+  }
+
+  static async getWorkingHistories(req, res, next) {
+    try {
+      const { user } = req;
+      const pagination = new Pagination(req);
+      const issues = await UserService.getWorkingHistories({
+        ...req.query,
+        limit: pagination.limit,
+        offset: pagination.skip,
+        user,
+      });
+      pagination.setTotal(issues.count);
+      return res.status(200).json({
+        meta: pagination.getMeta(),
+        data: issues.rows.map((issue) => objectToSnake(issue.toJSON())),
+      });
     } catch (e) {
       return next(e);
     }

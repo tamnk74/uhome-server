@@ -119,4 +119,6 @@ router.route('/auth/apple').post(validator(loginAppleSchema), AuthController.app
 
 router.route('/me/latest-issue-statuses').get(auth(), active, UserController.getLatestIssueStatus);
 
+router.get('/me/working-histories', auth(), active, UserController.getWorkingHistories);
+
 export default router;
