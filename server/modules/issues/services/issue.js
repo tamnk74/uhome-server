@@ -198,7 +198,7 @@ export default class IssueService {
       throw new Error('ISSUE-0002');
     }
 
-    const [distance, feeConfigure] = await Promise.all([
+    const [distance, feeConfigure, shortNames] = await Promise.all([
       googleMap.getDistance(
         {
           lat,
@@ -210,6 +210,10 @@ export default class IssueService {
         }
       ),
       FeeConfiguration.findOne(),
+      googleMap.getProvince({
+        lat,
+        lng: lon,
+      }),
     ]);
 
     const distanceFee =
@@ -232,6 +236,7 @@ export default class IssueService {
         lat,
         lon,
         distanceFee: Math.ceil(distanceFee / 1000) * 1000,
+        province: shortNames.join(','),
       },
     });
 
@@ -331,14 +336,48 @@ export default class IssueService {
     const { type, totalTime, workingTimes, numOfWorker } = data;
     const categories = get(issue, 'categories', []);
     const categoriesId = categories.map((item) => item.id);
+    const requestSupporting = await RequestSupporting.findOne({
+      where: {
+        userId: user.id,
+        issueId: issue.id,
+      },
+    });
+    const provinceCodes = get(requestSupporting, 'province', '').split(',');
 
     const [feeConfiguration, feeCategory, saleEvent, holidays] = await Promise.all([
-      FeeConfiguration.findOne({}),
+      FeeConfiguration.findOne({
+        where: {
+          [Op.or]: [
+            {
+              provinceCode: provinceCodes,
+            },
+            {
+              provinceCode: {
+                [Op.eq]: null,
+              },
+            },
+          ],
+        },
+        order: [['provinceCode', 'DESC']],
+      }),
       FeeCategory.findOne({
         where: {
           categoryId: categoriesId,
+          [Op.or]: [
+            {
+              provinceCode: provinceCodes,
+            },
+            {
+              provinceCode: {
+                [Op.eq]: null,
+              },
+            },
+          ],
         },
-        order: [['max', 'DESC']],
+        order: [
+          ['provinceCode', 'DESC'],
+          ['max', 'DESC'],
+        ],
       }),
       Event.findByPk(issue.eventId, {
         include: [
@@ -356,21 +395,28 @@ export default class IssueService {
       }),
     ]);
 
-    const [teamConfiguration, requestSupporting, survey] = await Promise.all([
+    const [teamConfiguration, survey] = await Promise.all([
       TeamFeeConfiguration.findOne({
         where: {
           categoryId: feeCategory.categoryId,
           minWorker: {
             [Op.lte]: numOfWorker,
           },
+          [Op.or]: [
+            {
+              provinceCode: provinceCodes,
+            },
+            {
+              provinceCode: {
+                [Op.eq]: null,
+              },
+            },
+          ],
         },
-        order: [['minWorker', 'DESC']],
-      }),
-      RequestSupporting.findOne({
-        where: {
-          issueId: issue.id,
-          userId: user.id,
-        },
+        order: [
+          ['provinceCode', 'DESC'],
+          ['minWorker', 'DESC'],
+        ],
       }),
       Survey.findOne({
         where: {

@@ -46,6 +46,9 @@ RequestSupporting.init(
       type: Sequelize.DataTypes.FLOAT,
       defaultValue: 0,
     },
+    province: {
+      type: Sequelize.DataTypes.STRING,
+    },
     createdAt: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.NOW,

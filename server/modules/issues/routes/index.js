@@ -12,7 +12,6 @@ import {
   verifyCategory,
   verifySaleEvent,
   verifyPhoneNumber,
-  verifyWorkerLocation,
   verifyThumbnail,
   limitAccountBalance,
 } from '../middlewares';
@@ -70,7 +69,7 @@ router.post(
   auth('requestSupport'),
   verified,
   validator(requestSupportSchema),
-  verifyWorkerLocation,
+  verifyLocation,
   verifyPhoneNumber,
   verifyIssue,
   verifyCategory,
