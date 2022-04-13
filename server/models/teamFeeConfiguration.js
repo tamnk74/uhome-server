@@ -21,6 +21,9 @@ TeamFeeConfiguration.init(
       allowNull: false,
       defaultValue: 0,
     },
+    provinceCode: {
+      type: Sequelize.STRING,
+    },
     createdAt: {
       defaultValue: Sequelize.NOW,
       type: Sequelize.DATE,

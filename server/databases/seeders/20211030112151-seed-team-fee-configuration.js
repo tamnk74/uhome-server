@@ -2,39 +2,33 @@ const { v4: uuidv4 } = require('uuid');
 const Category = require('../../models/category');
 const TeamFeeConfiguration = require('../../models/teamFeeConfiguration');
 
-const updateOrCreate = async (category, element) => {
-  const [feeCategory, created] = await TeamFeeConfiguration.findOrCreate({
-    where: {
-      categoryId: category.id,
-      minWorker: element.min,
-    },
-    defaults: {
-      id: uuidv4(),
-      categoryId: category.id,
-      minWorker: element.min,
-      fee: element.fee,
-    },
+const updateOrCreate = async (category, provinceCode, element) =>
+  TeamFeeConfiguration.upsert({
+    id: uuidv4(),
+    categoryId: category.id,
+    provinceCode,
+    minWorker: element.min,
+    fee: element.fee,
   });
 
-  if (!created) {
-    feeCategory.update({
-      minWorker: element.min,
-      fee: element.fee,
+const updateData = async ({ provinceCode, configurations = [] }) => {
+  for (let index = 0; index < configurations.length; index++) {
+    const configuration = configurations[index];
+    // eslint-disable-next-line no-await-in-loop
+    const category = await Category.findOne({
+      where: {
+        code: configuration.code,
+      },
     });
-  }
-};
 
-const updateData = async (data) => {
-  const category = await Category.findOne({
-    where: {
-      code: data.code,
-    },
-  });
-
-  if (category) {
-    const { configurations } = data;
-    const promises = configurations.map((element) => updateOrCreate(category, element));
-    await Promise.all(promises);
+    if (category) {
+      const { configurations } = configuration;
+      for (let index = 0; index < configurations.length; index++) {
+        const element = configurations[index];
+        // eslint-disable-next-line no-await-in-loop
+        await updateOrCreate(category, provinceCode, element);
+      }
+    }
   }
 };
 
@@ -42,191 +36,584 @@ module.exports = {
   up: () => {
     const categories = [
       {
-        code: 'DL',
+        provinceCode: 'Da Nang',
         configurations: [
           {
-            min: 1,
-            fee: 0,
+            code: 'DL',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 2,
-            fee: 0.15,
+            code: 'DM',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 3,
-            fee: 0.13,
+            code: 'DN',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 5,
-            fee: 0.1,
+            code: 'NT',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'XTVV',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'TVN',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'CK',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'SN',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'NK',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
         ],
       },
       {
-        code: 'DM',
+        provinceCode: 'Quang Nam Province',
         configurations: [
           {
-            min: 1,
-            fee: 0,
+            code: 'DL',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 2,
-            fee: 0.15,
+            code: 'DM',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 3,
-            fee: 0.13,
+            code: 'DN',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 5,
-            fee: 0.1,
+            code: 'NT',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'XTVV',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'TVN',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'CK',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'SN',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
+          },
+          {
+            code: 'NK',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
         ],
       },
       {
-        code: 'DN',
+        provinceCode: 'Ho Chi Minh City',
         configurations: [
           {
-            min: 1,
-            fee: 0,
+            code: 'DL',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 2,
-            fee: 0.1,
+            code: 'DM',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 3,
-            fee: 0.08,
+            code: 'DN',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 5,
-            fee: 0.05,
-          },
-        ],
-      },
-      {
-        code: 'NT',
-        configurations: [
-          {
-            min: 1,
-            fee: 0,
-          },
-          {
-            min: 2,
-            fee: 0.1,
-          },
-          {
-            min: 3,
-            fee: 0.08,
-          },
-          {
-            min: 5,
-            fee: 0.05,
-          },
-        ],
-      },
-      {
-        code: 'XTVV',
-        configurations: [
-          {
-            min: 1,
-            fee: 0,
+            code: 'NT',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 2,
-            fee: 0.1,
+            code: 'XTVV',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 3,
-            fee: 0.08,
+            code: 'TVN',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 5,
-            fee: 0.05,
-          },
-        ],
-      },
-      {
-        code: 'TVN',
-        configurations: [
-          {
-            min: 1,
-            fee: 0,
-          },
-          {
-            min: 2,
-            fee: 0.12,
-          },
-          {
-            min: 3,
-            fee: 0.1,
-          },
-          {
-            min: 5,
-            fee: 0.07,
-          },
-        ],
-      },
-      {
-        code: 'CK',
-        configurations: [
-          {
-            min: 1,
-            fee: 0,
+            code: 'CK',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 2,
-            fee: 0.12,
+            code: 'SN',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
           {
-            min: 3,
-            fee: 0.1,
-          },
-          {
-            min: 5,
-            fee: 0.07,
-          },
-        ],
-      },
-      {
-        code: 'SN',
-        configurations: [
-          {
-            min: 1,
-            fee: 0,
-          },
-          {
-            min: 2,
-            fee: 0.1,
-          },
-          {
-            min: 3,
-            fee: 0.08,
-          },
-          {
-            min: 5,
-            fee: 0.05,
-          },
-        ],
-      },
-      {
-        code: 'NK',
-        configurations: [
-          {
-            min: 1,
-            fee: 0,
-          },
-          {
-            min: 2,
-            fee: 0.12,
-          },
-          {
-            min: 3,
-            fee: 0.1,
-          },
-          {
-            min: 5,
-            fee: 0.07,
+            code: 'NK',
+            configurations: [
+              {
+                min: 1,
+                fee: 0,
+              },
+              {
+                min: 2,
+                fee: 0.05,
+              },
+              {
+                min: 3,
+                fee: 0.08,
+              },
+              {
+                min: 5,
+                fee: 0.08,
+              },
+            ],
           },
         ],
       },

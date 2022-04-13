@@ -1,5 +1,6 @@
 import { googleMap } from '../../../helpers/GoogleMap';
 import errorFactory from '../../../errors/ErrorFactory';
+import Province from '../../../models/province';
 
 export const verifyLocation = async (req, res, next) => {
   try {
@@ -7,14 +8,22 @@ export const verifyLocation = async (req, res, next) => {
     if (process.env.NODE_ENV === 'qa') {
       return next();
     }
-    const allowedProvinces = ['Đà Nẵng', 'Quang Nam Province', 'Quảng Nam', 'Da Nang'];
-    const province = await googleMap.getProvince({
+    const shortNames = await googleMap.getProvince({
       lat,
       lng: lon,
     });
-    if (!allowedProvinces.includes(province)) {
+
+    const province = await Province.findOne({
+      where: {
+        code: shortNames,
+      },
+      status: Province.IS_ENABLED,
+    });
+
+    if (!province) {
       return next(errorFactory.getError('ISSUE-0415'));
     }
+
     return next();
   } catch (e) {
     return next(e);
