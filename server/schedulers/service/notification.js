@@ -19,9 +19,8 @@ import RequestSupporting from '../../models/requestSupporting';
 import { objectToSnake } from '../../helpers/Util';
 import ChatChannel from '../../models/chatChannel';
 import ChatMember from '../../models/chatMember';
-import { sentryConfig, pushNotificationRound, maximumNotificationOneRound } from '../../config';
+import { sentryConfig, maximumNotificationOneRound } from '../../config';
 import LatestIssueStatus from '../../models/latestIssueStatus';
-import NotificationRound from '../../models/notificationRound';
 import Category from '../../models/category';
 import { notificationQueue } from '../../helpers/Queue';
 
@@ -313,7 +312,7 @@ export default class NotificationService {
 
   static async pushChatNotification(job, done) {
     try {
-      const { chatChannelId, actorId, commandName } = job.data;
+      const { chatChannelId, actorId, commandName, message = '' } = job.data;
       const [chatChannel, chatMembers, actor] = await Promise.all([
         ChatChannel.findByPk(chatChannelId, {
           include: [
@@ -340,38 +339,16 @@ export default class NotificationService {
 
       const { issue } = chatChannel;
       const memberIds = chatMembers.map((item) => item.userId);
-      const receives = await NotificationRound.findAll({
+
+      const subscriptions = await Subscription.findAll({
         where: {
           userId: memberIds,
-          channelId: chatChannel.id,
-          [Op.and]: [
-            Sequelize.where(Sequelize.literal(`mod(round, ${pushNotificationRound})`), '=', 0),
-          ],
+          deviceId: {
+            [Op.ne]: null,
+          },
         },
       });
 
-      const receiveIds = receives.map((item) => item.userId);
-      const subscriptions = await Promise.all([
-        Subscription.findAll({
-          where: {
-            userId: receiveIds,
-            deviceId: {
-              [Op.ne]: null,
-            },
-          },
-        }),
-        NotificationRound.update(
-          {
-            round: Sequelize.literal(`round + 1`),
-          },
-          {
-            where: {
-              userId: memberIds,
-              channelId: chatChannel.id,
-            },
-          }
-        ),
-      ]);
       const tokens = _.compact(subscriptions.map((item) => item.token));
 
       if (_.isEmpty(tokens)) {
@@ -386,6 +363,8 @@ export default class NotificationService {
           `${_.get(notificationMessage, commandName, commandName)}.body`,
           {
             title: issue.title,
+            message,
+            actor: _.get(actor, 'name', ''),
           }
         ),
       };

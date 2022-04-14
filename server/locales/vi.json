@@ -103,7 +103,7 @@
     },
     "new_message": {
       "title": "U-Home - Tin nhắn mới trong công việc.",
-      "body": "Bạn có 1 tin nhắn từ công việc {{title}}."
+      "body": "{{message}} từ {{actor}}."
     },
     "added_promotion": {
       "title": "U-Home - Công việc được cập nhật",
