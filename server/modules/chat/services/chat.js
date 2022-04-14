@@ -43,7 +43,6 @@ import FeeCategory from '../../../models/feeCategory';
 import FeeFactory from '../../../helpers/fee/FeeFactory';
 import CategoryIssue from '../../../models/categoryIssue';
 import LatestIssueStatus from '../../../models/latestIssueStatus';
-import NotificationRound from '../../../models/notificationRound';
 
 const getIssueCost = async (receiveIssue, estimationMessage, survey) => {
   const { issueId } = receiveIssue;
@@ -179,18 +178,7 @@ export default class ChatService {
   }
 
   static async addUserToChat(chatChannel, user) {
-    const [member] = await Promise.all([
-      ChatMember.findMember(user.id, chatChannel.id),
-      NotificationRound.findOrCreate({
-        where: {
-          userId: user.id,
-          channelId: chatChannel.id,
-        },
-        defaults: {
-          id: uuid(),
-        },
-      }),
-    ]);
+    const member = await ChatMember.findMember(user.id, chatChannel.id);
 
     if (member) {
       return member;
