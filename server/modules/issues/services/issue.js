@@ -30,6 +30,7 @@ import Survey from '../../../models/survey';
 import Category from '../../../models/category';
 import LatestIssueStatus from '../../../models/latestIssueStatus';
 import IssueSkip from '../../../models/issueSkip';
+import { maxWorkerDistance } from '../../../config';
 
 export default class IssueService {
   static async getUploadVideoLink({ thumbnail }) {
@@ -113,6 +114,16 @@ export default class IssueService {
     options.where.createdBy = {
       [Op.ne]: user.id,
     };
+    options.where[Op.and] = sequelize.where(
+      Sequelize.literal(
+        `(ROUND(ST_DISTANCE_SPHERE(POINT(issues.lon, issues.lat), POINT(${user.lon || 0.0}, ${
+          user.lat || 0.0
+        })) / 1000, 1))`
+      ),
+      '<=',
+      maxWorkerDistance
+    );
+
     options.where.id = {
       [Op.in]: Sequelize.literal(`(${Issue.getIssueOption(user.id)})`),
       [Op.notIn]: Sequelize.literal(`(${Issue.getCancelledIssues(user.id)})`),
