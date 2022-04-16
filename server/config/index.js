@@ -42,3 +42,4 @@ export const maximumNotificationOneRound =
   parseInt(process.env.MAXIMUM_NOTIFICATION_ONE_ROUND, 10) || 3;
 
 export const minAccountBalance = parseInt(process.env.MIN_ACCOUNT_BALANCE, 10) || -100000;
+export const maxWorkerDistance = parseInt(process.env.MAXIMUM_WORKER_DISTANCE, 10) || 60;
