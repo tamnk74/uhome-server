@@ -265,10 +265,6 @@ export default class AuthService {
       throw new Error('USER-0002');
     }
 
-    if (Number(user.status) === userStatus.ACTIVE) {
-      throw new Error('USER-2001');
-    }
-
     const userVerifyCode = await RedisService.getVerifyCode(user.id);
 
     if (userVerifyCode !== verifyCode) {
