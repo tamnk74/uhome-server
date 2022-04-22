@@ -442,6 +442,7 @@ export default class IssueService {
           categoryId: feeCategory.categoryId,
           province: provinceCodes,
         },
+        order: [['max', 'ASC']],
       }),
     ]);
 
