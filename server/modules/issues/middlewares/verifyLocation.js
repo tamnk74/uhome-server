@@ -5,9 +5,6 @@ import Province from '../../../models/province';
 export const verifyLocation = async (req, res, next) => {
   try {
     const { lat, lon } = req.body;
-    if (process.env.NODE_ENV === 'qa') {
-      return next();
-    }
     const shortNames = await googleMap.getProvince({
       lat,
       lng: lon,

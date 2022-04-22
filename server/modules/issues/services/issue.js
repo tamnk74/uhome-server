@@ -460,7 +460,7 @@ export default class IssueService {
         holidays,
       }
     );
-    console.log(cost);
+
     const distance = get(requestSupporting, 'distance', 0);
     const configDistanceFee = get(feeConfiguration, 'distance', 0);
     const distanceFee = Math.ceil((distance * configDistanceFee) / 1000) * 1000;
