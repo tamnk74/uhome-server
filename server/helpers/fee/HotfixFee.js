@@ -10,23 +10,18 @@ dayjs.extend(isBetween);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const getTimeSlotCost = (configuration, classFee, hours) => {
-  const fee1 = classFee.min / 8;
-
-  if (hours <= 1) {
-    return hours * fee1;
-  }
-
-  const fee4 = classFee.max / 8;
-
-  if (hours <= 4) {
-    return hours * ((fee1 + fee4) / 2);
+const getTimeSlotCost = (configuration, timeSlotConfigures, hours) => {
+  if (hours <= 0) {
+    return 0;
   }
 
   if (hours <= 8) {
-    return hours * fee4;
+    const timeSlot = timeSlotConfigures.find((item) => item.min <= hours && item.max > hours);
+    return hours * get(timeSlot, 'cost', 0);
   }
 
+  const timeSlot = timeSlotConfigures.find((item) => item.min <= 1 && item.max >= 4);
+  const fee4 = get(timeSlot, 'cost', 0);
   const fee16 = fee4 * configuration.experienceFee;
 
   if (hours <= 16) {
@@ -142,14 +137,18 @@ export default class HotfixFee extends Fee {
     this.numOfWorker = numOfWorker;
   }
 
-  getBasicCost(configuration, classFee, starTime, endTime, holidays) {
+  getBasicCost(configuration, timeSlotConfigures, starTime, endTime, holidays) {
     const workingTimeSlots = getWorkingTimeSlots(configuration, starTime, endTime, holidays);
-    const basicTimeSlotCost = getBasicTimeSlotCost(configuration, classFee, workingTimeSlots);
+    const basicTimeSlotCost = getBasicTimeSlotCost(
+      configuration,
+      timeSlotConfigures,
+      workingTimeSlots
+    );
 
     return this.numOfWorker * basicTimeSlotCost;
   }
 
-  getCost(configuration, classFee, teamConfiguration, holidays) {
+  getCost({ configuration, teamConfiguration, holidays, timeSlotConfigures }) {
     const workingTime = first(this.workingTimes);
     if (isEmpty(workingTime)) {
       return {
@@ -167,14 +166,20 @@ export default class HotfixFee extends Fee {
     const startTime = dayjs(workingTime.startTime).tz('Asia/Ho_Chi_Minh');
     const endTime = dayjs(startTime).add(this.totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
 
-    const basicCost = this.getBasicCost(configuration, classFee, startTime, endTime, holidays);
+    const basicCost = this.getBasicCost(
+      configuration,
+      timeSlotConfigures,
+      startTime,
+      endTime,
+      holidays
+    );
 
     return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getSurveyCost({ configuration, classFee, surveyTime = 0 }) {
-    const cost = getTimeSlotCost(configuration, classFee, surveyTime);
+  getSurveyCost({ configuration, timeSlotConfigures, surveyTime = 0 }) {
+    const cost = getTimeSlotCost(configuration, timeSlotConfigures, surveyTime);
 
     return Math.ceil(cost);
   }

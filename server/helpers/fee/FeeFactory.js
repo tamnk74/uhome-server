@@ -13,17 +13,23 @@ export default class FeeFactory {
 
   static getCost(
     type,
-    { configuration, classFee, teamConfiguration },
+    { configuration, classFee, teamConfiguration, timeSlotConfigures },
     { workingTimes, totalTime, numOfWorker, holidays }
   ) {
     const instance = FeeFactory.getInstance(type, workingTimes, totalTime, numOfWorker);
 
-    return instance.getCost(configuration, classFee, teamConfiguration, holidays);
+    return instance.getCost({
+      configuration,
+      classFee,
+      teamConfiguration,
+      holidays,
+      timeSlotConfigures,
+    });
   }
 
-  static getSurveyCost(type, surveyTime, { configuration, classFee }) {
+  static getSurveyCost(type, surveyTime, { configuration, classFee, timeSlotConfigures }) {
     const instance = FeeFactory.getInstance(type);
 
-    return instance.getSurveyCost({ configuration, classFee, surveyTime });
+    return instance.getSurveyCost({ configuration, classFee, surveyTime, timeSlotConfigures });
   }
 }

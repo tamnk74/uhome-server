@@ -52,7 +52,7 @@ export default class NormalFee extends Fee {
     return this.numOfWorker * sum(totals);
   }
 
-  getCost(configuration, classFee, teamConfiguration, holidays) {
+  getCost({ configuration, classFee, teamConfiguration, holidays }) {
     const basicCost = this.getBasicCost(configuration, classFee, holidays);
 
     return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);

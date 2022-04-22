@@ -1,0 +1,503 @@
+[
+    {
+      "province": "Da Nang",
+      "timeSlots": [
+        {
+          "category_code": "DL",
+          "min": 0,
+          "max": 1,
+          "cost": 68750
+        },
+        {
+          "category_code": "DL",
+          "min": 1,
+          "max": 4,
+          "cost": 71875
+        },
+        {
+          "category_code": "DL",
+          "min": 4,
+          "max": 8,
+          "cost": 75000
+        },
+        {
+          "category_code": "DM",
+          "min": 0,
+          "max": 1,
+          "cost": 68750
+        },
+        {
+          "category_code": "DM",
+          "min": 1,
+          "max": 4,
+          "cost": 71875
+        },
+        {
+          "category_code": "DM",
+          "min": 4,
+          "max": 8,
+          "cost": 75000
+        },
+        {
+          "category_code": "DN",
+          "min": 0,
+          "max": 1,
+          "cost": 56250
+        },
+        {
+          "category_code": "DN",
+          "min": 1,
+          "max": 4,
+          "cost": 59375
+        },
+        {
+          "category_code": "DN",
+          "min": 4,
+          "max": 8,
+          "cost": 62500
+        },
+        {
+          "category_code": "NT",
+          "min": 0,
+          "max": 1,
+          "cost": 75000
+        },
+        {
+          "category_code": "NT",
+          "min": 1,
+          "max": 4,
+          "cost": 78125
+        },
+        {
+          "category_code": "NT",
+          "min": 4,
+          "max": 8,
+          "cost": 81250
+        },
+        {
+          "category_code": "XTVV",
+          "min": 0,
+          "max": 1,
+          "cost": 56250
+        },
+        {
+          "category_code": "XTVV",
+          "min": 1,
+          "max": 4,
+          "cost": 59375
+        },
+        {
+          "category_code": "XTVV",
+          "min": 4,
+          "max": 8,
+          "cost": 62500
+        },
+        {
+          "category_code": "TVN",
+          "min": 0,
+          "max": 1,
+          "cost": 75000
+        },
+        {
+          "category_code": "TVN",
+          "min": 1,
+          "max": 4,
+          "cost": 78125
+        },
+        {
+          "category_code": "TVN",
+          "min": 4,
+          "max": 8,
+          "cost": 81250
+        },
+        {
+          "category_code": "CK",
+          "min": 0,
+          "max": 1,
+          "cost": 81250
+        },
+        {
+          "category_code": "CK",
+          "min": 1,
+          "max": 4,
+          "cost": 84375
+        },
+        {
+          "category_code": "CK",
+          "min": 4,
+          "max": 8,
+          "cost": 87500
+        },
+        {
+          "category_code": "SN",
+          "min": 0,
+          "max": 1,
+          "cost": 68750
+        },
+        {
+          "category_code": "SN",
+          "min": 1,
+          "max": 4,
+          "cost": 71875
+        },
+        {
+          "category_code": "SN",
+          "min": 4,
+          "max": 8,
+          "cost": 75000
+        },
+        {
+          "category_code": "NK",
+          "min": 0,
+          "max": 1,
+          "cost": 75000
+        },
+        {
+          "category_code": "NK",
+          "min": 1,
+          "max": 4,
+          "cost": 78125
+        },
+        {
+          "category_code": "NK",
+          "min": 4,
+          "max": 8,
+          "cost": 81250
+        }
+      ]
+    },
+    {
+      "province": "Quang Nam Province",
+      "timeSlots": [
+        {
+          "category_code": "DL",
+          "min": 0,
+          "max": 1,
+          "cost": 68750
+        },
+        {
+          "category_code": "DL",
+          "min": 1,
+          "max": 4,
+          "cost": 71875
+        },
+        {
+          "category_code": "DL",
+          "min": 4,
+          "max": 8,
+          "cost": 75000
+        },
+        {
+          "category_code": "DM",
+          "min": 0,
+          "max": 1,
+          "cost": 68750
+        },
+        {
+          "category_code": "DM",
+          "min": 1,
+          "max": 4,
+          "cost": 71875
+        },
+        {
+          "category_code": "DM",
+          "min": 4,
+          "max": 8,
+          "cost": 75000
+        },
+        {
+          "category_code": "DN",
+          "min": 0,
+          "max": 1,
+          "cost": 56250
+        },
+        {
+          "category_code": "DN",
+          "min": 1,
+          "max": 4,
+          "cost": 59375
+        },
+        {
+          "category_code": "DN",
+          "min": 4,
+          "max": 8,
+          "cost": 62500
+        },
+        {
+          "category_code": "NT",
+          "min": 0,
+          "max": 1,
+          "cost": 75000
+        },
+        {
+          "category_code": "NT",
+          "min": 1,
+          "max": 4,
+          "cost": 78125
+        },
+        {
+          "category_code": "NT",
+          "min": 4,
+          "max": 8,
+          "cost": 81250
+        },
+        {
+          "category_code": "XTVV",
+          "min": 0,
+          "max": 1,
+          "cost": 56250
+        },
+        {
+          "category_code": "XTVV",
+          "min": 1,
+          "max": 4,
+          "cost": 59375
+        },
+        {
+          "category_code": "XTVV",
+          "min": 4,
+          "max": 8,
+          "cost": 62500
+        },
+        {
+          "category_code": "TVN",
+          "min": 0,
+          "max": 1,
+          "cost": 75000
+        },
+        {
+          "category_code": "TVN",
+          "min": 1,
+          "max": 4,
+          "cost": 78125
+        },
+        {
+          "category_code": "TVN",
+          "min": 4,
+          "max": 8,
+          "cost": 81250
+        },
+        {
+          "category_code": "CK",
+          "min": 0,
+          "max": 1,
+          "cost": 81250
+        },
+        {
+          "category_code": "CK",
+          "min": 1,
+          "max": 4,
+          "cost": 84375
+        },
+        {
+          "category_code": "CK",
+          "min": 4,
+          "max": 8,
+          "cost": 87500
+        },
+        {
+          "category_code": "SN",
+          "min": 0,
+          "max": 1,
+          "cost": 68750
+        },
+        {
+          "category_code": "SN",
+          "min": 1,
+          "max": 4,
+          "cost": 71875
+        },
+        {
+          "category_code": "SN",
+          "min": 4,
+          "max": 8,
+          "cost": 75000
+        },
+        {
+          "category_code": "NK",
+          "min": 0,
+          "max": 1,
+          "cost": 75000
+        },
+        {
+          "category_code": "NK",
+          "min": 1,
+          "max": 4,
+          "cost": 78125
+        },
+        {
+          "category_code": "NK",
+          "min": 4,
+          "max": 8,
+          "cost": 81250
+        }
+      ]
+    },
+    {
+      "province": "Ho Chi Minh City",
+      "timeSlots": [
+        {
+          "category_code": "DL",
+          "min": 0,
+          "max": 1,
+          "cost": 105000
+        },
+        {
+          "category_code": "DL",
+          "min": 1,
+          "max": 4,
+          "cost": 100625
+        },
+        {
+          "category_code": "DL",
+          "min": 4,
+          "max": 8,
+          "cost": 96250
+        },
+        {
+          "category_code": "DM",
+          "min": 0,
+          "max": 1,
+          "cost": 97500
+        },
+        {
+          "category_code": "DM",
+          "min": 1,
+          "max": 4,
+          "cost": 95437.5
+        },
+        {
+          "category_code": "DM",
+          "min": 4,
+          "max": 8,
+          "cost": 89375
+        },
+        {
+          "category_code": "DN",
+          "min": 0,
+          "max": 1,
+          "cost": 97500
+        },
+        {
+          "category_code": "DN",
+          "min": 1,
+          "max": 4,
+          "cost": 95437.5
+        },
+        {
+          "category_code": "DN",
+          "min": 4,
+          "max": 8,
+          "cost": 89375
+        },
+        {
+          "category_code": "NT",
+          "min": 0,
+          "max": 1,
+          "cost": 112500
+        },
+        {
+          "category_code": "NT",
+          "min": 1,
+          "max": 4,
+          "cost": 107812.5
+        },
+        {
+          "category_code": "NT",
+          "min": 4,
+          "max": 8,
+          "cost": 103125
+        },
+        {
+          "category_code": "XTVV",
+          "min": 0,
+          "max": 1,
+          "cost": 105000
+        },
+        {
+          "category_code": "XTVV",
+          "min": 1,
+          "max": 4,
+          "cost": 100625
+        },
+        {
+          "category_code": "XTVV",
+          "min": 4,
+          "max": 8,
+          "cost": 96250
+        },
+        {
+          "category_code": "TVN",
+          "min": 0,
+          "max": 1,
+          "cost": 105000
+        },
+        {
+          "category_code": "TVN",
+          "min": 1,
+          "max": 4,
+          "cost": 100625
+        },
+        {
+          "category_code": "TVN",
+          "min": 4,
+          "max": 8,
+          "cost": 96250
+        },
+        {
+          "category_code": "CK",
+          "min": 0,
+          "max": 1,
+          "cost": 112500
+        },
+        {
+          "category_code": "CK",
+          "min": 1,
+          "max": 4,
+          "cost": 107812.5
+        },
+        {
+          "category_code": "CK",
+          "min": 4,
+          "max": 8,
+          "cost": 103125
+        },
+        {
+          "category_code": "SN",
+          "min": 0,
+          "max": 1,
+          "cost": 97500
+        },
+        {
+          "category_code": "SN",
+          "min": 1,
+          "max": 4,
+          "cost": 93437.5
+        },
+        {
+          "category_code": "SN",
+          "min": 4,
+          "max": 8,
+          "cost": 89375
+        },
+        {
+          "category_code": "NK",
+          "min": 0,
+          "max": 1,
+          "cost": 105000
+        },
+        {
+          "category_code": "NK",
+          "min": 1,
+          "max": 4,
+          "cost": 100625
+        },
+        {
+          "category_code": "NK",
+          "min": 4,
+          "max": 8,
+          "cost": 96250
+        }
+      ]
+    }
+]

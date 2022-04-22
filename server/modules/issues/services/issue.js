@@ -31,6 +31,7 @@ import Category from '../../../models/category';
 import LatestIssueStatus from '../../../models/latestIssueStatus';
 import IssueSkip from '../../../models/issueSkip';
 import { maxWorkerDistance } from '../../../config';
+import TimesSlotConfiguration from '../../../models/timesSlotConfiguration';
 
 export default class IssueService {
   static async getUploadVideoLink({ thumbnail }) {
@@ -406,7 +407,7 @@ export default class IssueService {
       }),
     ]);
 
-    const [teamConfiguration, survey] = await Promise.all([
+    const [teamConfiguration, survey, timeSlotConfigures] = await Promise.all([
       TeamFeeConfiguration.findOne({
         where: {
           categoryId: feeCategory.categoryId,
@@ -436,6 +437,12 @@ export default class IssueService {
           status: issueStatus.APPROVAL,
         },
       }),
+      TimesSlotConfiguration.findAll({
+        where: {
+          categoryId: feeCategory.categoryId,
+          province: provinceCodes,
+        },
+      }),
     ]);
 
     const cost = FeeFactory.getCost(
@@ -444,6 +451,7 @@ export default class IssueService {
         teamConfiguration,
         classFee: feeCategory,
         configuration: feeConfiguration,
+        timeSlotConfigures,
       },
       {
         workingTimes,
@@ -452,7 +460,7 @@ export default class IssueService {
         holidays,
       }
     );
-
+    console.log(cost);
     const distance = get(requestSupporting, 'distance', 0);
     const configDistanceFee = get(feeConfiguration, 'distance', 0);
     const distanceFee = Math.ceil((distance * configDistanceFee) / 1000) * 1000;
