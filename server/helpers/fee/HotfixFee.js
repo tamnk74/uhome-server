@@ -16,7 +16,7 @@ const getTimeSlotCost = (configuration, timeSlotConfigures, hours) => {
   }
 
   if (hours <= 8) {
-    const timeSlot = timeSlotConfigures.find((item) => item.min <= hours && item.max > hours);
+    const timeSlot = timeSlotConfigures.find((item) => item.max >= hours);
     return hours * get(timeSlot, 'cost', 0);
   }
 
