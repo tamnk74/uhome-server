@@ -1268,17 +1268,29 @@ export default class ChatService {
 
   static async survey({ user, chatChannel, data }) {
     const { issue } = chatChannel;
-    const categories = await CategoryIssue.findAll({
-      where: {
-        issueId: issue.id,
-      },
-    });
+    const [categories, requestSupporting] = await Promise.all([
+      CategoryIssue.findAll({
+        where: {
+          issueId: issue.id,
+        },
+      }),
+      RequestSupporting.findOne({
+        where: {
+          userId: user.id,
+          issueId: issue.id,
+        },
+      }),
+    ]);
+
     const categoriesId = categories.map((item) => item.categoryId);
+    const provinceCodes = get(requestSupporting, 'province', '').split(',');
 
     const [surveys, feeConfiguration, feeCategory] = await Promise.all([
       Survey.findAll({
-        channelId: chatChannel.id,
-        status: issueStatus.OPEN,
+        where: {
+          channelId: chatChannel.id,
+          status: issueStatus.OPEN,
+        },
       }),
       FeeConfiguration.findOne({}),
       FeeCategory.findOne({
@@ -1288,6 +1300,14 @@ export default class ChatService {
         order: [['max', 'DESC']],
       }),
     ]);
+
+    const timeSlotConfigures = await TimesSlotConfiguration.findAll({
+      where: {
+        categoryId: feeCategory.categoryId,
+        province: provinceCodes,
+      },
+      order: [['max', 'ASC']],
+    });
 
     surveys.forEach((item) => {
       chatMessageQueue.add('update_message', {
@@ -1302,6 +1322,7 @@ export default class ChatService {
     const surveyCost = FeeFactory.getSurveyCost(issueType.HOTFIX, get(data, 'totalTime', 0), {
       classFee: feeCategory,
       configuration: feeConfiguration,
+      timeSlotConfigures,
     });
 
     set(data, 'surveyFee', surveyCost);
