@@ -43,6 +43,7 @@ import FeeCategory from '../../../models/feeCategory';
 import FeeFactory from '../../../helpers/fee/FeeFactory';
 import CategoryIssue from '../../../models/categoryIssue';
 import LatestIssueStatus from '../../../models/latestIssueStatus';
+import TimesSlotConfiguration from '../../../models/timesSlotConfiguration';
 
 const getIssueCost = async (receiveIssue, estimationMessage, survey) => {
   const { issueId } = receiveIssue;
