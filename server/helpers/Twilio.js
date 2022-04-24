@@ -76,11 +76,11 @@ export default class Twilio {
   }
 
   async setWebhook({ postWebhookUrl, preWebhookUrl, webhookMethod = 'POST' }) {
-    return this.client.chat.services(twilioConfig.chatId).update({
+    return this.client.conversations.services(twilioConfig.chatId).update({
       postWebhookUrl,
       preWebhookUrl,
       webhookMethod,
-      webhookFilters: ['onMessageSent'],
+      webhookFilters: ['onMessageAdded'],
     });
   }
 }
