@@ -7,7 +7,13 @@ import Issue from '../../../models/issue';
 import User from '../../../models/user';
 import { notificationQueue, chatMessageQueue } from '../../../helpers/Queue';
 import RequestSupporting from '../../../models/requestSupporting';
-import { issueStatus, command, commandMessage, estimationMessageStatus } from '../../../constants';
+import {
+  issueStatus,
+  command,
+  commandMessage,
+  estimationMessageStatus,
+  roles,
+} from '../../../constants';
 import UserProfile from '../../../models/userProfile';
 import ReceiveIssue from '../../../models/receiveIssue';
 import sequelize from '../../../databases/database';
@@ -115,15 +121,19 @@ export default class IssueService {
     options.where.createdBy = {
       [Op.ne]: user.id,
     };
-    options.where[Op.and] = sequelize.where(
-      Sequelize.literal(
-        `(ROUND(ST_DISTANCE_SPHERE(POINT(issues.lon, issues.lat), POINT(${user.lon || 0.0}, ${
-          user.lat || 0.0
-        })) / 1000, 1))`
-      ),
-      '<=',
-      maxWorkerDistance
-    );
+    const { role } = user;
+
+    if (role !== roles.CONSULTING) {
+      options.where[Op.and] = sequelize.where(
+        Sequelize.literal(
+          `(ROUND(ST_DISTANCE_SPHERE(POINT(issues.lon, issues.lat), POINT(${user.lon || 0.0}, ${
+            user.lat || 0.0
+          })) / 1000, 1))`
+        ),
+        '<=',
+        maxWorkerDistance
+      );
+    }
 
     options.where.id = {
       [Op.in]: Sequelize.literal(`(${Issue.getIssueOption(user.id)})`),
