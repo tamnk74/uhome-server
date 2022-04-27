@@ -14,30 +14,33 @@ export default class Twilio {
   }
 
   async createChannel(name) {
-    return this.client.chat.services(twilioConfig.chatId).channels.create({
+    return this.client.chat.v2.services(twilioConfig.chatId).channels.create({
       friendlyName: name,
     });
   }
 
   async createUser(id) {
-    return this.client.chat.services(twilioConfig.chatId).users.create({
+    return this.client.chat.v2.services(twilioConfig.chatId).users.create({
       identity: id,
     });
   }
 
   async addMember(channelId, userId, attributes) {
-    return this.client.chat
+    return this.client.chat.v2
       .services(twilioConfig.chatId)
       .channels(channelId)
       .members.create({ identity: userId, attributes });
   }
 
   async sendMessage(channelId, data) {
-    return this.client.chat.services(twilioConfig.chatId).channels(channelId).messages.create(data);
+    return this.client.chat.v2
+      .services(twilioConfig.chatId)
+      .channels(channelId)
+      .messages.create(data);
   }
 
   async getUsers(limit, page) {
-    return this.client.chat.services(twilioConfig.chatId).users.list({
+    return this.client.chat.v2.services(twilioConfig.chatId).users.list({
       limit,
       page,
     });
@@ -60,11 +63,15 @@ export default class Twilio {
   }
 
   async getMessage(channelId, id) {
-    return this.client.chat.services(twilioConfig.chatId).channels(channelId).messages(id).fetch();
+    return this.client.chat.v2
+      .services(twilioConfig.chatId)
+      .channels(channelId)
+      .messages(id)
+      .fetch();
   }
 
   async updateMessage(id, channelId, data) {
-    return this.client.chat
+    return this.client.chat.v2
       .services(twilioConfig.chatId)
       .channels(channelId)
       .messages(id)
@@ -72,7 +79,11 @@ export default class Twilio {
   }
 
   async fetchMessage(id, channelId) {
-    return this.client.chat.services(twilioConfig.chatId).channels(channelId).messages(id).fetch();
+    return this.client.chat.v2
+      .services(twilioConfig.chatId)
+      .channels(channelId)
+      .messages(id)
+      .fetch();
   }
 
   async setWebhook({ postWebhookUrl, preWebhookUrl, webhookMethod = 'POST' }) {
@@ -85,6 +96,21 @@ export default class Twilio {
         webhookMethod,
         webhookFilters: ['onMessageAdded'],
       });
+  }
+
+  async fetchMember(channelId, id) {
+    return this.client.chat.v2
+      .services(twilioConfig.chatId)
+      .channels(channelId)
+      .members(id)
+      .fetch();
+  }
+
+  async fetchMembers(channelId) {
+    return this.client.chat.v2
+      .services(twilioConfig.chatId)
+      .channels(channelId)
+      .members.list({ limit: 20 });
   }
 }
 
