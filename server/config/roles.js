@@ -1,6 +1,6 @@
 const allRoles = {
   ADMIN: ['updateIssue', 'getIssue', 'getIssues', 'deleteIssue', 'joinChat'],
-  CONSULTING: ['getIssue', 'getIssues', 'joinChat'],
+  CONSULTING: ['getIssue', 'getIssues', 'joinChat', 'deleteIssue'],
   CUSTOMER: [
     'createIssue',
     'updateIssue',
