@@ -199,9 +199,13 @@ export default class ChatService {
       ]);
     }
 
-    const twilioMember = await twilioClient.addMember(chatChannel.channelSid, chatUser.identity, {
-      friendlyName: chatUser.friendlyName,
-    });
+    const twilioMembers = await twilioClient.fetchMembers(chatChannel.channelSid);
+    let twilioMember = twilioMembers.find((item) => item.identity === chatUser.identity);
+    if (!twilioMember) {
+      twilioMember = await twilioClient.addMember(chatChannel.channelSid, chatUser.identity, {
+        friendlyName: chatUser.friendlyName,
+      });
+    }
 
     chatUser.totalChannel += 1;
 
