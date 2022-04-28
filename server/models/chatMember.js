@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
 import ChatChannel from './chatChannel';
+import User from './user';
 
 class ChatMember extends BaseModel {
   static get searchFields() {
@@ -66,6 +67,7 @@ ChatMember.init(
 
 ChatMember.baseAttributes = ['id', 'friendlyName'];
 ChatMember.belongsTo(ChatChannel, { foreignKey: 'channelId', as: 'chatChannel' });
+User.hasMany(ChatMember);
 
 ChatMember.beforeCreate((member) => {
   member.id = uuidv4();

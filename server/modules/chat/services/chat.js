@@ -1390,4 +1390,23 @@ export default class ChatService {
       token: twilioToken,
     };
   }
+
+  static async getMembers(chatChannel) {
+    const users = await User.findAll({
+      include: [
+        {
+          model: ChatMember,
+          require: true,
+          where: {
+            channelId: chatChannel.id,
+          },
+        },
+      ],
+    });
+
+    return users.map((user) => ({
+      ...user.toChatActor(),
+      role: user.role,
+    }));
+  }
 }
