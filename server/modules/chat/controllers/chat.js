@@ -246,4 +246,15 @@ export default class ChatController {
       return next(e);
     }
   }
+
+  static async getMembers(req, res, next) {
+    try {
+      const { chatChannel } = req;
+      const members = await ChatService.getMembers(chatChannel);
+
+      return res.status(200).send(members.map((item) => objectToSnake(item)));
+    } catch (e) {
+      return next(e);
+    }
+  }
 }

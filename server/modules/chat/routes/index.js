@@ -181,4 +181,6 @@ router.post(
 
 router.get('/chat/initial', auth('joinChat'), active, ChatController.init);
 
+router.get('/chat/:channelId/members', auth(), active, verifyChannel, ChatController.getMembers);
+
 export default router;
