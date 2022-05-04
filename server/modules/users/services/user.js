@@ -455,7 +455,7 @@ export default class Userervice {
           ],
           where: {
             status: {
-              [Op.eq]: issueStatus.CANCELLED,
+              [Op.ne]: issueStatus.CANCELLED,
             },
           },
         },
