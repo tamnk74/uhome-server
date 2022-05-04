@@ -453,6 +453,11 @@ export default class Userervice {
               attributes: ['id', 'name', 'avatar'],
             },
           ],
+          where: {
+            status: {
+              [Op.eq]: issueStatus.CANCELLED,
+            },
+          },
         },
       ],
     });
