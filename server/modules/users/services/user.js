@@ -21,6 +21,7 @@ import { sendOTP } from '../../../helpers/SmsOTP';
 import RedisService from '../../../helpers/Redis';
 import AuthService from './auth';
 import LatestIssueStatus from '../../../models/latestIssueStatus';
+import { googleMap } from '../../../helpers';
 
 export default class Userervice {
   static async getIssues(query) {
@@ -299,11 +300,22 @@ export default class Userervice {
   }
 
   static async updateLatestLocation({ userId, data }) {
-    await User.update(data, {
-      where: {
-        id: userId,
-      },
+    const provinceShortNames = await googleMap.getProvince({
+      lat: data.lat,
+      lng: data.lon,
     });
+
+    await User.update(
+      {
+        ...data,
+        province: provinceShortNames.join(','),
+      },
+      {
+        where: {
+          id: userId,
+        },
+      }
+    );
   }
 
   static async updatePassword({ userId, data }) {

@@ -51,21 +51,16 @@ export default class AuthController {
   static async index(req, res, next) {
     try {
       const pagination = new Pagination(req);
-      const issues = await IssueService.getIssues({
+      const { total, data } = await IssueService.getIssues({
         ...objectToCamel(req.query),
         user: req.user,
         limit: pagination.limit,
         offset: pagination.skip,
       });
-      pagination.setTotal(issues.count);
+      pagination.setTotal(total);
       return res.status(200).json({
         meta: pagination.getMeta(),
-        data: issues.rows.map((issue) => {
-          const item = issue.toJSON();
-          item.distance = item.distanceRequest || item.distance;
-          delete item.distanceRequest;
-          return objectToSnake(item);
-        }),
+        data,
       });
     } catch (e) {
       return next(e);

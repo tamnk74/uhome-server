@@ -1297,7 +1297,7 @@ export default class ChatService {
           status: issueStatus.OPEN,
         },
       }),
-      FeeConfiguration.findOne({}),
+      FeeConfiguration.findByProvinces(provinceCodes),
       FeeCategory.findOne({
         where: {
           categoryId: categoriesId,
