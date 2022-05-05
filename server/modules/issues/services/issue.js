@@ -88,7 +88,7 @@ export default class IssueService {
 
   static async getDetail(user, id) {
     const { lat, lon } = user;
-
+    const province = user.province || '';
     const [issue, feeConfigure] = await Promise.all([
       Issue.findByPk(id, {
         include: [
@@ -117,7 +117,7 @@ export default class IssueService {
           ],
         },
       }),
-      FeeConfiguration.findByProvinces(get(user, 'province', '').split(',')),
+      FeeConfiguration.findByProvinces(province.split(',')),
     ]);
 
     let { distance } = issue.dataValues;
@@ -151,6 +151,7 @@ export default class IssueService {
       [Op.ne]: user.id,
     };
     const { role } = user;
+    const province = user.province || '';
 
     if (role !== roles.CONSULTING) {
       options.where[Op.and] = sequelize.where(
@@ -243,7 +244,7 @@ export default class IssueService {
         limit,
         offset,
       }),
-      FeeConfiguration.findByProvinces(get(user, 'province', '').split(',')),
+      FeeConfiguration.findByProvinces(province.split(',')),
     ]);
 
     const issues = result.rows;
