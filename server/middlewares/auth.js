@@ -52,6 +52,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
   user.signedSocial = signedSocial;
   user.lat = storedUser.lat;
   user.lon = storedUser.lon;
+  user.province = storedUser.province;
   req.user = user;
   resolve();
 };

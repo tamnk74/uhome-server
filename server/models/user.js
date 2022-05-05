@@ -99,6 +99,9 @@ User.init(
     lat: {
       type: Sequelize.DataTypes.DECIMAL(9, 6),
     },
+    province: {
+      type: Sequelize.STRING,
+    },
     role: {
       type: Sequelize.ENUM('USER', 'ADMIN'),
       allowNull: true,

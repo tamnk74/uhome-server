@@ -1,4 +1,4 @@
-import Sequelize from 'sequelize';
+import { Sequelize, Op } from 'sequelize';
 import uuid from 'uuid';
 import BaseModel from './model';
 import sequelize from '../databases/database';
@@ -79,5 +79,22 @@ FeeConfiguration.baseAttributes = [
   'holiday',
   'experienceFee',
 ];
+
+FeeConfiguration.findByProvinces = (provinces = []) =>
+  FeeConfiguration.findOne({
+    where: {
+      [Op.or]: [
+        {
+          provinceCode: provinces,
+        },
+        {
+          provinceCode: {
+            [Op.eq]: null,
+          },
+        },
+      ],
+    },
+    order: [['provinceCode', 'DESC']],
+  });
 
 module.exports = FeeConfiguration;

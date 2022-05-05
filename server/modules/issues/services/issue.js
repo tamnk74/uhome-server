@@ -87,30 +87,59 @@ export default class IssueService {
   }
 
   static async getDetail(user, id) {
-    const issue = await Issue.findByPk(id, {
-      include: [
-        ...Issue.buildRelation(),
-        {
-          model: RequestSupporting,
-          required: false,
-          as: 'requestSupportings',
-        },
-        {
-          model: User,
-          as: 'creator',
-          attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
-        },
-      ],
-    });
+    const { lat, lon } = user;
 
+    const [issue, feeConfigure] = await Promise.all([
+      Issue.findByPk(id, {
+        include: [
+          ...Issue.buildRelation(),
+          {
+            model: RequestSupporting,
+            required: false,
+            as: 'requestSupportings',
+          },
+          {
+            model: User,
+            as: 'creator',
+            attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
+          },
+        ],
+        attributes: {
+          include: [
+            [
+              Sequelize.literal(
+                `(ROUND(ST_DISTANCE_SPHERE(POINT(issues.lon, issues.lat), POINT(${lon || 0.0}, ${
+                  lat || 0.0
+                })) / 1000, 1))`
+              ),
+              'distance',
+            ],
+          ],
+        },
+      }),
+      FeeConfiguration.findByProvinces(get(user, 'province', '').split(',')),
+    ]);
+
+    let { distance } = issue.dataValues;
+    let distanceFee =
+      distance <= get(feeConfigure, 'minDistance', 0)
+        ? 0
+        : min([
+            distance * get(feeConfigure, 'distance', 0),
+            get(feeConfigure, 'maxDistanceFee', 0),
+          ]);
     issue.setDataValue('totalRequestSupporting', issue.requestSupportings.length);
     issue.setDataValue('isRequested', 0);
     issue.requestSupportings.forEach((item) => {
       if (item.userId === user.id) {
         issue.setDataValue('isRequested', 1);
+        distance = item.distance;
+        distanceFee = item.distanceFee;
       }
     });
+    issue.setDataValue('distance', distance);
     issue.setDataValue('requestSupportings', undefined);
+    issue.setDataValue('distanceFee', distanceFee);
 
     return issue;
   }
@@ -181,38 +210,63 @@ export default class IssueService {
       RequestSupporting
     ).slice(0, -1);
 
-    return Issue.findAndCountAll({
-      ...options,
-      include: [
-        ...Issue.buildRelation(categoryIds),
-        {
-          model: User,
-          as: 'creator',
-          attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
-        },
-      ],
-      attributes: {
+    const [result, feeConfigure] = await Promise.all([
+      Issue.findAndCountAll({
+        ...options,
         include: [
-          [Sequelize.literal(`(${countSQL})`), 'totalRequestSupporting'],
-          [Sequelize.literal(`(${isRequestedSQL})`), 'isRequested'],
-          [Sequelize.literal(`(${distanceRequest})`), 'distanceRequest'],
-          [
-            Sequelize.literal(
-              `(ROUND(ST_DISTANCE_SPHERE(POINT(lon, lat), POINT(${user.lon || 0.0}, ${
-                user.lat || 0.0
-              })) / 1000, 1))`
-            ),
-            'distance',
-          ],
+          ...Issue.buildRelation(categoryIds),
+          {
+            model: User,
+            as: 'creator',
+            attributes: ['id', 'phoneNumber', 'address', 'name', 'avatar', 'lon', 'lat'],
+          },
         ],
-      },
-      order: [
-        ['updated_at', 'DESC'],
-        [Attachment, 'created_at', 'DESC'],
-      ],
-      limit,
-      offset,
+        attributes: {
+          include: [
+            [Sequelize.literal(`(${countSQL})`), 'totalRequestSupporting'],
+            [Sequelize.literal(`(${isRequestedSQL})`), 'isRequested'],
+            [Sequelize.literal(`(${distanceRequest})`), 'distanceRequest'],
+            [
+              Sequelize.literal(
+                `(ROUND(ST_DISTANCE_SPHERE(POINT(lon, lat), POINT(${user.lon || 0.0}, ${
+                  user.lat || 0.0
+                })) / 1000, 1))`
+              ),
+              'distance',
+            ],
+          ],
+        },
+        order: [
+          ['updated_at', 'DESC'],
+          [Attachment, 'created_at', 'DESC'],
+        ],
+        limit,
+        offset,
+      }),
+      FeeConfiguration.findByProvinces(get(user, 'province', '').split(',')),
+    ]);
+
+    const issues = result.rows;
+
+    const data = issues.map((issue) => {
+      const item = issue.toJSON();
+      item.distance = item.distanceRequest || item.distance;
+      item.distanceFee =
+        item.distance <= get(feeConfigure, 'minDistance', 0)
+          ? 0
+          : min([
+              item.distance * get(feeConfigure, 'distance', 0),
+              get(feeConfigure, 'maxDistanceFee', 0),
+            ]);
+      delete item.distanceRequest;
+
+      return objectToSnake(item);
     });
+
+    return {
+      total: result.count,
+      data,
+    };
   }
 
   static async requestSupporting(user, issue, { message, lat, lon }) {
@@ -220,7 +274,7 @@ export default class IssueService {
       throw new Error('ISSUE-0002');
     }
 
-    const [distance, feeConfigure, shortNames] = await Promise.all([
+    const [distance, provincesShortNames] = await Promise.all([
       googleMap.getDistance(
         {
           lat,
@@ -231,12 +285,13 @@ export default class IssueService {
           lng: get(issue, 'lon'),
         }
       ),
-      FeeConfiguration.findOne(),
       googleMap.getProvince({
         lat,
         lng: lon,
       }),
     ]);
+
+    const feeConfigure = await FeeConfiguration.findByProvinces(provincesShortNames);
 
     const distanceFee =
       distance <= get(feeConfigure, 'minDistance', 0)
@@ -258,7 +313,7 @@ export default class IssueService {
         lat,
         lon,
         distanceFee: Math.ceil(distanceFee / 1000) * 1000,
-        province: shortNames.join(','),
+        province: provincesShortNames.join(','),
       },
     });
 
@@ -367,21 +422,7 @@ export default class IssueService {
     const provinceCodes = get(requestSupporting, 'province', '').split(',');
 
     const [feeConfiguration, feeCategory, saleEvent, holidays] = await Promise.all([
-      FeeConfiguration.findOne({
-        where: {
-          [Op.or]: [
-            {
-              provinceCode: provinceCodes,
-            },
-            {
-              provinceCode: {
-                [Op.eq]: null,
-              },
-            },
-          ],
-        },
-        order: [['provinceCode', 'DESC']],
-      }),
+      FeeConfiguration.findByProvinces(provinceCodes),
       FeeCategory.findOne({
         where: {
           categoryId: categoriesId,
