@@ -28,6 +28,7 @@ const getWorkingTimeSlots = (workingTimes = [], holidays = [], configuration) =>
     return {
       totalTime: endTime.diff(startTime, 'hour', true),
       factors: buildFactor(configuration, isHoliday),
+      isUrgentTime: isHoliday,
     };
   });
 };
@@ -42,20 +43,29 @@ export default class NormalFee extends Fee {
 
   getBasicCost(configuration, classFee, holidays) {
     const workingTimeSlots = getWorkingTimeSlots(this.workingTimes, holidays, configuration);
+    let isUrgentTime = false;
+
     const totals = workingTimeSlots.map((item) => {
       const timeSlotCost = (classFee.normalCost / 8) * (item.totalTime > 8 ? 8 : item.totalTime);
       const factor = sum(item.factors);
+      isUrgentTime = item.isUrgentTime;
 
       return timeSlotCost * factor;
     });
 
-    return this.numOfWorker * sum(totals);
+    return {
+      basicCost: this.numOfWorker * sum(totals),
+      isUrgentTime,
+    };
   }
 
   getCost({ configuration, classFee, teamConfiguration, holidays }) {
-    const basicCost = this.getBasicCost(configuration, classFee, holidays);
+    const { basicCost, isUrgentTime } = this.getBasicCost(configuration, classFee, holidays);
 
-    return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);
+    return {
+      cost: this.getCostInformation(basicCost, configuration, teamConfiguration, 0),
+      isUrgentTime,
+    };
   }
 
   // eslint-disable-next-line class-methods-use-this

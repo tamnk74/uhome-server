@@ -129,6 +129,19 @@ const getBasicTimeSlotCost = (configuration, classFee, workingsTimeSlot = []) =>
   return sum(totals);
 };
 
+const checkUrgentTime = (workingTimeSlots) => {
+  const totals = workingTimeSlots.map((items) => {
+    const total = items.map((item) => {
+      const factor = sum(item.factors);
+      return factor > 1 && item.totalTime > 0 ? 1 : 0;
+    });
+
+    return sum(total);
+  });
+
+  return Boolean(sum(totals));
+};
+
 export default class HotfixFee extends Fee {
   constructor(workingTimes = [], totalTime = 0, numOfWorker = 1) {
     super();
@@ -144,8 +157,12 @@ export default class HotfixFee extends Fee {
       timeSlotConfigures,
       workingTimeSlots
     );
+    const isUrgentTime = checkUrgentTime(workingTimeSlots);
 
-    return this.numOfWorker * basicTimeSlotCost;
+    return {
+      basicCost: this.numOfWorker * basicTimeSlotCost,
+      isUrgentTime,
+    };
   }
 
   getCost({ configuration, teamConfiguration, holidays, timeSlotConfigures }) {
@@ -166,7 +183,7 @@ export default class HotfixFee extends Fee {
     const startTime = dayjs(workingTime.startTime).tz('Asia/Ho_Chi_Minh');
     const endTime = dayjs(startTime).add(this.totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
 
-    const basicCost = this.getBasicCost(
+    const { basicCost, isUrgentTime } = this.getBasicCost(
       configuration,
       timeSlotConfigures,
       startTime,
@@ -174,7 +191,10 @@ export default class HotfixFee extends Fee {
       holidays
     );
 
-    return this.getCostInformation(basicCost, configuration, teamConfiguration, 0);
+    return {
+      cost: this.getCostInformation(basicCost, configuration, teamConfiguration, 0),
+      isUrgentTime,
+    };
   }
 
   // eslint-disable-next-line class-methods-use-this
