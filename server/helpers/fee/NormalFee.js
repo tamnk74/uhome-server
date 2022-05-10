@@ -1,9 +1,10 @@
 import dayjs from 'dayjs';
-import _, { sum } from 'lodash';
+import _ from 'lodash';
 import isBetween from 'dayjs/plugin/isBetween';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import Fee from './Fee';
+import { TimeWorkingType } from '../../constants';
 
 dayjs.extend(isBetween);
 dayjs.extend(utc);
@@ -28,7 +29,7 @@ const getWorkingTimeSlots = (workingTimes = [], holidays = [], configuration) =>
     return {
       totalTime: endTime.diff(startTime, 'hour', true),
       factors: buildFactor(configuration, isHoliday),
-      isUrgentTime: isHoliday,
+      timeWorkingType: isHoliday ? TimeWorkingType.holiday : TimeWorkingType.normalTime,
     };
   });
 };
@@ -43,28 +44,28 @@ export default class NormalFee extends Fee {
 
   getBasicCost(configuration, classFee, holidays) {
     const workingTimeSlots = getWorkingTimeSlots(this.workingTimes, holidays, configuration);
-    let isUrgentTime = false;
+    const timeWorkingTypes = [];
 
     const totals = workingTimeSlots.map((item) => {
       const timeSlotCost = (classFee.normalCost / 8) * (item.totalTime > 8 ? 8 : item.totalTime);
-      const factor = sum(item.factors);
-      isUrgentTime = item.isUrgentTime;
+      const factor = _.sum(item.factors);
+      timeWorkingTypes.push(item.timeWorkingType);
 
       return timeSlotCost * factor;
     });
 
     return {
-      basicCost: this.numOfWorker * sum(totals),
-      isUrgentTime,
+      basicCost: this.numOfWorker * _.sum(totals),
+      timeWorkingTypes: _.compact(timeWorkingTypes),
     };
   }
 
   getCost({ configuration, classFee, teamConfiguration, holidays }) {
-    const { basicCost, isUrgentTime } = this.getBasicCost(configuration, classFee, holidays);
+    const { basicCost, timeWorkingTypes } = this.getBasicCost(configuration, classFee, holidays);
 
     return {
       cost: this.getCostInformation(basicCost, configuration, teamConfiguration, 0),
-      isUrgentTime,
+      timeWorkingTypes,
     };
   }
 
