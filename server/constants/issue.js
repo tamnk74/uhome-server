@@ -53,3 +53,10 @@ export const unitTime = Object.freeze({
   DAY: 'DAY',
   HOUR: 'HOUR',
 });
+
+export const TimeWorkingType = Object.freeze({
+  urgentTime: 'URGENT',
+  normalTime: 'NORMAL',
+  nightTime: 'NIGHT',
+  holiday: 'HOLIDAY',
+});

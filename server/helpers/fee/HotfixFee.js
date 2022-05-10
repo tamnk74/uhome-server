@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
-import { sum, get, first, isEmpty } from 'lodash';
+import { sum, get, first, isEmpty, compact, union } from 'lodash';
 import isBetween from 'dayjs/plugin/isBetween';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import { workingTime } from '../../constants';
+import { workingTime, TimeWorkingType } from '../../constants';
 import Fee from './Fee';
 
 dayjs.extend(isBetween);
@@ -91,6 +91,7 @@ const getTimeSlot = (configuration, type, starTime, endTime, isHoliday) => {
   return {
     totalTime: sum(ranges),
     factors: buildFactorByType(configuration, type, isHoliday),
+    timeWorkingType: isHoliday ? TimeWorkingType.holiday : TimeWorkingType[type],
   };
 };
 
@@ -129,17 +130,16 @@ const getBasicTimeSlotCost = (configuration, classFee, workingsTimeSlot = []) =>
   return sum(totals);
 };
 
-const checkUrgentTime = (workingTimeSlots) => {
-  const totals = workingTimeSlots.map((items) => {
-    const total = items.map((item) => {
-      const factor = sum(item.factors);
-      return factor > 1 && item.totalTime > 0 ? 1 : 0;
+const getTimeWorkingTypes = (workingTimeSlots) => {
+  const types = workingTimeSlots.map((items) => {
+    const type = items.map((item) => {
+      return item.totalTime > 0 ? item.timeWorkingType : null;
     });
 
-    return sum(total);
+    return type;
   });
 
-  return Boolean(sum(totals));
+  return compact(union(...types));
 };
 
 export default class HotfixFee extends Fee {
@@ -157,11 +157,11 @@ export default class HotfixFee extends Fee {
       timeSlotConfigures,
       workingTimeSlots
     );
-    const isUrgentTime = checkUrgentTime(workingTimeSlots);
+    const timeWorkingTypes = getTimeWorkingTypes(workingTimeSlots);
 
     return {
       basicCost: this.numOfWorker * basicTimeSlotCost,
-      isUrgentTime,
+      timeWorkingTypes,
     };
   }
 
@@ -183,7 +183,7 @@ export default class HotfixFee extends Fee {
     const startTime = dayjs(workingTime.startTime).tz('Asia/Ho_Chi_Minh');
     const endTime = dayjs(startTime).add(this.totalTime, 'hour').tz('Asia/Ho_Chi_Minh');
 
-    const { basicCost, isUrgentTime } = this.getBasicCost(
+    const { basicCost, timeWorkingTypes } = this.getBasicCost(
       configuration,
       timeSlotConfigures,
       startTime,
@@ -193,7 +193,7 @@ export default class HotfixFee extends Fee {
 
     return {
       cost: this.getCostInformation(basicCost, configuration, teamConfiguration, 0),
-      isUrgentTime,
+      timeWorkingTypes,
     };
   }
 

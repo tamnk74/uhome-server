@@ -498,7 +498,7 @@ export default class IssueService {
       }),
     ]);
 
-    const { cost, isUrgentTime } = FeeFactory.getCost(
+    const { cost, timeWorkingTypes } = FeeFactory.getCost(
       type,
       {
         teamConfiguration,
@@ -529,7 +529,7 @@ export default class IssueService {
     set(data, 'customer.distanceFee', distanceFee);
     set(data, 'customer.surveyFee', get(survey, 'data.surveyFee', 0));
     set(data, 'worker.surveyFee', get(survey, 'data.surveyFee', 0));
-    set(data, 'isUrgentTime', isUrgentTime);
+    set(data, 'timeWorkingTypes', timeWorkingTypes);
 
     const { message, channel } = await this.sendMessage(
       command.SUBMIT_ESTIMATION_TIME,
