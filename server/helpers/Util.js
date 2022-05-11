@@ -90,6 +90,11 @@ export const objectToSnake = (obj) => {
   if (obj instanceof Sequelize.Model) {
     obj = obj.toJSON();
   }
+
+  if (typeof obj === 'string' || typeof obj === 'number') {
+    return obj;
+  }
+
   Object.keys(obj).forEach((key) => {
     const snakeKey = snakeCase(key);
     if (Array.isArray(obj[key])) {
