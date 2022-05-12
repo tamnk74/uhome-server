@@ -78,8 +78,11 @@ export default class IssueService {
     return this.getDetail(user, issue.id);
   }
 
-  static async remove(issue) {
-    if (get(issue, 'status') !== issueStatus.OPEN) {
+  static async remove(user, issue) {
+    if (
+      get(issue, 'status') !== issueStatus.OPEN &&
+      ![roles.CONSULTING, roles.ADMIN].includes(user.role)
+    ) {
       throw new Error('ISSUE-0403');
     }
 
