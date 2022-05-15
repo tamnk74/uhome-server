@@ -57,7 +57,7 @@ export default class NotificationService {
           INNER JOIN user_category ON user_category.user_id = users.id AND category_id IN (:categoryIds)
           LEFT JOIN notifications ON notifications.recipient_id = users.id AND issue_id = :issueId AND type = :type
         WHERE
-          subscriptions.role = :role AND notifications.id IS NULL and users.status = 1 and device_id IS NULL
+        users.session_role = :role AND notifications.id IS NULL and users.status = 1 and device_id IS NOT NULL
         ORDER BY user_profiles.reliability DESC , distance ASC
         LIMIT :limit`;
 
