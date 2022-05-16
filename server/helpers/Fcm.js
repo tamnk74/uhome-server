@@ -17,11 +17,24 @@ export default class Fcm {
   }
 
   static async sendNotification(tokens = [], data = {}, notification = {}) {
+    const apns = {
+      headers: {
+        'apns-collapse-id': '0',
+      },
+    };
+
+    const android = {
+      collapseKey: '0',
+    };
+
     const message = {
       data,
       tokens,
       notification,
+      apns,
+      android,
     };
+
     return admin.messaging().sendMulticast(message);
   }
 }
