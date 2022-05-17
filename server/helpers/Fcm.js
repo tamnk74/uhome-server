@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin';
+import { v4 as uuidv4 } from 'uuid';
 import { notificationType } from '../constants';
 
 const serviceAccount = require('../../firebase-admin-config.json');
@@ -17,14 +18,16 @@ export default class Fcm {
   }
 
   static async sendNotification(tokens = [], data = {}, notification = {}) {
+    const collapseId = uuidv4();
+
     const apns = {
       headers: {
-        'apns-collapse-id': '0',
+        'apns-collapse-id': collapseId,
       },
     };
 
     const android = {
-      collapseKey: '0',
+      collapseKey: collapseId,
     };
 
     const message = {
