@@ -38,6 +38,7 @@ export const saleEventTypes = Object.freeze({
   DISCOUNT: 'discount',
   BONUS: 'bonus',
   VOUCHER: 'voucher',
+  SPECIAL: 'special',
 });
 
 export const eventStatuses = Object.freeze({
