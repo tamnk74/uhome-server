@@ -172,7 +172,13 @@ Event.whereCondition = (user, params) => {
       [Op.in]: Sequelize.literal(`(${filteredEventSql})`),
     },
     status: eventStatuses.ACTIVE,
-    ...(types.length ? { type: types } : null),
+    ...(types.length
+      ? { type: types }
+      : {
+          type: {
+            [Op.notIn]: [saleEventTypes.SPECIAL],
+          },
+        }),
   };
 };
 
