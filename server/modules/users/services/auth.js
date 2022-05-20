@@ -253,7 +253,7 @@ export default class AuthService {
       });
     }
 
-    await sendOTP(user.id, phoneNumber);
+    sendOTP(user.id, phoneNumber);
 
     return user;
   }

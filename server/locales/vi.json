@@ -129,5 +129,33 @@
       "title": "U-Home - Công việc được cập nhật",
       "body": "Công việc {{title}} đã cập nhật. Hãy kiểm tra."
     }
-  }
+  },
+	"validation": {
+		"register": {
+			"phone_number": {
+				"any": {
+					"empty": "Bạn cần nhập số điện thoại hợp lệ"
+				},
+				"string": {
+					"regex": {
+						"base": "Bạn cần nhập số điện thoại hợp lệ"
+					},
+					"min": "validation.register.phone_number.string.min"
+				}
+			},
+			"password": {
+				"any": {
+					"empty": "Bạn cần nhập mật khẩu"
+				},
+				"string": {
+					"min": "Mật khẩu cần có kí tự và số, tối thiểu 6 kí tự"
+				}
+			},
+			"name": {
+				"any": {
+					"empty": "Bạn cần nhập họ và tên"
+				}
+			}
+		}
+	}
 }
