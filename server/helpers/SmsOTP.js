@@ -3,6 +3,7 @@ import SpeedSMS from './SpeedSMS';
 import RedisService from './Redis';
 import { otpLength, maximumReuestOtpPerDay, maximumReuestOtpPerHour } from '../config';
 import { randomNumber } from './Util';
+import BadRequestError from '../errors/BadRequestError';
 
 export const SmsCount = async (id) => {
   let counter = await RedisService.getSmsCounter(id);
@@ -31,7 +32,14 @@ export const SmsCount = async (id) => {
     (counter.perDay > maximumReuestOtpPerDay ||
       (hour === lastHour && counter.perHour > maximumReuestOtpPerHour))
   ) {
-    throw new Error('USER-0429');
+    const errors = [
+      {
+        // eslint-disable-next-line no-undef
+        message: __('otp.max_request', { number: maximumReuestOtpPerHour }),
+        field: 'otp',
+      },
+    ];
+    throw new BadRequestError({ code: 'USER-0429', errors });
   }
 
   counter.lastTime = now.toISOString();
