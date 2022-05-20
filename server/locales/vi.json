@@ -141,7 +141,8 @@
 						"base": "Bạn cần nhập số điện thoại hợp lệ"
 					},
 					"min": "validation.register.phone_number.string.min"
-				}
+				},
+				"used": "Số điện thoại đã được sử dụng"
 			},
 			"password": {
 				"any": {
