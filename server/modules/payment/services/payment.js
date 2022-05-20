@@ -1,4 +1,5 @@
 import axios from 'axios';
+import uuid, { v4 as uuidv4 } from 'uuid';
 import { paymentMethod, paymentType, currencies } from '@/constants/app';
 import { momoConfig } from '@/config';
 import { Momo, paymentLogger } from '@/helpers';
@@ -8,7 +9,6 @@ import UserEvent from '@/models/userEvent';
 import Event from '@/models/event';
 import TransactionHistory from '@/models/transactionHistory';
 import sequelize from '@/databases/database';
-import uuid, { v4 as uuidv4 } from 'uuid';
 import { paymentStatus, eventStatuses, transactionType } from '../../../constants';
 
 export class PaymentService {

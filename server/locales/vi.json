@@ -26,7 +26,8 @@
   },
   "otp": {
     "branch": "U-HOME",
-    "sms": "[U-HOME] Mã OTP của quý khách là {{code}}"
+    "sms": "[U-HOME] Mã OTP của quý khách là {{code}}",
+		"max_request": "Bạn đã gửi quá {{number}} lần. Xin hãy thử lại sau 1h"
   },
   "notification": {
     "request_support": {
