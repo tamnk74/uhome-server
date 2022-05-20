@@ -26,6 +26,7 @@ import IdentifyCard from '../../../models/identifyCard';
 import SocialAccount from '../../../models/socialAccount';
 import TransactionHistory from '../../../models/transactionHistory';
 import { fileSystemConfig } from '../../../config';
+import ValidationError from '../../../errors/ValidationError';
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -242,7 +243,14 @@ export default class AuthService {
     });
 
     if (user && user.status === userStatus.ACTIVE) {
-      throw new Error('REG-0001');
+      const errors = [
+        {
+          // eslint-disable-next-line no-undef
+          message: __('validation.register.phone_number.used'),
+          field: 'phone_number',
+        },
+      ];
+      throw new ValidationError({ code: 'ERR-0422', errors });
     }
 
     if (!user) {
@@ -253,7 +261,7 @@ export default class AuthService {
       });
     }
 
-    sendOTP(user.id, phoneNumber);
+    await sendOTP(user.id, phoneNumber);
 
     return user;
   }
