@@ -42,7 +42,7 @@
     "@aws-sdk/s3-request-presigner": "^3.47.0",
     "@googlemaps/google-maps-services-js": "^3.3.4",
     "@sentry/node": "^6.3.5",
-    "aws-sdk": "^2.863.0",
+    "aws-sdk": "^2.1277.0",
     "axios": "^0.21.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.1.0",
