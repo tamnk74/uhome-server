@@ -1,4 +1,4 @@
-FROM node:14.16.0-alpine
+FROM node:14.21.3-alpine
 
 RUN apk update && apk add bash && apk add python && apk add make && npm install -g nodemon && npm install -g node-pre-gyp && npm install pm2 -g && npm install -g babel-cli && npm install -g concurrently
 
