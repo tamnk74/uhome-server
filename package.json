@@ -62,7 +62,7 @@
     "express-fileupload": "^1.1.10",
     "express-validation": "^1.0.3",
     "fast-json-stringify": "^2.7.6",
-    "firebase-admin": "^9.5.0",
+    "firebase-admin": "^11.1.0",
     "form-data": "^4.0.0",
     "fs-extra": "^7.0.1",
     "google-auth-library": "^6.0.6",
